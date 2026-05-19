@@ -29,11 +29,11 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            Tai_Khoan? taiKhoan = _taiKhoanDAL.DangNhap(model.email, model.matKhau);
+            Tai_Khoan? taiKhoan = _taiKhoanDAL.DangNhap(model.soDienThoai, model.matKhau);
 
             if (taiKhoan == null)
             {
-                TempData["ThongBao"] = "Email hoặc mật khẩu không đúng";
+                TempData["ThongBao"] = "Số điện thoại hoặc mật khẩu không đúng";
                 return RedirectToAction("Index", "Home");
             }
 

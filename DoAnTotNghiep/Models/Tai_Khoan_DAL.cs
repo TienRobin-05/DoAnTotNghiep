@@ -11,7 +11,7 @@ namespace DoAnTotNghiep.Models
             _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         }
 
-        public Tai_Khoan? DangNhap(string email, string matKhau)
+        public Tai_Khoan? DangNhap(string soDienThoai, string matKhau)
         {
             Tai_Khoan? taiKhoan = null;
 
@@ -22,14 +22,14 @@ namespace DoAnTotNghiep.Models
                 string sql = @"
                     SELECT maTaiKhoan, hoTen, email, matKhau, soDienThoai, vaiTro, trangThai, ngayTao
                     FROM TaiKhoan
-                    WHERE email = @email 
+                    WHERE soDienThoai = @soDienThoai 
                     AND matKhau = @matKhau
                     AND trangThai = 1
                 ";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@email", email);
+                    cmd.Parameters.AddWithValue("@soDienThoai", soDienThoai);
                     cmd.Parameters.AddWithValue("@matKhau", matKhau);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())

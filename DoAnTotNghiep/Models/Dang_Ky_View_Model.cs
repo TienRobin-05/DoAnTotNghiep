@@ -19,7 +19,8 @@ namespace DoAnTotNghiep.Models
         [Compare(nameof(matKhau), ErrorMessage = "Mật khẩu nhập lại không khớp")]
         public string xacNhanMatKhau { get; set; } = "";
 
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        public string? soDienThoai { get; set; }
+        public string soDienThoai { get; set; } = "";
     }
 }

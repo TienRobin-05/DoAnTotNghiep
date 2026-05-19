@@ -1,8 +1,39 @@
 @{
     ViewData["Title"] = "Trang chủ";
 
+    var vaiTro = Context.Session.GetString("VaiTro") ?? "";
+    var laAdmin = vaiTro.ToLower().Contains("admin")
+        || vaiTro.ToLower().Contains("quantri")
+        || vaiTro.ToLower().Contains("quản trị");
 }
 
+@if (laAdmin)
+{
+    <section class="admin-home">
+        <h1>Quản trị hệ thống</h1>
+        <p>Quản lý đúng các nhóm chức năng trong báo cáo: danh mục Vaccine, bài viết cẩm nang và câu hỏi tư vấn.</p>
+
+        <div class="admin-feature-grid">
+            <a class="admin-feature-card" asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-vaccine">
+                <span>VX</span>
+                <strong>Quản lý danh mục Vaccine</strong>
+                <small>Thêm, cập nhật, xóa và quản lý thông tin Vaccine, mũi tiêm Vaccine trong hệ thống.</small>
+            </a>
+            <a class="admin-feature-card" asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-bai-viet">
+                <span>BV</span>
+                <strong>Quản lý bài viết cẩm nang</strong>
+                <small>Thêm, cập nhật, xóa và quản lý các bài viết cẩm nang sức khỏe, tiêm chủng.</small>
+            </a>
+            <a class="admin-feature-card" asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-tu-van">
+                <span>TV</span>
+                <strong>Quản lý câu hỏi tư vấn</strong>
+                <small>Xem, xử lý, phản hồi và trả lời câu hỏi tư vấn của người dùng.</small>
+            </a>
+        </div>
+    </section>
+}
+else
+{
 <section class="season-section">
     <h2>Mùa này cần <em>tiêm gì?</em></h2>
     <div class="vaccine-tabs">
@@ -141,3 +172,4 @@
         </div>
     </div>
 </footer>
+}

@@ -67,18 +67,21 @@
         </div>
 
         <nav class="lc-nav">
-            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="tra-cuu-vaccine">Vắc xin phòng bệnh</a>
-            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Gói vắc xin</a>
-            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="thong-bao">Khuyến mãi 🔥</a>
-            <a asp-controller="Home" asp-action="Index">Hệ thống tiêm chủng</a>
-            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Tôi nên tiêm gì</a>
-            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="hoi-dap-tu-van">Đội ngũ chuyên môn</a>
-            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-bai-viet">Kiến thức tiêm chủng</a>
-
             @if (laAdmin)
             {
-                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-vaccine">Vaccine</a>
-                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-du-lieu">Dữ liệu</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-vaccine">Quản lý Vaccine</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-bai-viet">Quản lý bài viết</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-tu-van">Quản lý tư vấn</a>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="tra-cuu-vaccine">Vắc xin phòng bệnh</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Gói vắc xin</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="thong-bao">Khuyến mãi 🔥</a>
+                <a asp-controller="Home" asp-action="Index">Hệ thống tiêm chủng</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Tôi nên tiêm gì</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="hoi-dap-tu-van">Đội ngũ chuyên môn</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-bai-viet">Kiến thức tiêm chủng</a>
             }
         </nav>
     </header>
@@ -100,7 +103,7 @@
                 }
 
                 <form asp-controller="Tai_Khoan" asp-action="DangNhap" method="post" class="lc-login-form">
-                    <input name="email" type="email" placeholder="Email đăng nhập" autocomplete="email" required />
+                    <input name="soDienThoai" type="tel" placeholder="Số điện thoại đăng nhập" autocomplete="tel" required />
                     <input name="matKhau" type="password" placeholder="Mật khẩu" autocomplete="current-password" required />
                     <button type="submit">Tiếp tục</button>
                 </form>
