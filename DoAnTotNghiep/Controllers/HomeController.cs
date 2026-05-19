@@ -11,6 +11,17 @@ namespace DoAnTotNghiep.Controllers
             return View();
         }
 
+        public IActionResult ChucNang(string id)
+        {
+            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
+            {
+                return RedirectToAction("DangNhap", "Tai_Khoan");
+            }
+
+            ViewBag.MaChucNang = id;
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();

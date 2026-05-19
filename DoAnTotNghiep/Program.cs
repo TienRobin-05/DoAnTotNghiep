@@ -1,7 +1,15 @@
+using DoAnTotNghiep.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Đăng ký session
+builder.Services.AddSession();
+
+// Đăng ký DAL
+builder.Services.AddScoped<Tai_Khoan_DAL>();
 
 var app = builder.Build();
 
@@ -10,16 +18,18 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+
+app.UseStaticFiles();
+
 app.UseRouting();
+
+// Dùng session
+app.UseSession();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Tai_Khoan}/{action=DangNhap}/{id?}");
 
 app.Run();

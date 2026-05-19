@@ -1,0 +1,47 @@
+@model DoAnTotNghiep.Models.Quen_Mat_Khau_View_Model
+
+@{
+    ViewData["Title"] = "Quên mật khẩu";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Quên mật khẩu</h2>
+        <p class="text-muted">Nhập email tài khoản và mật khẩu mới để khôi phục quyền đăng nhập.</p>
+
+        <form asp-controller="Tai_Khoan" asp-action="QuenMatKhau" method="post">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input asp-for="email" class="form-control" />
+                <span asp-validation-for="email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu mới</label>
+                <input asp-for="matKhauMoi" type="password" class="form-control" />
+                <span asp-validation-for="matKhauMoi" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Nhập lại mật khẩu mới</label>
+                <input asp-for="xacNhanMatKhauMoi" type="password" class="form-control" />
+                <span asp-validation-for="xacNhanMatKhauMoi" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Đổi mật khẩu</button>
+
+            @if (ViewBag.ThongBao != null)
+            {
+                <div class="alert alert-danger mt-3">@ViewBag.ThongBao</div>
+            }
+        </form>
+
+        <div class="auth-links">
+            <a asp-controller="Tai_Khoan" asp-action="DangNhap">Quay lại đăng nhập</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

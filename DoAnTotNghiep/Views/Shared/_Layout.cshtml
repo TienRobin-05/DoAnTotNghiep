@@ -1,50 +1,127 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DoAnTotNghiep</title>
+
+    <title>Hồ sơ sức khỏe và tiêm chủng</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DoAnTotNghiep.styles.css" asp-append-version="true" />
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DoAnTotNghiep</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    @{
+        var hoTen = Context.Session.GetString("HoTen");
+        var vaiTro = Context.Session.GetString("VaiTro");
+        var daDangNhap = !string.IsNullOrWhiteSpace(hoTen);
+        var laAdmin = !string.IsNullOrWhiteSpace(vaiTro)
+            && (vaiTro.ToLower().Contains("admin")
+                || vaiTro.ToLower().Contains("quantri")
+                || vaiTro.ToLower().Contains("quản trị"));
+    }
+
+    <header class="lc-site-header">
+        <div class="lc-topbar">
+            <a class="lc-logo" asp-controller="Home" asp-action="Index">
+                <span class="lc-logo-mark">TT</span>
+                <span>Hồ sơ sức khỏe<br />và tiêm chủng</span>
+            </a>
+
+            <form class="lc-search" asp-controller="Home" asp-action="ChucNang" method="get">
+                <input name="id" value="tra-cuu-vaccine" type="hidden" />
+                <input type="search" placeholder="Bạn cần tìm gì?" aria-label="Tìm kiếm" />
+                <button type="submit" aria-label="Tìm kiếm">⌕</button>
+            </form>
+
+            <div class="lc-header-actions">
+                @if (daDangNhap)
+                {
+                    @* Khi bấm vào tên tài khoản thì mở menu thông tin cá nhân và đăng xuất. *@
+                    <div class="dropdown lc-account-menu">
+                        <button class="lc-user-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @hoTen
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Tai_Khoan" asp-action="ThongTinCaNhan">Thông tin cá nhân</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" asp-controller="Tai_Khoan" asp-action="DangXuat">Đăng xuất</a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <button type="button" class="lc-login-btn" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <span class="lc-login-icon"></span>
+                        Đăng nhập
+                    </button>
+                }
+                <a class="lc-consult-btn" asp-controller="Home" asp-action="ChucNang" asp-route-id="hoi-dap-tu-van">Yêu cầu tư vấn</a>
             </div>
+        </div>
+
+        <nav class="lc-nav">
+            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="tra-cuu-vaccine">Vắc xin phòng bệnh</a>
+            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Gói vắc xin</a>
+            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="thong-bao">Khuyến mãi 🔥</a>
+            <a asp-controller="Home" asp-action="Index">Hệ thống tiêm chủng</a>
+            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Tôi nên tiêm gì</a>
+            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="hoi-dap-tu-van">Đội ngũ chuyên môn</a>
+            <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-bai-viet">Kiến thức tiêm chủng</a>
+
+            @if (laAdmin)
+            {
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-vaccine">Vaccine</a>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-du-lieu">Dữ liệu</a>
+            }
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+    <main role="main" class="lc-page">
+        @RenderBody()
+    </main>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered lc-login-dialog">
+            <div class="modal-content lc-login-modal">
+                <button type="button" class="lc-modal-close" data-bs-dismiss="modal" aria-label="Đóng">×</button>
+                <h2 id="loginModalLabel">Đăng nhập / Đăng ký</h2>
+                <p>Đăng nhập để nhận gợi ý vắc xin và phác đồ phù hợp nhất cho Quý khách và gia đình!</p>
+
+                @if (TempData["ThongBao"] != null)
+                {
+                    <div class="alert alert-warning py-2">@TempData["ThongBao"]</div>
+                }
+
+                <form asp-controller="Tai_Khoan" asp-action="DangNhap" method="post" class="lc-login-form">
+                    <input name="email" type="email" placeholder="Email đăng nhập" autocomplete="email" required />
+                    <input name="matKhau" type="password" placeholder="Mật khẩu" autocomplete="current-password" required />
+                    <button type="submit">Tiếp tục</button>
+                </form>
+
+                <div class="lc-modal-links">
+                    <a asp-controller="Tai_Khoan" asp-action="DangKy">Đăng ký tài khoản</a>
+                    <a asp-controller="Tai_Khoan" asp-action="QuenMatKhau">Quên mật khẩu</a>
+                </div>
+
+                <div class="lc-modal-illustration">
+                    <span class="lc-building"></span>
+                    <span class="lc-family"></span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - DoAnTotNghiep - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

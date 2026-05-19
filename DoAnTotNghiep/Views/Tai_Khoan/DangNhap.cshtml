@@ -1,0 +1,47 @@
+@model DoAnTotNghiep.Models.Login_View_Model
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Đăng nhập</h2>
+        <p class="text-muted">Đăng nhập để theo dõi hồ sơ, lịch tiêm và các thông báo.</p>
+
+        @if (TempData["ThongBao"] != null)
+        {
+            <div class="alert alert-success">@TempData["ThongBao"]</div>
+        }
+
+        <form asp-controller="Tai_Khoan" asp-action="DangNhap" method="post">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input asp-for="email" class="form-control" />
+                <span asp-validation-for="email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input asp-for="matKhau" type="password" class="form-control" />
+                <span asp-validation-for="matKhau" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+
+            @if (ViewBag.ThongBao != null)
+            {
+                <div class="alert alert-danger mt-3">@ViewBag.ThongBao</div>
+            }
+        </form>
+
+        <div class="auth-links">
+            <a asp-controller="Tai_Khoan" asp-action="DangKy">Đăng ký tài khoản</a>
+            <a asp-controller="Tai_Khoan" asp-action="QuenMatKhau">Quên mật khẩu</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

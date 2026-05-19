@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Thông tin hồ sơ";
+    var hoTenDangKy = TempData["HoTenDangKy"] as string;
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Thông tin hồ sơ</h2>
+        <p class="text-muted">Điền thông tin cơ bản để tạo hồ sơ sức khỏe ban đầu.</p>
+
+        <form asp-controller="Tai_Khoan" asp-action="HoSoSauDangKy" method="post">
+            <div class="mb-3">
+                <label class="form-label">Họ tên</label>
+                <input name="hoTen" class="form-control" value="@hoTenDangKy" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Giới tính</label>
+                <select name="gioiTinh" class="form-select">
+                    <option value="">Chọn giới tính</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ngày tháng năm sinh</label>
+                <input name="ngaySinh" type="date" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Lưu hồ sơ</button>
+
+            @if (ViewBag.ThongBao != null)
+            {
+                <div class="alert alert-danger mt-3">@ViewBag.ThongBao</div>
+            }
+        </form>
+    </div>
+</div>

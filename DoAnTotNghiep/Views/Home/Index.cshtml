@@ -1,8 +1,143 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Trang chủ";
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="season-section">
+    <h2>Mùa này cần <em>tiêm gì?</em></h2>
+    <div class="vaccine-tabs">
+        <button class="active">HPV</button>
+        <button>Sốt Xuất Huyết</button>
+        <button>6 Trong 1</button>
+        <button>Viêm Não Mô cầu</button>
+        <button>Viêm Não Nhật Bản</button>
+        <button>RSV</button>
+    </div>
+
+    <div class="season-panel">
+        <div class="season-info">
+            <div class="weather-icon">☀️</div>
+            <h3>Phòng ngừa ung thư do HPV thế nào cho hiệu quả?</h3>
+            <p>HPV là nguyên nhân chính gây ung thư cổ tử cung và một số bệnh lý khác. Tiêm đúng lịch, đủ liều giúp tăng hiệu quả phòng bệnh.</p>
+            <ul>
+                <li>Gardasil: Bảo vệ 4 chủng, khuyến cáo cho nữ từ 9 đến 26 tuổi.</li>
+                <li>Gardasil 9: Bảo vệ 9 chủng, khuyến cáo cho nam và nữ từ 9 đến 45 tuổi.</li>
+            </ul>
+        </div>
+
+        <div class="vaccine-products">
+            <article>
+                <span class="country">🇺🇸 Hoa Kỳ</span>
+                <div class="product-image box-one"></div>
+                <small>Vắc xin Gardasil 9 0.5ml</small>
+                <strong>Phòng bệnh ung thư do HPV 9 chủng</strong>
+                <b>2.965.000đ <span>/ Liều</span></b>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Đặt hẹn</a>
+            </article>
+            <article>
+                <span class="country">🇺🇸 Hoa Kỳ</span>
+                <div class="product-image box-two"></div>
+                <small>Vắc xin Gardasil 4 0.5ml</small>
+                <strong>Phòng bệnh ung thư do HPV 4 chủng</strong>
+                <b>1.780.000đ <span>/ Liều</span></b>
+                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Đặt hẹn</a>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="combo-section">
+    <h2>Gói vắc xin bảo vệ toàn diện</h2>
+    <div class="combo-benefits">
+        <div><span>📅</span><strong>Miễn phí nhắc lịch hẹn</strong><small>Chính xác và khoa học cho cả gia đình</small></div>
+        <div><span>💰</span><strong>Cam kết giữ giá vắc xin</strong><small>Suốt thời gian tiêm theo phác đồ</small></div>
+        <div><span>💉</span><strong>Cam kết luôn đủ vắc xin</strong><small>Không lo hàng khan hiếm</small></div>
+    </div>
+
+    <div class="combo-board">
+        <aside>
+            <h3>6 gói vắc xin theo độ tuổi</h3>
+            <button class="active">Gói combo 6 tháng <span>Giảm tới 618.690đ</span></button>
+            <button>Gói combo 12 tháng <span>Giảm tới 1.007.280đ</span></button>
+            <button>Gói combo 24 tháng <span>Giảm tới 1.155.870đ</span></button>
+            <button>Gói trẻ tiền học đường <span>Giảm tới 646.840đ</span></button>
+        </aside>
+        <div class="combo-table">
+            <h3>Gói combo 6 tháng</h3>
+            <div class="combo-row header"><span>Vắc xin</span><span>Phác đồ</span><span>Số lượng</span><span>Đơn giá</span></div>
+            <div class="combo-row"><span>Vắc xin PCV15</span><span>2 Liều</span><span>2</span><strong>3.162.200đ</strong></div>
+            <div class="combo-row"><span>Phòng tiêu chảy do Rota virus</span><span>2 Liều</span><span>2</span><strong>1.687.800đ</strong></div>
+            <div class="combo-row"><span>Phòng Cúm</span><span>1 Liều</span><span>1</span><strong>323.010đ</strong></div>
+            <div class="combo-row"><span>Phòng bệnh Não mô cầu ACYW</span><span>1 Liều</span><span>1</span><strong>1.784.800đ</strong></div>
+        </div>
+    </div>
+</section>
+
+<section class="knowledge-section">
+    <h2>Kiến thức tiêm chủng</h2>
+    <div class="knowledge-board">
+        <article class="doctor-story">
+            <div class="story-image"></div>
+            <strong>Zona thần kinh gây đau rát, khó chịu và dễ để lại biến chứng nếu...</strong>
+        </article>
+        <article class="main-story">
+            <div class="story-image vaccine-shot"></div>
+            <strong>Tiêm một loại vắc xin phòng não mô cầu được không?</strong>
+        </article>
+        <div class="side-stories">
+            <a>Dấu hiệu phân biệt viêm não mô cầu và bệnh cúm</a>
+            <a>Chủ động tiêm cúm mùa trước giai đoạn cao điểm</a>
+            <a>Virus Nipah: Nguy cơ bùng phát dịch bệnh</a>
+            <a>Cập nhật các vắc xin phối hợp mới</a>
+        </div>
+    </div>
+</section>
+
+<section class="category-section">
+    <h2>🔥 Danh mục nổi bật</h2>
+    <div class="category-grid">
+        <a>Mẹ & Bé</a>
+        <a>Dinh dưỡng</a>
+        <a>Chăm sóc sức khỏe</a>
+        <a>Sức khỏe giới tính</a>
+        <a>Nhi</a>
+        <a>Thanh thiếu niên</a>
+        <a>Người trưởng thành</a>
+        <a>Tiền hôn nhân</a>
+        <a>Du lịch</a>
+        <a>Bệnh truyền nhiễm</a>
+    </div>
+</section>
+
+<footer class="home-footer">
+    <div class="footer-top">
+        <strong>📍 Với 231 trung tâm tiêm chủng trên toàn quốc</strong>
+        <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Xem danh sách</a>
+    </div>
+    <div class="footer-links">
+        <div>
+            <h3>Về chúng tôi</h3>
+            <p>Giới thiệu Hồ sơ sức khỏe và tiêm chủng</p>
+            <p>Quy chế hoạt động website</p>
+            <p>Chính sách bảo mật</p>
+        </div>
+        <div>
+            <h3>Mục nổi bật</h3>
+            <p>Danh mục vắc xin</p>
+            <p>Kiến thức tiêm chủng</p>
+            <p>Đội ngũ bác sĩ, chuyên gia</p>
+        </div>
+        <div>
+            <h3>Tìm hiểu thêm</h3>
+            <p>Khuyến mãi</p>
+            <p>Tôi nên tiêm gì?</p>
+            <p>Tiêm chủng đi nước ngoài</p>
+        </div>
+        <div>
+            <h3>Tổng đài</h3>
+            <p>Tư vấn & đặt hẹn: 1800 6928</p>
+            <p>Góp ý, khiếu nại: 1800 6928</p>
+            <p class="socials">f t z ▶</p>
+        </div>
+    </div>
+</footer>
