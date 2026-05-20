@@ -1,35 +1,41 @@
-using DoAnTotNghiep.Models;
+using DoAnTotNghiep.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Đăng ký session
-builder.Services.AddSession();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
-// Đăng ký DAL
-builder.Services.AddScoped<Tai_Khoan_DAL>();
+builder.Services.AddScoped<coSoDuLieu>();
+builder.Services.AddScoped<taiKhoanDAL>();
+builder.Services.AddScoped<hoSoSucKhoeDAL>();
+builder.Services.AddScoped<vaccineDAL>();
+builder.Services.AddScoped<muiTiemVaccineDAL>();
+builder.Services.AddScoped<lichTiemDAL>();
+builder.Services.AddScoped<lichSuTiemDAL>();
+builder.Services.AddScoped<thongBaoDAL>();
+builder.Services.AddScoped<baiVietCamNangDAL>();
+builder.Services.AddScoped<cauHoiTuVanDAL>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
 
 app.UseStaticFiles();
-
 app.UseRouting();
-
-// Dùng session
 app.UseSession();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Tai_Khoan}/{action=DangNhap}/{id?}");
+    pattern: "{controller=taiKhoan}/{action=dangNhap}/{id?}");
 
 app.Run();
