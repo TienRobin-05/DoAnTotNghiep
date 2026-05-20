@@ -12,6 +12,8 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddScoped<coSoDuLieu>();
+builder.Services.AddScoped<TaiKhoan_DAL>();
+builder.Services.AddScoped<HoSoSucKhoe_DAL>();
 builder.Services.AddScoped<taiKhoanDAL>();
 builder.Services.AddScoped<hoSoSucKhoeDAL>();
 builder.Services.AddScoped<vaccineDAL>();
@@ -36,6 +38,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=taiKhoan}/{action=dangNhap}/{id?}");
+    pattern: "{controller=TaiKhoan}/{action=DangNhap}/{id?}");
 
 app.Run();
