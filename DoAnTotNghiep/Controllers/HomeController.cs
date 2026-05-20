@@ -15,7 +15,7 @@ namespace DoAnTotNghiep.Controllers
         {
             if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
             {
-                return RedirectToAction("DangNhap", "Tai_Khoan");
+                return RedirectToAction("dangNhap", "taiKhoan");
             }
 
             ViewBag.MaChucNang = id;
