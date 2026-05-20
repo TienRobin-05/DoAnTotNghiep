@@ -1,22 +1,75 @@
 @{
     ViewData["Title"] = "Trang quản trị";
+    var hoTen = ViewBag.HoTen as string ?? "Admin";
 }
 
-<h2>Xin chào Admin @ViewBag.HoTen</h2>
+<style>
+    .admin-dashboard { background: #f7fbff; margin: -1.5rem calc(50% - 50vw) -1.5rem; min-height: 80vh; padding: 28px calc(50vw - 50%) 40px; color: #14343b; }
+    .admin-wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+    .admin-top { background: #fff; border: 1px solid #dceeee; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: 0 8px 22px rgba(22, 88, 96, .07); }
+    .admin-top h1 { margin: 0 0 6px; font-size: 28px; }
+    .admin-logout, .admin-card a { background: #0797a8; color: #fff; text-decoration: none; border-radius: 8px; padding: 10px 14px; font-weight: 700; display: inline-block; }
+    .admin-section-title { margin: 28px 0 14px; font-size: 22px; }
+    .stats-grid, .admin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .stat-card, .admin-card { background: #fff; border: 1px solid #dceeee; border-radius: 12px; padding: 18px; box-shadow: 0 8px 22px rgba(22, 88, 96, .07); }
+    .stat-card strong { display: block; font-size: 28px; color: #07839a; }
+    .admin-card h3 { margin-top: 0; }
+    .admin-card p { color: #4d6b72; min-height: 48px; }
+    .admin-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(22, 88, 96, .11); }
+    @@media (max-width: 850px) { .stats-grid, .admin-grid { grid-template-columns: 1fr; } }
+</style>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-3"><div class="border p-3"><strong>@ViewBag.SoTaiKhoan</strong><br />Tài khoản</div></div>
-    <div class="col-md-3"><div class="border p-3"><strong>@ViewBag.SoVaccine</strong><br />Vaccine</div></div>
-    <div class="col-md-3"><div class="border p-3"><strong>@ViewBag.SoLichTiem</strong><br />Lịch tiêm</div></div>
-    <div class="col-md-3"><div class="border p-3"><strong>@ViewBag.SoCauHoiChoTraLoi</strong><br />Câu hỏi chờ trả lời</div></div>
-</div>
+<div class="admin-dashboard">
+    <div class="admin-wrap">
+        <header class="admin-top">
+            <div>
+                <h1>Trang quản trị hệ thống</h1>
+                <span>Xin chào Admin @hoTen</span>
+            </div>
+            <a class="admin-logout" href="/TaiKhoan/DangXuat">Đăng xuất</a>
+        </header>
 
-<div class="list-group col-md-5">
-    <a class="list-group-item list-group-item-action" asp-controller="Admin" asp-action="taiKhoan">Quản lý tài khoản</a>
-    <a class="list-group-item list-group-item-action" asp-controller="vaccine" asp-action="index">Quản lý vaccine</a>
-    <a class="list-group-item list-group-item-action" asp-controller="muiTiemVaccine" asp-action="index">Quản lý mũi tiêm</a>
-    <a class="list-group-item list-group-item-action" asp-controller="baiViet" asp-action="index">Quản lý bài viết</a>
-    <a class="list-group-item list-group-item-action" asp-controller="cauHoiTuVan" asp-action="index">Quản lý câu hỏi tư vấn</a>
-    <a class="list-group-item list-group-item-action" href="#">Thống kê</a>
-    <a class="list-group-item list-group-item-action text-danger" asp-controller="TaiKhoan" asp-action="DangXuat">Đăng xuất</a>
+        <h2 class="admin-section-title">Thống kê nhanh</h2>
+        <section class="stats-grid">
+            <div class="stat-card"><strong>@(ViewBag.SoTaiKhoan ?? 0)</strong><span>Tài khoản</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoHoSoSucKhoe ?? 0)</strong><span>Hồ sơ sức khỏe</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoVaccine ?? 0)</strong><span>Vaccine</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoLichTiem ?? 0)</strong><span>Lịch tiêm</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoCauHoiChoTraLoi ?? 0)</strong><span>Câu hỏi chờ trả lời</span></div>
+        </section>
+
+        <h2 class="admin-section-title">Chức năng quản trị</h2>
+        <section class="admin-grid">
+            <article class="admin-card">
+                <h3>Quản lý tài khoản</h3>
+                <p>Xem, khóa hoặc mở khóa tài khoản người dùng.</p>
+                <a href="/AdminTaiKhoan/Index">Mở quản lý</a>
+            </article>
+            <article class="admin-card">
+                <h3>Quản lý vaccine</h3>
+                <p>Thêm, sửa, ẩn hoặc xem danh mục vaccine.</p>
+                <a href="/Vaccine/Index">Mở quản lý</a>
+            </article>
+            <article class="admin-card">
+                <h3>Quản lý mũi tiêm vaccine</h3>
+                <p>Cấu hình số mũi, độ tuổi và khoảng cách tiêm.</p>
+                <a href="/MuiTiemVaccine/Index">Mở quản lý</a>
+            </article>
+            <article class="admin-card">
+                <h3>Quản lý bài viết cẩm nang</h3>
+                <p>Thêm, sửa và ẩn hiện bài viết sức khỏe.</p>
+                <a href="/AdminBaiViet/Index">Mở quản lý</a>
+            </article>
+            <article class="admin-card">
+                <h3>Quản lý câu hỏi tư vấn</h3>
+                <p>Xem và phản hồi câu hỏi của người dùng.</p>
+                <a href="/AdminCauHoiTuVan/Index">Mở quản lý</a>
+            </article>
+            <article class="admin-card">
+                <h3>Thống kê</h3>
+                <p>Xem tổng quan dữ liệu hệ thống.</p>
+                <a href="/ThongKe/Index">Xem thống kê</a>
+            </article>
+        </section>
+    </div>
 </div>

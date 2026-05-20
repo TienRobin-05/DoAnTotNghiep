@@ -1,175 +1,171 @@
 @{
-    ViewData["Title"] = "Trang chủ";
-
-    var vaiTro = Context.Session.GetString("VaiTro") ?? "";
-    var laAdmin = vaiTro.ToLower().Contains("admin")
-        || vaiTro.ToLower().Contains("quantri")
-        || vaiTro.ToLower().Contains("quản trị");
+    Layout = null;
+    var hoTen = Context.Session.GetString("HoTen");
+    var vaiTro = Context.Session.GetString("VaiTro");
+    var daDangNhap = !string.IsNullOrWhiteSpace(hoTen);
+    var trangSauDangNhap = string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+        ? "/Admin/Index"
+        : "/NguoiDung/Index";
 }
 
-@if (laAdmin)
-{
-    <section class="admin-home">
-        <h1>Quản trị hệ thống</h1>
-        <p>Quản lý đúng các nhóm chức năng trong báo cáo: danh mục Vaccine, bài viết cẩm nang và câu hỏi tư vấn.</p>
-
-        <div class="admin-feature-grid">
-            <a class="admin-feature-card" asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-vaccine">
-                <span>VX</span>
-                <strong>Quản lý danh mục Vaccine</strong>
-                <small>Thêm, cập nhật, xóa và quản lý thông tin Vaccine, mũi tiêm Vaccine trong hệ thống.</small>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tiêm Chủng Sức Khỏe</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #eaf8fb; color: #12343b; }
+        a { text-decoration: none; color: inherit; }
+        .topbar { background: linear-gradient(90deg, #06a9a9, #04b7a7); color: #fff; }
+        .topbar-inner { max-width: 1520px; margin: 0 auto; padding: 8px 28px; display: grid; grid-template-columns: 220px 1fr auto auto; gap: 18px; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; line-height: 1.05; font-size: 24px; }
+        .logo-mark { width: 44px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #2563eb 0 33%, #ff7a18 33% 66%, #39b54a 66%); display: inline-block; }
+        .search-box { height: 50px; border-radius: 28px; background: #fff; display: flex; align-items: center; padding: 0 8px 0 20px; max-width: 600px; }
+        .search-box input { border: 0; outline: 0; flex: 1; font-size: 17px; color: #36515a; }
+        .search-box button { width: 42px; height: 42px; border: 0; border-radius: 50%; background: #e8f9fb; color: #07839a; font-size: 22px; cursor: pointer; }
+        .login-btn, .consult-btn { border-radius: 28px; color: #fff; padding: 14px 22px; font-weight: 700; white-space: nowrap; }
+        .login-btn { background: #078b8d; }
+        .consult-btn { background: #ff931f; }
+        .menu { background: #fff; border-bottom: 1px solid #d7e8ef; }
+        .menu-inner { max-width: 1520px; margin: 0 auto; display: flex; justify-content: center; gap: 0; overflow-x: auto; }
+        .menu a { padding: 16px 30px; font-weight: 700; border-left: 1px solid #e5eef2; white-space: nowrap; }
+        .page { max-width: 1520px; margin: 0 auto; padding: 44px 28px; }
+        .hero-row { display: grid; grid-template-columns: 2fr .95fr; gap: 18px; align-items: stretch; }
+        .hero-main { min-height: 374px; border-radius: 14px; padding: 38px 48px; overflow: hidden; position: relative; background: linear-gradient(135deg, #c9fbf3 0%, #5ee6e8 42%, #0872f2 100%); color: #053f73; border: 3px solid #fff; }
+        .hero-main h1 { max-width: 620px; font-size: 46px; line-height: 1.12; margin: 22px 0 16px; color: #075bb7; text-transform: uppercase; }
+        .hero-main p { max-width: 540px; font-size: 18px; margin-bottom: 26px; color: #07515f; }
+        .hero-badge { display: inline-block; background: #fff; color: #07839a; border-radius: 999px; padding: 9px 14px; font-weight: 800; }
+        .hero-offer { display: inline-block; background: #ffe04d; color: #075bb7; padding: 12px 20px; border-radius: 10px; font-size: 28px; font-weight: 900; transform: rotate(-3deg); box-shadow: 0 8px 0 rgba(0,0,0,.08); }
+        .hero-shape { position: absolute; right: 42px; bottom: 34px; width: 240px; height: 160px; border-radius: 24px; background: rgba(255,255,255,.45); border: 4px solid rgba(255,255,255,.65); display: grid; place-items: center; text-align: center; font-weight: 900; color: #087a8a; }
+        .warning-box { background: #fff; border-radius: 14px; padding: 20px; overflow: hidden; }
+        .warning-box h2 { color: #ff761a; font-size: 18px; margin: 0 0 14px; }
+        .news-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        .news-card { min-height: 320px; border-radius: 10px; padding: 14px; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(180deg, #91e3ef, #06385d); }
+        .news-card:nth-child(2) { background: linear-gradient(180deg, #b7d7e4, #20384a); }
+        .news-card:nth-child(3) { background: linear-gradient(180deg, #b6efe5, #0a4362); }
+        .news-card small { color: #f8d566; font-weight: 700; }
+        .news-card strong { display: block; margin-top: 8px; line-height: 1.35; }
+        .benefits { background: #fff; margin-top: 0; border-radius: 0 0 14px 14px; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #e3eef3; }
+        .benefit { padding: 14px 20px; display: flex; gap: 12px; align-items: center; border-right: 1px dashed #cddde5; }
+        .benefit span { width: 42px; height: 42px; border-radius: 50%; background: #e5fbf6; display: grid; place-items: center; color: #07839a; font-weight: 900; }
+        .benefit strong { display: block; }
+        .benefit small { color: #4b6570; }
+        .quick-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+        .quick-card { background: #fff; border-radius: 10px; min-height: 150px; padding: 20px 14px; display: grid; place-items: center; text-align: center; font-weight: 800; box-shadow: 0 8px 18px rgba(9, 77, 97, .06); }
+        .quick-icon { width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center; background: #dcfbf8; color: #0797a8; font-size: 28px; }
+        .section-title { margin: 32px 0 14px; color: #ff761a; font-size: 20px; text-transform: uppercase; }
+        .doctor-row, .guide-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .doctor-card, .guide-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 8px 18px rgba(9, 77, 97, .06); }
+        .doctor-card div { height: 88px; border-radius: 12px; background: linear-gradient(135deg, #d8fbf4, #e8f3ff); margin-bottom: 12px; }
+        .guide-card p { color: #4b6570; }
+        .footer { margin-top: 34px; padding: 24px; border-radius: 12px; background: #073b4c; color: #e8fcff; display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+        .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+        @@media (max-width: 1100px) { .topbar-inner { grid-template-columns: 1fr; } .hero-row, .doctor-row, .guide-row { grid-template-columns: 1fr; } .quick-grid { grid-template-columns: repeat(2, 1fr); } .benefits { grid-template-columns: repeat(2, 1fr); } .hero-shape { position: static; margin-top: 20px; width: 100%; } }
+        @@media (max-width: 640px) { .page { padding: 24px 12px; } .hero-main { padding: 24px; } .hero-main h1 { font-size: 30px; } .news-list, .benefits, .quick-grid { grid-template-columns: 1fr; } .menu-inner { justify-content: flex-start; } }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="logo" href="/">
+                <span class="logo-mark"></span>
+                <span>TIÊM CHỦNG<br />SỨC KHỎE</span>
             </a>
-            <a class="admin-feature-card" asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-bai-viet">
-                <span>BV</span>
-                <strong>Quản lý bài viết cẩm nang</strong>
-                <small>Thêm, cập nhật, xóa và quản lý các bài viết cẩm nang sức khỏe, tiêm chủng.</small>
-            </a>
-            <a class="admin-feature-card" asp-controller="Home" asp-action="ChucNang" asp-route-id="quan-ly-tu-van">
-                <span>TV</span>
-                <strong>Quản lý câu hỏi tư vấn</strong>
-                <small>Xem, xử lý, phản hồi và trả lời câu hỏi tư vấn của người dùng.</small>
-            </a>
+            <form class="search-box" action="/Vaccine/TraCuu" method="get">
+                <input name="tuKhoa" placeholder="Bạn cần tìm gì?" />
+                <button type="submit">⌕</button>
+            </form>
+            @if (daDangNhap)
+            {
+                <a class="login-btn" href="@trangSauDangNhap">Xin chào, @hoTen</a>
+            }
+            else
+            {
+                <a class="login-btn" href="/TaiKhoan/DangNhap">Đăng nhập</a>
+            }
+            <a class="consult-btn" href="/CauHoiTuVan/Create">Yêu cầu tư vấn</a>
         </div>
-    </section>
-}
-else
-{
-<section class="season-section">
-    <h2>Mùa này cần <em>tiêm gì?</em></h2>
-    <div class="vaccine-tabs">
-        <button class="active">HPV</button>
-        <button>Sốt Xuất Huyết</button>
-        <button>6 Trong 1</button>
-        <button>Viêm Não Mô cầu</button>
-        <button>Viêm Não Nhật Bản</button>
-        <button>RSV</button>
-    </div>
+    </header>
 
-    <div class="season-panel">
-        <div class="season-info">
-            <div class="weather-icon">☀️</div>
-            <h3>Phòng ngừa ung thư do HPV thế nào cho hiệu quả?</h3>
-            <p>HPV là nguyên nhân chính gây ung thư cổ tử cung và một số bệnh lý khác. Tiêm đúng lịch, đủ liều giúp tăng hiệu quả phòng bệnh.</p>
-            <ul>
-                <li>Gardasil: Bảo vệ 4 chủng, khuyến cáo cho nữ từ 9 đến 26 tuổi.</li>
-                <li>Gardasil 9: Bảo vệ 9 chủng, khuyến cáo cho nam và nữ từ 9 đến 45 tuổi.</li>
-            </ul>
+    <nav class="menu">
+        <div class="menu-inner">
+            <a href="/Vaccine/TraCuu">Vắc xin phòng bệnh</a>
+            <a href="/LichTiem/ChonHoSo">Gói vắc xin</a>
+            <a href="/BaiVietCamNang/Index">Khuyến mãi</a>
+            <a href="/">Hệ thống tiêm chủng</a>
+            <a href="/Vaccine/TraCuu">Tôi nên tiêm gì</a>
+            <a href="/CauHoiTuVan/Index">Đội ngũ chuyên môn</a>
+            <a href="/BaiVietCamNang/Index">Kiến thức tiêm chủng</a>
         </div>
+    </nav>
 
-        <div class="vaccine-products">
-            <article>
-                <span class="country">🇺🇸 Hoa Kỳ</span>
-                <div class="product-image box-one"></div>
-                <small>Vắc xin Gardasil 9 0.5ml</small>
-                <strong>Phòng bệnh ung thư do HPV 9 chủng</strong>
-                <b>2.965.000đ <span>/ Liều</span></b>
-                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Đặt hẹn</a>
-            </article>
-            <article>
-                <span class="country">🇺🇸 Hoa Kỳ</span>
-                <div class="product-image box-two"></div>
-                <small>Vắc xin Gardasil 4 0.5ml</small>
-                <strong>Phòng bệnh ung thư do HPV 4 chủng</strong>
-                <b>1.780.000đ <span>/ Liều</span></b>
-                <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Đặt hẹn</a>
-            </article>
-        </div>
-    </div>
-</section>
+    <main class="page">
+        <section class="hero-row">
+            <div>
+                <div class="hero-main">
+                    <span class="hero-badge">Chủ động chăm sóc sức khỏe</span>
+                    <h1>Tiêm chủng an tâm, quản lý đủ lịch</h1>
+                    <p>Theo dõi hồ sơ sức khỏe, lịch tiêm và lịch sử tiêm cho bạn và gia đình trên một hệ thống đơn giản.</p>
+                    <span class="hero-offer">Nhắc lịch miễn phí</span>
+                    <div class="hero-shape">Sổ tiêm điện tử<br />Lịch tiêm cá nhân<br />Tư vấn nhanh</div>
+                </div>
+                <div class="benefits">
+                    <div class="benefit"><span>✓</span><div><strong>Bảo quản chuẩn GSP</strong><small>Vaccine được quản lý rõ ràng</small></div></div>
+                    <div class="benefit"><span>BS</span><div><strong>Đội ngũ chuyên môn</strong><small>Hỗ trợ tư vấn sức khỏe</small></div></div>
+                    <div class="benefit"><span>Sổ</span><div><strong>Sổ tiêm chủng điện tử</strong><small>Nhắc lịch cho cả gia đình</small></div></div>
+                    <div class="benefit"><span>%</span><div><strong>Ưu đãi sức khỏe</strong><small>Theo dõi cẩm nang và thông tin mới</small></div></div>
+                </div>
+            </div>
 
-<section class="combo-section">
-    <h2>Gói vắc xin bảo vệ toàn diện</h2>
-    <div class="combo-benefits">
-        <div><span>📅</span><strong>Miễn phí nhắc lịch hẹn</strong><small>Chính xác và khoa học cho cả gia đình</small></div>
-        <div><span>💰</span><strong>Cam kết giữ giá vắc xin</strong><small>Suốt thời gian tiêm theo phác đồ</small></div>
-        <div><span>💉</span><strong>Cam kết luôn đủ vắc xin</strong><small>Không lo hàng khan hiếm</small></div>
-    </div>
+            <aside class="warning-box">
+                <h2>CẢNH BÁO QUAN TRỌNG</h2>
+                <div class="news-list">
+                    <article class="news-card"><small>Sức khỏe</small><strong>Khuyến cáo theo dõi lịch tiêm đúng hẹn cho trẻ em</strong></article>
+                    <article class="news-card"><small>Vaccine</small><strong>Cập nhật thông tin vaccine và mũi tiêm cần lưu ý</strong></article>
+                    <article class="news-card"><small>Phòng bệnh</small><strong>Chủ động tư vấn khi có thắc mắc sau tiêm</strong></article>
+                </div>
+            </aside>
+        </section>
 
-    <div class="combo-board">
-        <aside>
-            <h3>6 gói vắc xin theo độ tuổi</h3>
-            <button class="active">Gói combo 6 tháng <span>Giảm tới 618.690đ</span></button>
-            <button>Gói combo 12 tháng <span>Giảm tới 1.007.280đ</span></button>
-            <button>Gói combo 24 tháng <span>Giảm tới 1.155.870đ</span></button>
-            <button>Gói trẻ tiền học đường <span>Giảm tới 646.840đ</span></button>
-        </aside>
-        <div class="combo-table">
-            <h3>Gói combo 6 tháng</h3>
-            <div class="combo-row header"><span>Vắc xin</span><span>Phác đồ</span><span>Số lượng</span><span>Đơn giá</span></div>
-            <div class="combo-row"><span>Vắc xin PCV15</span><span>2 Liều</span><span>2</span><strong>3.162.200đ</strong></div>
-            <div class="combo-row"><span>Phòng tiêu chảy do Rota virus</span><span>2 Liều</span><span>2</span><strong>1.687.800đ</strong></div>
-            <div class="combo-row"><span>Phòng Cúm</span><span>1 Liều</span><span>1</span><strong>323.010đ</strong></div>
-            <div class="combo-row"><span>Phòng bệnh Não mô cầu ACYW</span><span>1 Liều</span><span>1</span><strong>1.784.800đ</strong></div>
-        </div>
-    </div>
-</section>
+        <section class="quick-grid">
+            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">?</span><span>Tôi nên tiêm gì?</span></a>
+            <a class="quick-card" href="/CauHoiTuVan/Create"><span class="quick-icon">BS</span><span>Chat với bác sĩ</span></a>
+            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">VX</span><span>Danh mục vắc xin</span></a>
+            <a class="quick-card" href="/HoSoSucKhoe/Index"><span class="quick-icon">Sổ</span><span>Sổ tiêm của tôi</span></a>
+            <a class="quick-card" href="/LichTiem/ChonHoSo"><span class="quick-icon">✓</span><span>Lịch tiêm</span></a>
+            <a class="quick-card" href="/BaiVietCamNang/Index"><span class="quick-icon">Tin</span><span>Kiến thức tiêm chủng</span></a>
+        </section>
 
-<section class="knowledge-section">
-    <h2>Kiến thức tiêm chủng</h2>
-    <div class="knowledge-board">
-        <article class="doctor-story">
-            <div class="story-image"></div>
-            <strong>Zona thần kinh gây đau rát, khó chịu và dễ để lại biến chứng nếu...</strong>
-        </article>
-        <article class="main-story">
-            <div class="story-image vaccine-shot"></div>
-            <strong>Tiêm một loại vắc xin phòng não mô cầu được không?</strong>
-        </article>
-        <div class="side-stories">
-            <a>Dấu hiệu phân biệt viêm não mô cầu và bệnh cúm</a>
-            <a>Chủ động tiêm cúm mùa trước giai đoạn cao điểm</a>
-            <a>Virus Nipah: Nguy cơ bùng phát dịch bệnh</a>
-            <a>Cập nhật các vắc xin phối hợp mới</a>
-        </div>
-    </div>
-</section>
+        <h2 class="section-title">Đội ngũ chuyên môn</h2>
+        <section class="doctor-row">
+            <article class="doctor-card"><div></div><strong>Tư vấn lịch tiêm phù hợp</strong><p>Hỗ trợ giải đáp câu hỏi về hồ sơ và mũi tiêm.</p></article>
+            <article class="doctor-card"><div></div><strong>Theo dõi sau tiêm</strong><p>Ghi nhận lịch sử và tình trạng sức khỏe sau tiêm.</p></article>
+            <article class="doctor-card"><div></div><strong>Nhắc lịch khoa học</strong><p>Giúp người dùng không bỏ sót các mũi tiêm quan trọng.</p></article>
+            <article class="doctor-card"><div></div><strong>Cẩm nang sức khỏe</strong><p>Cung cấp kiến thức cơ bản về phòng bệnh.</p></article>
+        </section>
 
-<section class="category-section">
-    <h2>🔥 Danh mục nổi bật</h2>
-    <div class="category-grid">
-        <a>Mẹ & Bé</a>
-        <a>Dinh dưỡng</a>
-        <a>Chăm sóc sức khỏe</a>
-        <a>Sức khỏe giới tính</a>
-        <a>Nhi</a>
-        <a>Thanh thiếu niên</a>
-        <a>Người trưởng thành</a>
-        <a>Tiền hôn nhân</a>
-        <a>Du lịch</a>
-        <a>Bệnh truyền nhiễm</a>
-    </div>
-</section>
+        <h2 class="section-title">Kiến thức tiêm chủng</h2>
+        <section class="guide-row">
+            <article class="guide-card"><h3>Những điều cần biết trước khi tiêm vaccine</h3><p>Chuẩn bị thông tin sức khỏe và tiền sử dị ứng trước khi tiêm.</p><a href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            <article class="guide-card"><h3>Cách theo dõi sau tiêm</h3><p>Ghi nhận phản ứng sau tiêm và liên hệ tư vấn khi cần.</p><a href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            <article class="guide-card"><h3>Vì sao cần tiêm đúng lịch?</h3><p>Tiêm đúng lịch giúp duy trì hiệu quả phòng bệnh tốt hơn.</p><a href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            <article class="guide-card"><h3>Quản lý hồ sơ sức khỏe gia đình</h3><p>Lưu hồ sơ để theo dõi chỉ số và lịch tiêm thuận tiện hơn.</p><a href="/HoSoSucKhoe/Index">Xem hồ sơ</a></article>
+        </section>
 
-<footer class="home-footer">
-    <div class="footer-top">
-        <strong>📍 Với 231 trung tâm tiêm chủng trên toàn quốc</strong>
-        <a asp-controller="Home" asp-action="ChucNang" asp-route-id="lich-tiem">Xem danh sách</a>
-    </div>
-    <div class="footer-links">
-        <div>
-            <h3>Về chúng tôi</h3>
-            <p>Giới thiệu Hồ sơ sức khỏe và tiêm chủng</p>
-            <p>Quy chế hoạt động website</p>
-            <p>Chính sách bảo mật</p>
-        </div>
-        <div>
-            <h3>Mục nổi bật</h3>
-            <p>Danh mục vắc xin</p>
-            <p>Kiến thức tiêm chủng</p>
-            <p>Đội ngũ bác sĩ, chuyên gia</p>
-        </div>
-        <div>
-            <h3>Tìm hiểu thêm</h3>
-            <p>Khuyến mãi</p>
-            <p>Tôi nên tiêm gì?</p>
-            <p>Tiêm chủng đi nước ngoài</p>
-        </div>
-        <div>
-            <h3>Tổng đài</h3>
-            <p>Tư vấn & đặt hẹn: 1800 6928</p>
-            <p>Góp ý, khiếu nại: 1800 6928</p>
-            <p class="socials">f t z ▶</p>
-        </div>
-    </div>
-</footer>
-}
+        <footer class="footer">
+            <div>
+                <strong>Tiêm Chủng Sức Khỏe</strong>
+                <p>Trang chủ công khai cho hệ thống quản lý hồ sơ sức khỏe và tiêm chủng.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/HoSoSucKhoe/Index">Hồ sơ sức khỏe</a>
+                <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
+                <a href="/CauHoiTuVan/Create">Tư vấn</a>
+                <a href="/TaiKhoan/DangNhap">Đăng nhập</a>
+            </div>
+        </footer>
+    </main>
+</body>
+</html>

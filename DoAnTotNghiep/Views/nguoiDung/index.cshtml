@@ -1,14 +1,133 @@
 @{
     ViewData["Title"] = "Trang người dùng";
+    var hoTen = ViewBag.HoTen as string ?? "người dùng";
+    var baiViet = ViewBag.BaiViet as IEnumerable<dynamic>;
 }
 
-<h2>Xin chào @ViewBag.HoTen</h2>
+<style>
+    .user-home { background: #f4fbfb; margin: -1.5rem calc(50% - 50vw) -1.5rem; padding: 0 calc(50vw - 50%) 32px; color: #14343b; }
+    .user-header { background: #fff; border-bottom: 1px solid #d9eeee; padding: 14px 0; }
+    .user-header-inner, .user-footer-inner, .user-container { max-width: 1180px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+    .user-header-inner { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+    .user-logo { font-weight: 800; color: #07839a; text-decoration: none; white-space: nowrap; }
+    .user-menu { display: flex; gap: 12px; flex: 1; flex-wrap: wrap; }
+    .user-menu a, .user-actions a, .user-footer a { color: #21535c; text-decoration: none; font-weight: 600; }
+    .user-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .logout-link { color: #c93434 !important; }
+    .user-container { padding-top: 24px; padding-bottom: 24px; }
+    .hero-banner { display: grid; grid-template-columns: 1.5fr .8fr; gap: 24px; align-items: center; background: linear-gradient(135deg, #dff8f4, #eaf5ff); border-radius: 12px; padding: 34px; border: 1px solid #cdecea; }
+    .hero-banner h1 { font-size: 34px; margin: 0 0 12px; }
+    .hero-banner p { font-size: 17px; margin-bottom: 20px; color: #345e66; }
+    .btn-main, .btn-sub, .card-link { display: inline-block; border-radius: 8px; padding: 10px 15px; text-decoration: none; font-weight: 700; }
+    .btn-main, .card-link { background: #0797a8; color: #fff; }
+    .btn-sub { background: #fff; color: #087a8a; border: 1px solid #b8e0e0; margin-left: 8px; }
+    .hero-note { background: rgba(255,255,255,.72); border: 1px solid #c6e9e8; border-radius: 12px; padding: 22px; font-weight: 800; color: #087a8a; line-height: 1.8; }
+    .section-title { margin: 30px 0 14px; font-size: 24px; }
+    .feature-grid, .article-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .feature-card, .article-card, .faq-item, .consult-box { background: #fff; border: 1px solid #dceeee; border-radius: 12px; box-shadow: 0 8px 22px rgba(22, 88, 96, .07); padding: 18px; }
+    .feature-card:hover, .article-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(22, 88, 96, .11); }
+    .feature-card h3, .article-card h3 { margin-top: 0; }
+    .feature-card p, .article-card p { min-height: 48px; color: #4d6b72; }
+    .faq-consult { display: grid; grid-template-columns: 1.4fr .8fr; gap: 18px; }
+    .faq-list { display: grid; gap: 10px; }
+    .consult-box { display: flex; flex-direction: column; justify-content: center; }
+    .user-footer { background: #fff; border-top: 1px solid #d9eeee; margin-top: 30px; padding: 22px 0; }
+    .user-footer-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
+    @@media (max-width: 850px) { .hero-banner, .faq-consult, .feature-grid, .article-grid { grid-template-columns: 1fr; } .btn-sub { margin: 8px 0 0; } }
+</style>
 
-<div class="list-group col-md-5">
-    <a class="list-group-item list-group-item-action" asp-controller="HoSoSucKhoe" asp-action="Index">Hồ sơ sức khỏe</a>
-    <a class="list-group-item list-group-item-action" asp-controller="lichTiem" asp-action="index">Lịch tiêm</a>
-    <a class="list-group-item list-group-item-action" asp-controller="lichTiem" asp-action="lichSu">Lịch sử tiêm</a>
-    <a class="list-group-item list-group-item-action" href="#">Thông báo</a>
-    <a class="list-group-item list-group-item-action" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a>
-    <a class="list-group-item list-group-item-action text-danger" asp-controller="TaiKhoan" asp-action="DangXuat">Đăng xuất</a>
+<div class="user-home">
+    <header class="user-header">
+        <div class="user-header-inner">
+            <a class="user-logo" href="/NguoiDung/Index">Tiêm Chủng Sức Khỏe</a>
+            <nav class="user-menu">
+                <a href="/NguoiDung/Index">Trang chủ</a>
+                <a href="/HoSoSucKhoe/Index">Hồ sơ sức khỏe</a>
+                <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
+                <a href="/LichSuTiem/ChonHoSo">Lịch sử tiêm</a>
+                <a href="/ThongBao/Index">Thông báo</a>
+                <a href="/Vaccine/TraCuu">Vaccine</a>
+                <a href="/BaiVietCamNang/Index">Cẩm nang</a>
+                <a href="/CauHoiTuVan/Index">Tư vấn</a>
+            </nav>
+            <div class="user-actions">
+                <span>Xin chào, @hoTen</span>
+                <a class="logout-link" href="/TaiKhoan/DangXuat">Đăng xuất</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="user-container">
+        <section class="hero-banner">
+            <div>
+                <h1>Quản lý sức khỏe và lịch tiêm chủng dễ dàng</h1>
+                <p>Theo dõi hồ sơ sức khỏe, lịch tiêm, lịch sử tiêm và nhận thông báo nhắc lịch.</p>
+                <a class="btn-main" href="/LichTiem/ChonHoSo">Xem lịch tiêm</a>
+                <a class="btn-sub" href="/HoSoSucKhoe/Create">Tạo hồ sơ sức khỏe</a>
+            </div>
+            <div class="hero-note">Nhắc lịch tiêm<br />Theo dõi sức khỏe<br />Tư vấn</div>
+        </section>
+
+        <h2 class="section-title">Chức năng chính</h2>
+        <section class="feature-grid">
+            <article class="feature-card"><h3>Hồ sơ sức khỏe</h3><p>Quản lý thông tin sức khỏe của bạn và người thân.</p><a class="card-link" href="/HoSoSucKhoe/Index">Xem</a></article>
+            <article class="feature-card"><h3>Lịch tiêm</h3><p>Xem danh sách các mũi tiêm dự kiến.</p><a class="card-link" href="/LichTiem/ChonHoSo">Chọn</a></article>
+            <article class="feature-card"><h3>Lịch sử tiêm</h3><p>Theo dõi các mũi tiêm đã hoàn thành.</p><a class="card-link" href="/LichSuTiem/ChonHoSo">Xem</a></article>
+            <article class="feature-card"><h3>Thông báo</h3><p>Xem nhắc lịch tiêm sắp đến hạn hoặc quá hạn.</p><a class="card-link" href="/ThongBao/Index">Xem</a></article>
+            <article class="feature-card"><h3>Tra cứu vaccine</h3><p>Xem thông tin vaccine và các mũi tiêm.</p><a class="card-link" href="/Vaccine/TraCuu">Tra cứu</a></article>
+            <article class="feature-card"><h3>Cẩm nang sức khỏe</h3><p>Đọc bài viết về tiêm chủng và chăm sóc sức khỏe.</p><a class="card-link" href="/BaiVietCamNang/Index">Đọc</a></article>
+            <article class="feature-card"><h3>Tư vấn</h3><p>Gửi câu hỏi tư vấn đến quản trị viên.</p><a class="card-link" href="/CauHoiTuVan/Index">Gửi câu hỏi</a></article>
+        </section>
+
+        <section class="faq-consult">
+            <div>
+                <h2 class="section-title">Câu hỏi thường gặp</h2>
+                <div class="faq-list">
+                    <div class="faq-item">Trẻ em cần tiêm những vaccine nào?</div>
+                    <div class="faq-item">Làm sao để xem lịch tiêm?</div>
+                    <div class="faq-item">Tôi đã tiêm rồi thì cập nhật ở đâu?</div>
+                    <div class="faq-item">Làm sao để gửi câu hỏi tư vấn?</div>
+                </div>
+            </div>
+            <aside class="consult-box">
+                <h2>Cần tư vấn?</h2>
+                <p>Bạn có thắc mắc về lịch tiêm hoặc vaccine?</p>
+                <a class="btn-main" href="/CauHoiTuVan/Create">Gửi câu hỏi tư vấn</a>
+            </aside>
+        </section>
+
+        <h2 class="section-title">Cẩm nang sức khỏe</h2>
+        <section class="article-grid">
+            @if (baiViet != null && baiViet.Any())
+            {
+                foreach (var item in baiViet.Take(3))
+                {
+                    <article class="article-card">
+                        <h3>@item.tieuDe</h3>
+                        <p>@item.noiDung</p>
+                        <a class="card-link" href="/BaiVietCamNang/Index">Xem bài viết</a>
+                    </article>
+                }
+            }
+            else
+            {
+                <article class="article-card"><h3>Những điều cần biết trước khi tiêm vaccine</h3><p>Chuẩn bị thông tin sức khỏe và theo dõi chỉ định trước khi tiêm.</p><a class="card-link" href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+                <article class="article-card"><h3>Cách theo dõi sau tiêm</h3><p>Ghi nhận phản ứng sau tiêm và liên hệ tư vấn khi cần.</p><a class="card-link" href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+                <article class="article-card"><h3>Vì sao cần tiêm đúng lịch?</h3><p>Tiêm đúng lịch giúp duy trì hiệu quả phòng bệnh tốt hơn.</p><a class="card-link" href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            }
+        </section>
+    </main>
+
+    <footer class="user-footer">
+        <div class="user-footer-inner">
+            <div><strong>Tiêm Chủng Sức Khỏe</strong><p>Quản lý hồ sơ sức khỏe và lịch tiêm chủng đơn giản.</p></div>
+            <div class="footer-links">
+                <a href="/HoSoSucKhoe/Index">Hồ sơ sức khỏe</a>
+                <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
+                <a href="/CauHoiTuVan/Index">Tư vấn</a>
+                <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
+            </div>
+        </div>
+    </footer>
 </div>
