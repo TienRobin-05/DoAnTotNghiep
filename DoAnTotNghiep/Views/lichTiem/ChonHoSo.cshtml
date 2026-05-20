@@ -1,0 +1,42 @@
+@model List<HoSoSucKhoe>
+@{
+    ViewData["Title"] = "Chọn hồ sơ xem lịch tiêm";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Chọn hồ sơ xem lịch tiêm</h2>
+    <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Bạn chưa có hồ sơ sức khỏe. Vui lòng tạo hồ sơ trước khi xem lịch tiêm.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Họ tên</th>
+                <th>Ngày sinh</th>
+                <th>Giới tính</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.HoTen</td>
+                <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
+                <td>@item.GioiTinh</td>
+                <td>
+                    <a asp-action="Index" asp-route-maHoSo="@item.MaHoSo" class="btn btn-sm btn-primary">Xem lịch tiêm</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
