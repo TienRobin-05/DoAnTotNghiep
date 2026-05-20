@@ -1,0 +1,21 @@
+@model Vaccine
+@{
+    ViewData["Title"] = "Chi tiết vaccine";
+}
+
+<h2>Chi tiết vaccine</h2>
+
+<table class="table table-bordered col-md-8">
+    <tr><th>Mã vaccine</th><td>@Model.MaVaccine</td></tr>
+    <tr><th>Tên vaccine</th><td>@Model.TenVaccine</td></tr>
+    <tr><th>Nhóm vaccine</th><td>@Model.NhomVaccine</td></tr>
+    <tr><th>Độ tuổi tối thiểu</th><td>@Model.DoTuoiToiThieu</td></tr>
+    <tr><th>Độ tuổi tối đa</th><td>@Model.DoTuoiToiDa</td></tr>
+    <tr><th>Đơn vị tuổi</th><td>@Model.DonViTuoi</td></tr>
+    <tr><th>Mô tả</th><td style="white-space: pre-wrap">@Model.MoTa</td></tr>
+    <tr><th>Lưu ý</th><td style="white-space: pre-wrap">@Model.LuuY</td></tr>
+    <tr><th>Trạng thái</th><td>@(Model.TrangThai ? "Đang dùng" : "Đã ẩn")</td></tr>
+</table>
+
+<a asp-action="Edit" asp-route-id="@Model.MaVaccine" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-link">Quay lại</a>

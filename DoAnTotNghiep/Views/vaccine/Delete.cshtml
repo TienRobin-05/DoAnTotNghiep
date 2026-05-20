@@ -1,0 +1,22 @@
+@model Vaccine
+@{
+    ViewData["Title"] = "Ẩn vaccine";
+}
+
+<h2>Ẩn vaccine</h2>
+<div class="alert alert-warning">
+    Hệ thống sẽ không xóa cứng dữ liệu. Vaccine này chỉ được cập nhật <strong>trangThai = false</strong>.
+</div>
+
+<table class="table table-bordered col-md-8">
+    <tr><th>Mã vaccine</th><td>@Model.MaVaccine</td></tr>
+    <tr><th>Tên vaccine</th><td>@Model.TenVaccine</td></tr>
+    <tr><th>Nhóm vaccine</th><td>@Model.NhomVaccine</td></tr>
+    <tr><th>Trạng thái hiện tại</th><td>@(Model.TrangThai ? "Đang dùng" : "Đã ẩn")</td></tr>
+</table>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Ẩn vaccine</button>
+    <a asp-action="Index" class="btn btn-link">Hủy</a>
+</form>

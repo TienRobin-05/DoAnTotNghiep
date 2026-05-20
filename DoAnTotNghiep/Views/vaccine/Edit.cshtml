@@ -1,0 +1,19 @@
+@model Vaccine
+@{
+    ViewData["Title"] = "Sửa vaccine";
+}
+
+<h2>Sửa vaccine</h2>
+
+@if (ViewBag.ThongBao != null)
+{
+    <div class="alert alert-danger">@ViewBag.ThongBao</div>
+}
+
+<form method="post" class="col-md-8">
+    @Html.AntiForgeryToken()
+    <input asp-for="MaVaccine" type="hidden" />
+    <partial name="_FormVaccine" model="Model" />
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-action="Index" class="btn btn-link">Quay lại</a>
+</form>
