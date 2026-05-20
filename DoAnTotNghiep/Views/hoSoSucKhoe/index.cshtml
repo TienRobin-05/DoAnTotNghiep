@@ -1,0 +1,32 @@
+@model List<hoSoSucKhoeModels>
+@{
+    ViewData["Title"] = "Hồ sơ sức khỏe";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Hồ sơ sức khỏe</h2>
+    <a asp-action="them" class="btn btn-primary">Thêm hồ sơ</a>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead><tr><th>Họ tên</th><th>Ngày sinh</th><th>Giới tính</th><th>Chiều cao</th><th>Cân nặng</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.hoTen</td>
+            <td>@item.ngaySinh.ToString("dd/MM/yyyy")</td>
+            <td>@item.gioiTinh</td>
+            <td>@item.chieuCao</td>
+            <td>@item.canNang</td>
+            <td class="d-flex gap-2">
+                <a asp-action="sua" asp-route-id="@item.maHoSo" class="btn btn-sm btn-outline-primary">Sửa</a>
+                <form asp-action="xoa" asp-route-id="@item.maHoSo" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

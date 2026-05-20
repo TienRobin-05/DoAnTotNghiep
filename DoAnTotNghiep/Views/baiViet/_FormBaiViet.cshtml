@@ -1,0 +1,22 @@
+@model baiVietCamNangModels
+
+<form method="post" class="col-md-8">
+    @Html.AntiForgeryToken()
+    <input asp-for="maBaiViet" type="hidden" />
+    <div class="mb-3">
+        <label asp-for="tieuDe" class="form-label">Tiêu đề</label>
+        <input asp-for="tieuDe" class="form-control" />
+        <span asp-validation-for="tieuDe" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="noiDung" class="form-label">Nội dung</label>
+        <textarea asp-for="noiDung" rows="8" class="form-control"></textarea>
+        <span asp-validation-for="noiDung" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="trangThai" class="form-check-input" />
+        <label asp-for="trangThai" class="form-check-label">Hiển thị</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="index" class="btn btn-link">Quay lại</a>
+</form>

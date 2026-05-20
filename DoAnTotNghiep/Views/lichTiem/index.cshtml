@@ -1,0 +1,33 @@
+@model List<lichTiemModels>
+@{
+    ViewData["Title"] = "Lịch tiêm";
+}
+
+<h2>Lịch tiêm</h2>
+<table class="table table-bordered table-striped">
+    <thead><tr><th>Hồ sơ</th><th>Vaccine</th><th>Mũi</th><th>Ngày dự kiến</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.tenHoSo</td>
+            <td>@item.tenVaccine</td>
+            <td>@item.tenMui (@item.soMui)</td>
+            <td>@item.ngayTiemDuKien.ToString("dd/MM/yyyy")</td>
+            <td>@item.trangThai</td>
+            <td>
+                @if (item.trangThai != "Đã tiêm")
+                {
+                    <form asp-action="capNhatDaTiem" method="post" class="d-flex gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maLichTiem" value="@item.maLichTiem" />
+                        <input type="date" name="ngayTiemThucTe" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                        <input name="ghiChu" class="form-control form-control-sm" placeholder="Ghi chú" />
+                        <button type="submit" class="btn btn-sm btn-success">Đã tiêm</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

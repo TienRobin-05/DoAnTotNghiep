@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Trang người dùng";
+    var lichTiem = ViewBag.LichTiem as List<lichTiemModels> ?? new List<lichTiemModels>();
+    var thongBao = ViewBag.ThongBao as List<thongBaoModels> ?? new List<thongBaoModels>();
+}
+
+<h2>Trang người dùng</h2>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <h4>Lịch tiêm gần nhất</h4>
+        <table class="table table-bordered">
+            <thead><tr><th>Hồ sơ</th><th>Vaccine</th><th>Ngày dự kiến</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+            @foreach (var item in lichTiem)
+            {
+                <tr>
+                    <td>@item.tenHoSo</td>
+                    <td>@item.tenVaccine</td>
+                    <td>@item.ngayTiemDuKien.ToString("dd/MM/yyyy")</td>
+                    <td>@item.trangThai</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h4>Thông báo</h4>
+        <table class="table table-bordered">
+            <thead><tr><th>Tiêu đề</th><th>Ngày gửi</th><th>Đã đọc</th></tr></thead>
+            <tbody>
+            @foreach (var item in thongBao)
+            {
+                <tr>
+                    <td>@item.tieuDe</td>
+                    <td>@item.ngayGui.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(item.daDoc ? "Rồi" : "Chưa")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

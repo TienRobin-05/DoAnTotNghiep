@@ -1,0 +1,39 @@
+@model hoSoSucKhoeModels
+
+<form method="post" class="col-md-7">
+    @Html.AntiForgeryToken()
+    <input asp-for="maHoSo" type="hidden" />
+    <div class="mb-3">
+        <label asp-for="hoTen" class="form-label">Họ tên</label>
+        <input asp-for="hoTen" class="form-control" />
+        <span asp-validation-for="hoTen" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ngaySinh" class="form-label">Ngày sinh</label>
+        <input asp-for="ngaySinh" type="date" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="gioiTinh" class="form-label">Giới tính</label>
+        <input asp-for="gioiTinh" class="form-control" />
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="chieuCao" class="form-label">Chiều cao</label>
+            <input asp-for="chieuCao" class="form-control" />
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="canNang" class="form-label">Cân nặng</label>
+            <input asp-for="canNang" class="form-control" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="tienSuBenh" class="form-label">Tiền sử bệnh</label>
+        <textarea asp-for="tienSuBenh" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label asp-for="diUng" class="form-label">Dị ứng</label>
+        <textarea asp-for="diUng" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="index" class="btn btn-link">Quay lại</a>
+</form>

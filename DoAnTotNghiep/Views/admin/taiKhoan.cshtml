@@ -1,0 +1,33 @@
+@model List<taiKhoanModels>
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<h2>Quản lý tài khoản</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr><th>Mã</th><th>Họ tên</th><th>Email</th><th>Số điện thoại</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.maTaiKhoan</td>
+            <td>@item.hoTen</td>
+            <td>@item.email</td>
+            <td>@item.soDienThoai</td>
+            <td>@item.vaiTro</td>
+            <td>@(item.trangThai ? "Hoạt động" : "Khóa")</td>
+            <td>
+                <form asp-action="doiTrangThaiTaiKhoan" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maTaiKhoan" value="@item.maTaiKhoan" />
+                    <input type="hidden" name="trangThai" value="@(!item.trangThai)" />
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">Đổi trạng thái</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

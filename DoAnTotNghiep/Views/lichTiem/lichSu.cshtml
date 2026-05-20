@@ -1,0 +1,21 @@
+@model List<lichSuTiemModels>
+@{
+    ViewData["Title"] = "Lịch sử tiêm";
+}
+
+<h2>Lịch sử tiêm</h2>
+<table class="table table-bordered table-striped">
+    <thead><tr><th>Hồ sơ</th><th>Vaccine</th><th>Mũi</th><th>Ngày tiêm</th><th>Ghi chú</th></tr></thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.tenHoSo</td>
+            <td>@item.tenVaccine</td>
+            <td>@item.tenMui</td>
+            <td>@item.ngayTiemThucTe.ToString("dd/MM/yyyy")</td>
+            <td>@item.ghiChu</td>
+        </tr>
+    }
+    </tbody>
+</table>

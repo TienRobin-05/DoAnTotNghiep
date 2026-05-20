@@ -1,0 +1,35 @@
+@model dangKyViewModels
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<h2>Đăng ký tài khoản</h2>
+
+<form asp-action="dangKy" method="post" class="col-md-6">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="hoTen" class="form-label">Họ tên</label>
+        <input asp-for="hoTen" class="form-control" />
+        <span asp-validation-for="hoTen" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="email" class="form-label">Email</label>
+        <input asp-for="email" class="form-control" />
+        <span asp-validation-for="email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="matKhau" class="form-label">Mật khẩu</label>
+        <input asp-for="matKhau" type="password" class="form-control" />
+        <span asp-validation-for="matKhau" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="soDienThoai" class="form-label">Số điện thoại</label>
+        <input asp-for="soDienThoai" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+    <a asp-action="dangNhap" class="btn btn-link">Quay lại đăng nhập</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

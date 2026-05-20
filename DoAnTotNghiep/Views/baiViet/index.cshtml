@@ -1,0 +1,35 @@
+@model List<baiVietCamNangModels>
+@{
+    ViewData["Title"] = "Bài viết cẩm nang";
+    var laAdmin = string.Equals(Context.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Bài viết cẩm nang</h2>
+    @if (laAdmin)
+    {
+        <a asp-action="them" class="btn btn-primary">Thêm bài viết</a>
+    }
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead><tr><th>Tiêu đề</th><th>Tác giả</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.tieuDe</td>
+            <td>@item.tenTacGia</td>
+            <td>@item.ngayTao.ToString("dd/MM/yyyy")</td>
+            <td>@(item.trangThai ? "Hiển thị" : "Ẩn")</td>
+            <td>
+                <a asp-action="chiTiet" asp-route-id="@item.maBaiViet" class="btn btn-sm btn-outline-secondary">Xem</a>
+                @if (laAdmin)
+                {
+                    <a asp-action="sua" asp-route-id="@item.maBaiViet" class="btn btn-sm btn-outline-primary">Sửa</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

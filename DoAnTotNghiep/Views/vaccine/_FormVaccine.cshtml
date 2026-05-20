@@ -1,0 +1,25 @@
+@model vaccineModels
+
+<form method="post" class="col-md-8">
+    @Html.AntiForgeryToken()
+    <input asp-for="maVaccine" type="hidden" />
+    <div class="mb-3">
+        <label asp-for="tenVaccine" class="form-label">Tên vaccine</label>
+        <input asp-for="tenVaccine" class="form-control" />
+        <span asp-validation-for="tenVaccine" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="nhomVaccine" class="form-label">Nhóm vaccine</label>
+        <input asp-for="nhomVaccine" class="form-control" />
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label asp-for="doTuoiToiThieu" class="form-label">Tuổi tối thiểu</label><input asp-for="doTuoiToiThieu" class="form-control" /></div>
+        <div class="col-md-4 mb-3"><label asp-for="doTuoiToiDa" class="form-label">Tuổi tối đa</label><input asp-for="doTuoiToiDa" class="form-control" /></div>
+        <div class="col-md-4 mb-3"><label asp-for="donViTuoi" class="form-label">Đơn vị tuổi</label><input asp-for="donViTuoi" class="form-control" /></div>
+    </div>
+    <div class="mb-3"><label asp-for="moTa" class="form-label">Mô tả</label><textarea asp-for="moTa" class="form-control"></textarea></div>
+    <div class="mb-3"><label asp-for="luuY" class="form-label">Lưu ý</label><textarea asp-for="luuY" class="form-control"></textarea></div>
+    <div class="form-check mb-3"><input asp-for="trangThai" class="form-check-input" /><label asp-for="trangThai" class="form-check-label">Hoạt động</label></div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="index" class="btn btn-link">Quay lại</a>
+</form>
