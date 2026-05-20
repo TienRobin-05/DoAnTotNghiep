@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    public class adminController : Controller
+    public class AdminController : Controller
     {
         private readonly taiKhoanDAL taiKhoanDAL;
         private readonly vaccineDAL vaccineDAL;
         private readonly lichTiemDAL lichTiemDAL;
         private readonly cauHoiTuVanDAL cauHoiTuVanDAL;
 
-        public adminController(taiKhoanDAL taiKhoanDAL, vaccineDAL vaccineDAL, lichTiemDAL lichTiemDAL, cauHoiTuVanDAL cauHoiTuVanDAL)
+        public AdminController(taiKhoanDAL taiKhoanDAL, vaccineDAL vaccineDAL, lichTiemDAL lichTiemDAL, cauHoiTuVanDAL cauHoiTuVanDAL)
         {
             this.taiKhoanDAL = taiKhoanDAL;
             this.vaccineDAL = vaccineDAL;
@@ -18,13 +18,11 @@ namespace DoAnTotNghiep.Controllers
             this.cauHoiTuVanDAL = cauHoiTuVanDAL;
         }
 
-        public IActionResult index()
+        public IActionResult Index()
         {
-            if (!laAdmin())
-            {
-                return RedirectToAction("dangNhap", "taiKhoan");
-            }
+            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            ViewBag.HoTen = HttpContext.Session.GetString("HoTen") ?? string.Empty;
             ViewBag.SoTaiKhoan = taiKhoanDAL.layTatCa().Count;
             ViewBag.SoVaccine = vaccineDAL.layTatCa().Count;
             ViewBag.SoLichTiem = lichTiemDAL.layTatCa().Count;
@@ -34,7 +32,7 @@ namespace DoAnTotNghiep.Controllers
 
         public IActionResult taiKhoan()
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
+            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             return View(taiKhoanDAL.layTatCa());
         }
 
@@ -42,14 +40,16 @@ namespace DoAnTotNghiep.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult doiTrangThaiTaiKhoan(int maTaiKhoan, bool trangThai)
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
+            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             taiKhoanDAL.doiTrangThai(maTaiKhoan, trangThai);
             return RedirectToAction(nameof(taiKhoan));
         }
 
-        private bool laAdmin()
+        private bool LaAdmin()
         {
-            return string.Equals(HttpContext.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            return maTaiKhoan != null
+                && string.Equals(HttpContext.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

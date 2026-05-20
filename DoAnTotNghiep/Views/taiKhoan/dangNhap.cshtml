@@ -1,32 +1,29 @@
-@model dangNhapViewModels
 @{
     ViewData["Title"] = "Đăng nhập";
 }
 
 <h2>Đăng nhập</h2>
 
-@if (TempData["thongBao"] != null)
+@if (TempData["ThongBao"] != null)
 {
-    <div class="alert alert-success">@TempData["thongBao"]</div>
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
 }
 
-<form asp-action="dangNhap" method="post" class="col-md-5">
+@if (ViewBag.ThongBao != null)
+{
+    <div class="alert alert-danger">@ViewBag.ThongBao</div>
+}
+
+<form method="post" class="col-md-5">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="mb-3">
-        <label asp-for="email" class="form-label">Email</label>
-        <input asp-for="email" class="form-control" />
-        <span asp-validation-for="email" class="text-danger"></span>
+        <label class="form-label">Số điện thoại</label>
+        <input name="soDienThoai" class="form-control" />
     </div>
     <div class="mb-3">
-        <label asp-for="matKhau" class="form-label">Mật khẩu</label>
-        <input asp-for="matKhau" type="password" class="form-control" />
-        <span asp-validation-for="matKhau" class="text-danger"></span>
+        <label class="form-label">Mật khẩu</label>
+        <input name="matKhau" type="password" class="form-control" />
     </div>
     <button type="submit" class="btn btn-primary">Đăng nhập</button>
-    <a asp-action="dangKy" class="btn btn-link">Đăng ký</a>
+    <a asp-action="DangKy" class="btn btn-link">Đăng ký</a>
 </form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

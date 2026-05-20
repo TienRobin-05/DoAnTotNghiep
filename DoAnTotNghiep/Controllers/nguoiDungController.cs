@@ -1,35 +1,24 @@
-using DoAnTotNghiep.DAL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    public class nguoiDungController : Controller
+    public class NguoiDungController : Controller
     {
-        private readonly thongBaoDAL thongBaoDAL;
-        private readonly lichTiemDAL lichTiemDAL;
-
-        public nguoiDungController(thongBaoDAL thongBaoDAL, lichTiemDAL lichTiemDAL)
+        public IActionResult Index()
         {
-            this.thongBaoDAL = thongBaoDAL;
-            this.lichTiemDAL = lichTiemDAL;
-        }
-
-        public IActionResult index()
-        {
-            var maTaiKhoan = layMaTaiKhoan();
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
             if (maTaiKhoan == null)
             {
-                return RedirectToAction("dangNhap", "taiKhoan");
+                return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
-            ViewBag.ThongBao = thongBaoDAL.layTheoTaiKhoan(maTaiKhoan.Value).Take(5).ToList();
-            ViewBag.LichTiem = lichTiemDAL.layTheoTaiKhoan(maTaiKhoan.Value).Take(5).ToList();
-            return View();
-        }
+            if (!string.Equals(HttpContext.Session.GetString("VaiTro"), "User", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
 
-        private int? layMaTaiKhoan()
-        {
-            return HttpContext.Session.GetInt32("MaTaiKhoan");
+            ViewBag.HoTen = HttpContext.Session.GetString("HoTen") ?? string.Empty;
+            return View();
         }
     }
 }

@@ -4,96 +4,152 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    public class taiKhoanController : Controller
+    public class TaiKhoanController : Controller
     {
-        private readonly taiKhoanDAL taiKhoanDAL;
+        private readonly TaiKhoan_DAL taiKhoanDAL;
+        private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
 
-        public taiKhoanController(taiKhoanDAL taiKhoanDAL)
+        public TaiKhoanController(TaiKhoan_DAL taiKhoanDAL, HoSoSucKhoe_DAL hoSoSucKhoeDAL)
         {
             this.taiKhoanDAL = taiKhoanDAL;
+            this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
         }
 
         [HttpGet]
-        public IActionResult dangNhap()
+        public IActionResult DangKy()
         {
-            if (HttpContext.Session.GetInt32("MaTaiKhoan") != null)
-            {
-                return chuyenTrangTheoVaiTro(HttpContext.Session.GetString("VaiTro"));
-            }
-            return View(new dangNhapViewModels());
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult dangNhap(dangNhapViewModels model)
+        public IActionResult DangKy(string hoTen, string email, string soDienThoai, string matKhau, string nhapLaiMatKhau)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(hoTen))
             {
-                return View(model);
+                ViewBag.ThongBao = "Họ tên không được bỏ trống";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.ThongBao = "Email không được bỏ trống";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(matKhau))
+            {
+                ViewBag.ThongBao = "Mật khẩu không được bỏ trống";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(nhapLaiMatKhau))
+            {
+                ViewBag.ThongBao = "Nhập lại mật khẩu không được bỏ trống";
+                return View();
+            }
+            if (matKhau != nhapLaiMatKhau)
+            {
+                ViewBag.ThongBao = "Nhập lại mật khẩu không trùng khớp";
+                return View();
+            }
+            if (taiKhoanDAL.KiemTraSoDienThoaiTonTai(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại đã được sử dụng";
+                return View();
+            }
+            if (taiKhoanDAL.KiemTraEmailTonTai(email))
+            {
+                ViewBag.ThongBao = "Email đã được sử dụng";
+                return View();
             }
 
-            var taiKhoan = taiKhoanDAL.dangNhap(model.email, model.matKhau);
+            var taiKhoan = new TaiKhoan
+            {
+                HoTen = hoTen,
+                Email = email,
+                MatKhau = matKhau,
+                SoDienThoai = soDienThoai,
+                VaiTro = "User",
+                TrangThai = true,
+                NgayTao = DateTime.Now
+            };
+
+            if (taiKhoanDAL.DangKy(taiKhoan))
+            {
+                TempData["ThongBao"] = "Đăng ký thành công. Vui lòng đăng nhập.";
+                return RedirectToAction(nameof(DangNhap));
+            }
+
+            ViewBag.ThongBao = "Đăng ký thất bại, vui lòng thử lại";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult DangNhap()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DangNhap(string soDienThoai, string matKhau)
+        {
+            if (string.IsNullOrWhiteSpace(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(matKhau))
+            {
+                ViewBag.ThongBao = "Mật khẩu không được bỏ trống";
+                return View();
+            }
+
+            var taiKhoan = taiKhoanDAL.DangNhap(soDienThoai, matKhau);
             if (taiKhoan == null)
             {
-                ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng, hoặc tài khoản đã bị khóa.");
-                return View(model);
+                ViewBag.ThongBao = "Số điện thoại hoặc mật khẩu không đúng";
+                return View();
+            }
+            if (!taiKhoan.TrangThai)
+            {
+                ViewBag.ThongBao = "Tài khoản đã bị khóa";
+                return View();
             }
 
-            HttpContext.Session.SetInt32("MaTaiKhoan", taiKhoan.maTaiKhoan);
-            HttpContext.Session.SetString("HoTen", taiKhoan.hoTen);
-            HttpContext.Session.SetString("VaiTro", taiKhoan.vaiTro);
+            HttpContext.Session.SetInt32("MaTaiKhoan", taiKhoan.MaTaiKhoan);
+            HttpContext.Session.SetString("HoTen", taiKhoan.HoTen ?? string.Empty);
+            HttpContext.Session.SetString("VaiTro", taiKhoan.VaiTro);
+            HttpContext.Session.SetString("SoDienThoai", taiKhoan.SoDienThoai);
+            HttpContext.Session.SetString("Email", taiKhoan.Email ?? string.Empty);
 
-            return chuyenTrangTheoVaiTro(taiKhoan.vaiTro);
-        }
-
-        [HttpGet]
-        public IActionResult dangKy()
-        {
-            return View(new dangKyViewModels());
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult dangKy(dangKyViewModels model)
-        {
-            if (!ModelState.IsValid)
+            if (string.Equals(taiKhoan.VaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
             {
-                return View(model);
+                return RedirectToAction("Index", "Admin");
             }
 
-            if (taiKhoanDAL.emailDaTonTai(model.email))
+            if (string.Equals(taiKhoan.VaiTro, "User", StringComparison.OrdinalIgnoreCase))
             {
-                ModelState.AddModelError(nameof(model.email), "Email đã được sử dụng.");
-                return View(model);
+                if (!hoSoSucKhoeDAL.KiemTraTaiKhoanDaCoHoSo(taiKhoan.MaTaiKhoan))
+                {
+                    return RedirectToAction("CapNhatThongTinCaNhan", "HoSoSucKhoe");
+                }
+
+                return RedirectToAction("Index", "NguoiDung");
             }
 
-            taiKhoanDAL.them(new taiKhoanModels
-            {
-                hoTen = model.hoTen,
-                email = model.email,
-                matKhau = model.matKhau,
-                soDienThoai = model.soDienThoai,
-                vaiTro = "User",
-                trangThai = true
-            });
-
-            TempData["thongBao"] = "Đăng ký thành công. Vui lòng đăng nhập.";
-            return RedirectToAction(nameof(dangNhap));
+            ViewBag.ThongBao = "Vai trò tài khoản không hợp lệ";
+            HttpContext.Session.Clear();
+            return View();
         }
 
-        public IActionResult dangXuat()
+        public IActionResult DangXuat()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction(nameof(dangNhap));
-        }
-
-        private IActionResult chuyenTrangTheoVaiTro(string? vaiTro)
-        {
-            if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                return RedirectToAction("index", "admin");
-            }
-            return RedirectToAction("index", "nguoiDung");
+            return RedirectToAction(nameof(DangNhap));
         }
     }
 }
