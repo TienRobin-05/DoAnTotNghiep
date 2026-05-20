@@ -15,6 +15,7 @@ builder.Services.AddScoped<coSoDuLieu>();
 builder.Services.AddScoped<TaiKhoan_DAL>();
 builder.Services.AddScoped<HoSoSucKhoe_DAL>();
 builder.Services.AddScoped<Vaccine_DAL>();
+builder.Services.AddScoped<MuiTiemVaccine_DAL>();
 builder.Services.AddScoped<taiKhoanDAL>();
 builder.Services.AddScoped<hoSoSucKhoeDAL>();
 builder.Services.AddScoped<vaccineDAL>();

@@ -1,24 +1,49 @@
-@model muiTiemVaccineModels
+@model MuiTiemVaccine
 
-<form method="post" class="col-md-8">
-    @Html.AntiForgeryToken()
-    <input asp-for="maMuiTiem" type="hidden" />
-    <div class="mb-3">
-        <label asp-for="maVaccine" class="form-label">Vaccine</label>
-        <select asp-for="maVaccine" asp-items="ViewBag.DanhSachVaccine" class="form-select"></select>
+<div class="mb-3">
+    <label asp-for="MaVaccine" class="form-label">Vaccine</label>
+    <select asp-for="MaVaccine" asp-items="ViewBag.DanhSachVaccine" class="form-select">
+        <option value="0">-- Chọn vaccine --</option>
+    </select>
+</div>
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label asp-for="SoMui" class="form-label">Số mũi</label>
+        <input asp-for="SoMui" type="number" class="form-control" />
     </div>
-    <div class="row">
-        <div class="col-md-4 mb-3"><label asp-for="soMui" class="form-label">Số mũi</label><input asp-for="soMui" class="form-control" /></div>
-        <div class="col-md-8 mb-3"><label asp-for="tenMui" class="form-label">Tên mũi</label><input asp-for="tenMui" class="form-control" /></div>
+    <div class="col-md-8 mb-3">
+        <label asp-for="TenMui" class="form-label">Tên mũi</label>
+        <input asp-for="TenMui" class="form-control" />
     </div>
-    <div class="row">
-        <div class="col-md-3 mb-3"><label asp-for="doTuoiToiThieu" class="form-label">Tuổi tối thiểu</label><input asp-for="doTuoiToiThieu" class="form-control" /></div>
-        <div class="col-md-3 mb-3"><label asp-for="doTuoiToiDa" class="form-label">Tuổi tối đa</label><input asp-for="doTuoiToiDa" class="form-control" /></div>
-        <div class="col-md-3 mb-3"><label asp-for="doTuoiKhuyenNghi" class="form-label">Tuổi khuyến nghị</label><input asp-for="doTuoiKhuyenNghi" class="form-control" /></div>
-        <div class="col-md-3 mb-3"><label asp-for="donViTuoi" class="form-label">Đơn vị</label><input asp-for="donViTuoi" class="form-control" /></div>
+</div>
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <label asp-for="DoTuoiToiThieu" class="form-label">Tuổi tối thiểu</label>
+        <input asp-for="DoTuoiToiThieu" type="number" class="form-control" />
     </div>
-    <div class="mb-3"><label asp-for="khoangCachNgay" class="form-label">Khoảng cách ngày</label><input asp-for="khoangCachNgay" class="form-control" /></div>
-    <div class="mb-3"><label asp-for="ghiChu" class="form-label">Ghi chú</label><textarea asp-for="ghiChu" class="form-control"></textarea></div>
-    <button type="submit" class="btn btn-primary">Lưu</button>
-    <a asp-action="index" class="btn btn-link">Quay lại</a>
-</form>
+    <div class="col-md-3 mb-3">
+        <label asp-for="DoTuoiToiDa" class="form-label">Tuổi tối đa</label>
+        <input asp-for="DoTuoiToiDa" type="number" class="form-control" />
+    </div>
+    <div class="col-md-3 mb-3">
+        <label asp-for="DoTuoiKhuyenNghi" class="form-label">Tuổi khuyến nghị</label>
+        <input asp-for="DoTuoiKhuyenNghi" type="number" class="form-control" />
+    </div>
+    <div class="col-md-3 mb-3">
+        <label asp-for="DonViTuoi" class="form-label">Đơn vị tuổi</label>
+        <select asp-for="DonViTuoi" class="form-select">
+            <option value="">-- Chọn đơn vị --</option>
+            <option value="ngày">ngày</option>
+            <option value="tháng">tháng</option>
+            <option value="năm">năm</option>
+        </select>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="KhoangCachNgay" class="form-label">Khoảng cách ngày</label>
+    <input asp-for="KhoangCachNgay" type="number" class="form-control" />
+</div>
+<div class="mb-3">
+    <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+    <textarea asp-for="GhiChu" rows="4" class="form-control"></textarea>
+</div>

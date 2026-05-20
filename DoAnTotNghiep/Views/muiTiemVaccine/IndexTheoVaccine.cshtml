@@ -1,22 +1,22 @@
 @model List<MuiTiemVaccine>
 @{
-    ViewData["Title"] = "Quản lý mũi tiêm vaccine";
+    ViewData["Title"] = "Mũi tiêm theo vaccine";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Quản lý mũi tiêm vaccine</h2>
-    <a asp-action="Create" class="btn btn-primary">Thêm mũi tiêm</a>
+    <h2>Mũi tiêm của vaccine: @ViewBag.TenVaccine</h2>
+    <a asp-action="Create" asp-route-maVaccine="@ViewBag.MaVaccine" class="btn btn-primary">Thêm mũi tiêm</a>
 </div>
 
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Mã</th>
-            <th>Vaccine</th>
             <th>Số mũi</th>
             <th>Tên mũi</th>
+            <th>Độ tuổi</th>
             <th>Tuổi khuyến nghị</th>
             <th>Khoảng cách ngày</th>
+            <th>Ghi chú</th>
             <th>Thao tác</th>
         </tr>
     </thead>
@@ -24,19 +24,20 @@
     @foreach (var item in Model)
     {
         <tr>
-            <td>@item.MaMuiTiem</td>
-            <td>@item.TenVaccine</td>
             <td>@item.SoMui</td>
             <td>@item.TenMui</td>
+            <td>@item.DoTuoiToiThieu - @item.DoTuoiToiDa @item.DonViTuoi</td>
             <td>@item.DoTuoiKhuyenNghi @item.DonViTuoi</td>
             <td>@item.KhoangCachNgay</td>
+            <td>@item.GhiChu</td>
             <td>
                 <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
                 <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sửa</a>
                 <a asp-action="Delete" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-danger">Xóa</a>
-                <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Theo vaccine</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
+
+<a asp-action="Index" class="btn btn-link">Quay lại danh sách</a>
