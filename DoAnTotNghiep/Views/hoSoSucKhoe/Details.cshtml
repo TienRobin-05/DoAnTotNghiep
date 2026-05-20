@@ -1,0 +1,21 @@
+@model HoSoSucKhoe
+@{
+    ViewData["Title"] = "Chi tiết hồ sơ";
+}
+
+<h2>Chi tiết hồ sơ sức khỏe</h2>
+
+<table class="table table-bordered col-md-8">
+    <tr><th>Mã hồ sơ</th><td>@Model.MaHoSo</td></tr>
+    <tr><th>Họ tên</th><td>@Model.HoTen</td></tr>
+    <tr><th>Ngày sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>Giới tính</th><td>@Model.GioiTinh</td></tr>
+    <tr><th>Chiều cao</th><td>@Model.ChieuCao</td></tr>
+    <tr><th>Cân nặng</th><td>@Model.CanNang</td></tr>
+    <tr><th>Tiền sử bệnh</th><td>@Model.TienSuBenh</td></tr>
+    <tr><th>Dị ứng</th><td>@Model.DiUng</td></tr>
+    <tr><th>Ngày tạo</th><td>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</td></tr>
+</table>
+
+<a asp-action="Edit" asp-route-id="@Model.MaHoSo" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-link">Quay lại</a>

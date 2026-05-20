@@ -1,0 +1,19 @@
+@model HoSoSucKhoe
+@{
+    ViewData["Title"] = "Sửa hồ sơ sức khỏe";
+}
+
+<h2>Sửa hồ sơ sức khỏe</h2>
+
+@if (ViewBag.ThongBao != null)
+{
+    <div class="alert alert-danger">@ViewBag.ThongBao</div>
+}
+
+<form method="post" class="col-md-7">
+    @Html.AntiForgeryToken()
+    <input asp-for="MaHoSo" type="hidden" />
+    <partial name="_FormHoSo" model="Model" />
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-action="Index" class="btn btn-link">Quay lại</a>
+</form>
