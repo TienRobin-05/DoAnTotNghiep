@@ -1,22 +1,27 @@
+﻿@* Khu vực giao diện của view Delete.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model Vaccine
 @{
-    ViewData["Title"] = "Ẩn vaccine";
+    ViewData["Title"] = "áº¨n vaccine";
 }
 
-<h2>Ẩn vaccine</h2>
+<h2>áº¨n vaccine</h2>
+@* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
 <div class="alert alert-warning">
-    Hệ thống sẽ không xóa cứng dữ liệu. Vaccine này chỉ được cập nhật <strong>trangThai = false</strong>.
+    Há»‡ thá»‘ng sáº½ khÃ´ng xÃ³a cá»©ng dá»¯ liá»‡u. Vaccine nÃ y chá»‰ Ä‘Æ°á»£c cáº­p nháº­t <strong>trangThai = false</strong>.
 </div>
 
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered col-md-8">
-    <tr><th>Mã vaccine</th><td>@Model.MaVaccine</td></tr>
-    <tr><th>Tên vaccine</th><td>@Model.TenVaccine</td></tr>
-    <tr><th>Nhóm vaccine</th><td>@Model.NhomVaccine</td></tr>
-    <tr><th>Trạng thái hiện tại</th><td>@(Model.TrangThai ? "Đang dùng" : "Đã ẩn")</td></tr>
+    <tr><th>MÃ£ vaccine</th><td>@Model.MaVaccine</td></tr>
+    <tr><th>TÃªn vaccine</th><td>@Model.TenVaccine</td></tr>
+    <tr><th>NhÃ³m vaccine</th><td>@Model.NhomVaccine</td></tr>
+    <tr><th>Tráº¡ng thÃ¡i hiá»‡n táº¡i</th><td>@(Model.TrangThai ? "Äang dÃ¹ng" : "ÄÃ£ áº©n")</td></tr>
 </table>
 
+@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">Ẩn vaccine</button>
-    <a asp-action="Index" class="btn btn-link">Hủy</a>
+    <button type="submit" class="btn btn-danger">áº¨n vaccine</button>
+    <a asp-action="Index" class="btn btn-link">Há»§y</a>
 </form>

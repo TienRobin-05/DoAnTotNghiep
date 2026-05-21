@@ -1,29 +1,36 @@
+﻿@* Khu vực giao diện của view DangNhap.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @{
-    ViewData["Title"] = "Đăng nhập";
+    ViewData["Title"] = "ÄÄƒng nháº­p";
 }
 
-<h2>Đăng nhập</h2>
+<h2>ÄÄƒng nháº­p</h2>
 
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (TempData["ThongBao"] != null)
 {
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     <div class="alert alert-success">@TempData["ThongBao"]</div>
 }
 
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
 {
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     <div class="alert alert-danger">@ViewBag.ThongBao</div>
 }
 
+@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post" class="col-md-5">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label class="form-label">Số điện thoại</label>
+        <label class="form-label">Sá»‘ Ä‘iá»‡n thoáº¡i</label>
         <input name="soDienThoai" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Mật khẩu</label>
+        <label class="form-label">Máº­t kháº©u</label>
         <input name="matKhau" type="password" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">Đăng nhập</button>
-    <a asp-action="DangKy" class="btn btn-link">Đăng ký</a>
+    <button type="submit" class="btn btn-primary">ÄÄƒng nháº­p</button>
+    <a asp-action="DangKy" class="btn btn-link">ÄÄƒng kÃ½</a>
 </form>

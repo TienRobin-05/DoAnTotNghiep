@@ -1,0 +1,48 @@
+﻿@* Khu vực giao diện của view Index.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@model List<BaiVietCamNang>
+@{
+    ViewData["Title"] = "Quáº£n lÃ½ bÃ i viáº¿t";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Quáº£n lÃ½ bÃ i viáº¿t cáº©m nang</h2>
+    <a asp-action="Create" class="btn btn-primary">ThÃªm bÃ i viáº¿t</a>
+</div>
+
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>TiÃªu Ä‘á»</th>
+            <th>TÃ¡c giáº£</th>
+            <th>NgÃ y táº¡o</th>
+            <th>Tráº¡ng thÃ¡i</th>
+            <th>Thao tÃ¡c</th>
+        </tr>
+    </thead>
+    <tbody>
+    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.TieuDe</td>
+            <td>@item.TenTacGia</td>
+            <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+            <td>@(item.TrangThai ? "Äang hiá»ƒn thá»‹" : "Äang áº©n")</td>
+            <td>
+                <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-secondary">Chi tiáº¿t</a>
+                <a asp-action="Edit" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-primary">Sá»­a</a>
+                <a asp-action="Delete" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-danger">XÃ³a</a>
+                @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
+                <form asp-action="AnHien" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maBaiViet" value="@item.MaBaiViet" />
+                    <input type="hidden" name="trangThai" value="@(!item.TrangThai)" />
+                    <button type="submit" class="btn btn-sm btn-outline-warning">@(item.TrangThai ? "áº¨n" : "Hiá»‡n")</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

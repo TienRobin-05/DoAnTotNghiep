@@ -1,0 +1,28 @@
+﻿@* Khu vực giao diện của view Create.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@model CauHoiTuVan
+@{
+    ViewData["Title"] = "Gá»­i cÃ¢u há»i tÆ° váº¥n";
+}
+
+<h2>Gá»­i cÃ¢u há»i tÆ° váº¥n</h2>
+
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+@if (ViewBag.ThongBao != null)
+{
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
+    <div class="alert alert-danger">@ViewBag.ThongBao</div>
+}
+
+@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
+<form asp-action="Create" method="post" class="col-md-8">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Ná»™i dung cÃ¢u há»i</label>
+        <textarea name="CauHoi" rows="6" class="form-control">@Model.CauHoi</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Gá»­i cÃ¢u há»i</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay láº¡i</a>
+</form>

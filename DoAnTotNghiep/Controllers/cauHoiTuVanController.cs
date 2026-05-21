@@ -1,66 +1,130 @@
-using DoAnTotNghiep.DAL;
+﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    public class cauHoiTuVanController : Controller
+    /// <summary>
+    /// Lớp CauHoiTuVanController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
+    /// </summary>
+    public class CauHoiTuVanController : Controller
     {
-        private readonly cauHoiTuVanDAL cauHoiTuVanDAL;
+        private readonly CauHoiTuVan_DAL cauHoiTuVanDAL;
 
-        public cauHoiTuVanController(cauHoiTuVanDAL cauHoiTuVanDAL)
+        public CauHoiTuVanController(CauHoiTuVan_DAL cauHoiTuVanDAL)
         {
             this.cauHoiTuVanDAL = cauHoiTuVanDAL;
         }
 
-        public IActionResult index()
+        // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        public IActionResult Index()
         {
-            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
-            if (maTaiKhoan == null) return RedirectToAction("dangNhap", "taiKhoan");
-            if (laAdmin()) return View(cauHoiTuVanDAL.layTatCa());
-            return View(cauHoiTuVanDAL.layTheoNguoiGui(maTaiKhoan.Value));
+            var maTaiKhoan = LayMaTaiKhoanUser();
+            if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            return View(cauHoiTuVanDAL.LayDanhSachTheoNguoiGui(maTaiKhoan.Value));
         }
 
         [HttpGet]
-        public IActionResult guiCauHoi()
+        // Mục đích: action Create xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        public IActionResult Create()
         {
-            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null) return RedirectToAction("dangNhap", "taiKhoan");
-            return View(new cauHoiTuVanModels());
+            var maTaiKhoan = LayMaTaiKhoanUser();
+            if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            return View(new CauHoiTuVan());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult guiCauHoi(cauHoiTuVanModels model)
+        // Mục đích: action Create xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        public IActionResult Create(CauHoiTuVan model)
         {
-            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
-            if (maTaiKhoan == null) return RedirectToAction("dangNhap", "taiKhoan");
-            if (!ModelState.IsValid) return View(model);
-            model.maNguoiGui = maTaiKhoan.Value;
-            cauHoiTuVanDAL.them(model);
-            return RedirectToAction(nameof(index));
+            var maTaiKhoan = LayMaTaiKhoanUser();
+            if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            if (string.IsNullOrWhiteSpace(model.CauHoi))
+            {
+                ViewBag.ThongBao = "Vui lÃ²ng nháº­p ná»™i dung cÃ¢u há»i.";
+                return View(model);
+            }
+
+            var cauHoi = new CauHoiTuVan
+            {
+                MaNguoiGui = maTaiKhoan.Value,
+                MaNguoiTraLoi = null,
+                CauHoi = model.CauHoi.Trim(),
+                CauTraLoi = string.Empty,
+                NgayGui = DateTime.Now,
+                NgayTraLoi = null,
+                TrangThai = "ChÆ°a tráº£ lá»i"
+            };
+
+            if (!cauHoiTuVanDAL.GuiCauHoi(cauHoi))
+            {
+                ViewBag.ThongBao = "Gá»­i cÃ¢u há»i tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i.";
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
-        public IActionResult traLoi(int id)
+        // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        public IActionResult Details(int maCauHoi)
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
-            var cauHoi = cauHoiTuVanDAL.layTheoMa(id);
+            var maTaiKhoan = LayMaTaiKhoanUser();
+            if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            var cauHoi = cauHoiTuVanDAL.LayTheoIdCuaNguoiGui(maCauHoi, maTaiKhoan.Value);
             return cauHoi == null ? NotFound() : View(cauHoi);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult traLoi(int maCauHoi, string cauTraLoi)
+        [HttpGet]
+        // Mục đích: action guiCauHoi xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        public IActionResult guiCauHoi()
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
-            var maNguoiTraLoi = HttpContext.Session.GetInt32("MaTaiKhoan")!.Value;
-            cauHoiTuVanDAL.traLoi(maCauHoi, maNguoiTraLoi, cauTraLoi);
-            return RedirectToAction(nameof(index));
+            return RedirectToAction(nameof(Create));
         }
 
-        private bool laAdmin()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        // Mục đích: action guiCauHoi xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        public IActionResult guiCauHoi(CauHoiTuVan model)
         {
-            return string.Equals(HttpContext.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
+            return Create(model);
+        }
+
+        // Mục đích: action LayMaTaiKhoanUser xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        private int? LayMaTaiKhoanUser()
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (maTaiKhoan == null) return null;
+
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (vaiTro != "User") return null;
+
+            return maTaiKhoan.Value;
         }
     }
 }

@@ -1,41 +1,43 @@
+﻿@* Khu vực giao diện của view _FormVaccine.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model Vaccine
 
 <div class="mb-3">
-    <label asp-for="TenVaccine" class="form-label">Tên vaccine</label>
+    <label asp-for="TenVaccine" class="form-label">TÃªn vaccine</label>
     <input asp-for="TenVaccine" class="form-control" />
 </div>
 <div class="mb-3">
-    <label asp-for="NhomVaccine" class="form-label">Nhóm vaccine</label>
+    <label asp-for="NhomVaccine" class="form-label">NhÃ³m vaccine</label>
     <input asp-for="NhomVaccine" class="form-control" />
 </div>
 <div class="row">
     <div class="col-md-4 mb-3">
-        <label asp-for="DoTuoiToiThieu" class="form-label">Độ tuổi tối thiểu</label>
+        <label asp-for="DoTuoiToiThieu" class="form-label">Äá»™ tuá»•i tá»‘i thiá»ƒu</label>
         <input asp-for="DoTuoiToiThieu" type="number" class="form-control" />
     </div>
     <div class="col-md-4 mb-3">
-        <label asp-for="DoTuoiToiDa" class="form-label">Độ tuổi tối đa</label>
+        <label asp-for="DoTuoiToiDa" class="form-label">Äá»™ tuá»•i tá»‘i Ä‘a</label>
         <input asp-for="DoTuoiToiDa" type="number" class="form-control" />
     </div>
     <div class="col-md-4 mb-3">
-        <label asp-for="DonViTuoi" class="form-label">Đơn vị tuổi</label>
+        <label asp-for="DonViTuoi" class="form-label">ÄÆ¡n vá»‹ tuá»•i</label>
         <select asp-for="DonViTuoi" class="form-select">
-            <option value="">-- Chọn đơn vị --</option>
-            <option value="ngày">ngày</option>
-            <option value="tháng">tháng</option>
-            <option value="năm">năm</option>
+            <option value="">-- Chá»n Ä‘Æ¡n vá»‹ --</option>
+            <option value="ngÃ y">ngÃ y</option>
+            <option value="thÃ¡ng">thÃ¡ng</option>
+            <option value="nÄƒm">nÄƒm</option>
         </select>
     </div>
 </div>
 <div class="mb-3">
-    <label asp-for="MoTa" class="form-label">Mô tả</label>
+    <label asp-for="MoTa" class="form-label">MÃ´ táº£</label>
     <textarea asp-for="MoTa" rows="5" class="form-control"></textarea>
 </div>
 <div class="mb-3">
-    <label asp-for="LuuY" class="form-label">Lưu ý</label>
+    <label asp-for="LuuY" class="form-label">LÆ°u Ã½</label>
     <textarea asp-for="LuuY" rows="4" class="form-control"></textarea>
 </div>
 <div class="form-check mb-3">
     <input asp-for="TrangThai" class="form-check-input" />
-    <label asp-for="TrangThai" class="form-check-label">Đang sử dụng</label>
+    <label asp-for="TrangThai" class="form-check-label">Äang sá»­ dá»¥ng</label>
 </div>

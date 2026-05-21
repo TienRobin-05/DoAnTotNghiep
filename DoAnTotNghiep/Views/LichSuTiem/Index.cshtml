@@ -1,0 +1,52 @@
+﻿@* Khu vực giao diện của view Index.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@model List<LichSuTiem>
+@{
+    ViewData["Title"] = "Lá»‹ch sá»­ tiÃªm";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Lá»‹ch sá»­ tiÃªm cá»§a @ViewBag.HoTenHoSo</h2>
+    <a asp-action="ChonHoSo" class="btn btn-link">Chá»n há»“ sÆ¡ khÃ¡c</a>
+</div>
+
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+@if (Model.Count == 0)
+{
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
+    <div class="alert alert-info">ChÆ°a cÃ³ lá»‹ch sá»­ tiÃªm</div>
+}
+else
+{
+    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>TÃªn há»“ sÆ¡</th>
+                <th>TÃªn vaccine</th>
+                <th>TÃªn mÅ©i</th>
+                <th>Sá»‘ mÅ©i</th>
+                <th>NgÃ y tiÃªm dá»± kiáº¿n</th>
+                <th>NgÃ y tiÃªm thá»±c táº¿</th>
+                <th>Ghi chÃº</th>
+                <th>NgÃ y cáº­p nháº­t</th>
+            </tr>
+        </thead>
+        <tbody>
+        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.HoTenHoSo</td>
+                <td>@item.TenVaccine</td>
+                <td>@item.TenMui</td>
+                <td>@item.SoMui</td>
+                <td>@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
+                <td>@item.NgayTiemThucTe.ToString("dd/MM/yyyy")</td>
+                <td>@item.GhiChu</td>
+                <td>@item.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

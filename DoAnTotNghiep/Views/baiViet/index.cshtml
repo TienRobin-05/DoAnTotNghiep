@@ -1,32 +1,38 @@
+﻿@* Khu vực giao diện của view index.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<baiVietCamNangModels>
 @{
-    ViewData["Title"] = "Bài viết cẩm nang";
+    ViewData["Title"] = "BÃ i viáº¿t cáº©m nang";
     var laAdmin = string.Equals(Context.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Bài viết cẩm nang</h2>
+    <h2>BÃ i viáº¿t cáº©m nang</h2>
+    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
     @if (laAdmin)
     {
-        <a asp-action="them" class="btn btn-primary">Thêm bài viết</a>
+        <a asp-action="them" class="btn btn-primary">ThÃªm bÃ i viáº¿t</a>
     }
 </div>
 
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered table-striped">
-    <thead><tr><th>Tiêu đề</th><th>Tác giả</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead>
+    <thead><tr><th>TiÃªu Ä‘á»</th><th>TÃ¡c giáº£</th><th>NgÃ y táº¡o</th><th>Tráº¡ng thÃ¡i</th><th></th></tr></thead>
     <tbody>
+    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
         <tr>
             <td>@item.tieuDe</td>
             <td>@item.tenTacGia</td>
             <td>@item.ngayTao.ToString("dd/MM/yyyy")</td>
-            <td>@(item.trangThai ? "Hiển thị" : "Ẩn")</td>
+            <td>@(item.trangThai ? "Hiá»ƒn thá»‹" : "áº¨n")</td>
             <td>
                 <a asp-action="chiTiet" asp-route-id="@item.maBaiViet" class="btn btn-sm btn-outline-secondary">Xem</a>
+                @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                 @if (laAdmin)
                 {
-                    <a asp-action="sua" asp-route-id="@item.maBaiViet" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <a asp-action="sua" asp-route-id="@item.maBaiViet" class="btn btn-sm btn-outline-primary">Sá»­a</a>
                 }
             </td>
         </tr>

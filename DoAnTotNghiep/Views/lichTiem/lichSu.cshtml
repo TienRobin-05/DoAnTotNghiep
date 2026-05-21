@@ -1,12 +1,16 @@
+﻿@* Khu vực giao diện của view lichSu.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<lichSuTiemModels>
 @{
-    ViewData["Title"] = "Lịch sử tiêm";
+    ViewData["Title"] = "Lá»‹ch sá»­ tiÃªm";
 }
 
-<h2>Lịch sử tiêm</h2>
+<h2>Lá»‹ch sá»­ tiÃªm</h2>
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered table-striped">
-    <thead><tr><th>Hồ sơ</th><th>Vaccine</th><th>Mũi</th><th>Ngày tiêm</th><th>Ghi chú</th></tr></thead>
+    <thead><tr><th>Há»“ sÆ¡</th><th>Vaccine</th><th>MÅ©i</th><th>NgÃ y tiÃªm</th><th>Ghi chÃº</th></tr></thead>
     <tbody>
+    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
         <tr>

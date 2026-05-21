@@ -1,26 +1,30 @@
+﻿@* Khu vực giao diện của view IndexTheoVaccine.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<MuiTiemVaccine>
 @{
-    ViewData["Title"] = "Mũi tiêm theo vaccine";
+    ViewData["Title"] = "MÅ©i tiÃªm theo vaccine";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Mũi tiêm của vaccine: @ViewBag.TenVaccine</h2>
-    <a asp-action="Create" asp-route-maVaccine="@ViewBag.MaVaccine" class="btn btn-primary">Thêm mũi tiêm</a>
+    <h2>MÅ©i tiÃªm cá»§a vaccine: @ViewBag.TenVaccine</h2>
+    <a asp-action="Create" asp-route-maVaccine="@ViewBag.MaVaccine" class="btn btn-primary">ThÃªm mÅ©i tiÃªm</a>
 </div>
 
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Số mũi</th>
-            <th>Tên mũi</th>
-            <th>Độ tuổi</th>
-            <th>Tuổi khuyến nghị</th>
-            <th>Khoảng cách ngày</th>
-            <th>Ghi chú</th>
-            <th>Thao tác</th>
+            <th>Sá»‘ mÅ©i</th>
+            <th>TÃªn mÅ©i</th>
+            <th>Äá»™ tuá»•i</th>
+            <th>Tuá»•i khuyáº¿n nghá»‹</th>
+            <th>Khoáº£ng cÃ¡ch ngÃ y</th>
+            <th>Ghi chÃº</th>
+            <th>Thao tÃ¡c</th>
         </tr>
     </thead>
     <tbody>
+    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
         <tr>
@@ -31,13 +35,13 @@
             <td>@item.KhoangCachNgay</td>
             <td>@item.GhiChu</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sửa</a>
-                <a asp-action="Delete" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-danger">Xóa</a>
+                <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-secondary">Chi tiáº¿t</a>
+                <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sá»­a</a>
+                <a asp-action="Delete" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-danger">XÃ³a</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
 
-<a asp-action="Index" class="btn btn-link">Quay lại danh sách</a>
+<a asp-action="Index" class="btn btn-link">Quay láº¡i danh sÃ¡ch</a>

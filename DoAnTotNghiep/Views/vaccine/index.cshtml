@@ -1,30 +1,35 @@
+﻿@* Khu vực giao diện của view Index.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<Vaccine>
 @{
-    ViewData["Title"] = ViewBag.LaTraCuu == true ? "Tra cứu vaccine" : "Quản lý vaccine";
+    ViewData["Title"] = ViewBag.LaTraCuu == true ? "Tra cá»©u vaccine" : "Quáº£n lÃ½ vaccine";
     var laTraCuu = ViewBag.LaTraCuu == true;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>@ViewData["Title"]</h2>
+    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
     @if (!laTraCuu)
     {
-        <a asp-action="Create" class="btn btn-primary">Thêm vaccine</a>
+        <a asp-action="Create" class="btn btn-primary">ThÃªm vaccine</a>
     }
 </div>
 
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Mã</th>
-            <th>Tên vaccine</th>
-            <th>Nhóm</th>
-            <th>Độ tuổi</th>
-            <th>Đơn vị tuổi</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
+            <th>MÃ£</th>
+            <th>TÃªn vaccine</th>
+            <th>NhÃ³m</th>
+            <th>Äá»™ tuá»•i</th>
+            <th>ÄÆ¡n vá»‹ tuá»•i</th>
+            <th>Tráº¡ng thÃ¡i</th>
+            <th>Thao tÃ¡c</th>
         </tr>
     </thead>
     <tbody>
+    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
         <tr>
@@ -33,17 +38,18 @@
             <td>@item.NhomVaccine</td>
             <td>@item.DoTuoiToiThieu - @item.DoTuoiToiDa</td>
             <td>@item.DonViTuoi</td>
-            <td>@(item.TrangThai ? "Đang dùng" : "Đã ẩn")</td>
+            <td>@(item.TrangThai ? "Äang dÃ¹ng" : "ÄÃ£ áº©n")</td>
             <td>
+                @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                 @if (!laTraCuu)
                 {
-                    <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                    <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Ẩn</a>
+                    <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiáº¿t</a>
+                    <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sá»­a</a>
+                    <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">áº¨n</a>
                 }
                 else
                 {
-                    <span class="text-muted">Đang hiển thị</span>
+                    <span class="text-muted">Äang hiá»ƒn thá»‹</span>
                 }
             </td>
         </tr>

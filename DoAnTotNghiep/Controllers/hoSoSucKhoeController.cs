@@ -1,9 +1,12 @@
-using DoAnTotNghiep.DAL;
+﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
+    /// <summary>
+    /// Lớp HoSoSucKhoeController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
+    /// </summary>
     public class HoSoSucKhoeController : Controller
     {
         private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
@@ -15,6 +18,10 @@ namespace DoAnTotNghiep.Controllers
             this.taiKhoanDAL = taiKhoanDAL;
         }
 
+        // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Index()
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -24,6 +31,10 @@ namespace DoAnTotNghiep.Controllers
             return View(danhSach);
         }
 
+        // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Details(int id)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -36,6 +47,10 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // Mục đích: action Create xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create()
         {
             if (LayMaTaiKhoanUser() == null) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -44,6 +59,10 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // Mục đích: action Create xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create(HoSoSucKhoe hoSo)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -56,7 +75,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!hoSoSucKhoeDAL.Them(hoSo))
             {
-                ViewBag.ThongBao = "Thêm hồ sơ thất bại, vui lòng thử lại";
+                ViewBag.ThongBao = "ThÃªm há»“ sÆ¡ tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
                 return View(hoSo);
             }
 
@@ -64,6 +83,10 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // Mục đích: action Edit xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Edit(int id)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -77,6 +100,10 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // Mục đích: action Edit xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Edit(HoSoSucKhoe hoSo)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -87,7 +114,7 @@ namespace DoAnTotNghiep.Controllers
             hoSo.MaTaiKhoan = maTaiKhoan.Value;
             if (!hoSoSucKhoeDAL.CapNhat(hoSo))
             {
-                ViewBag.ThongBao = "Cập nhật hồ sơ thất bại hoặc hồ sơ không thuộc tài khoản của bạn";
+                ViewBag.ThongBao = "Cáº­p nháº­t há»“ sÆ¡ tháº¥t báº¡i hoáº·c há»“ sÆ¡ khÃ´ng thuá»™c tÃ i khoáº£n cá»§a báº¡n";
                 return View(hoSo);
             }
 
@@ -95,6 +122,10 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // Mục đích: action Delete xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Delete(int id)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -108,6 +139,10 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        // Mục đích: action DeleteConfirmed xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DeleteConfirmed(int id)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -118,6 +153,10 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // Mục đích: action CapNhatThongTinCaNhan xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult CapNhatThongTinCaNhan()
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -134,6 +173,10 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // Mục đích: action CapNhatThongTinCaNhan xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult CapNhatThongTinCaNhan(
             string hoTen,
             DateTime? ngaySinh,
@@ -178,10 +221,14 @@ namespace DoAnTotNghiep.Controllers
             }
 
             GanThongTinTaiKhoanLenView(maTaiKhoan.Value);
-            ViewBag.ThongBao = "Lưu thông tin cá nhân thất bại, vui lòng thử lại";
+            ViewBag.ThongBao = "LÆ°u thÃ´ng tin cÃ¡ nhÃ¢n tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
             return View();
         }
 
+        // Mục đích: action LayMaTaiKhoanUser xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private int? LayMaTaiKhoanUser()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
@@ -193,42 +240,50 @@ namespace DoAnTotNghiep.Controllers
             return maTaiKhoan.Value;
         }
 
+        // Mục đích: action KiemTraHopLe xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private bool KiemTraHopLe(HoSoSucKhoe hoSo, DateTime? ngaySinhNhap = null)
         {
             if (string.IsNullOrWhiteSpace(hoSo.HoTen))
             {
-                ViewBag.ThongBao = "Họ tên không được bỏ trống";
+                ViewBag.ThongBao = "Há» tÃªn khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
                 return false;
             }
 
             var ngaySinh = ngaySinhNhap ?? hoSo.NgaySinh;
             if (ngaySinh == default)
             {
-                ViewBag.ThongBao = "Ngày sinh không được bỏ trống";
+                ViewBag.ThongBao = "NgÃ y sinh khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
                 return false;
             }
 
             if (ngaySinh.Date > DateTime.Today)
             {
-                ViewBag.ThongBao = "Ngày sinh không được lớn hơn ngày hiện tại";
+                ViewBag.ThongBao = "NgÃ y sinh khÃ´ng Ä‘Æ°á»£c lá»›n hÆ¡n ngÃ y hiá»‡n táº¡i";
                 return false;
             }
 
             if (hoSo.ChieuCao.HasValue && hoSo.ChieuCao.Value <= 0)
             {
-                ViewBag.ThongBao = "Chiều cao phải lớn hơn 0";
+                ViewBag.ThongBao = "Chiá»u cao pháº£i lá»›n hÆ¡n 0";
                 return false;
             }
 
             if (hoSo.CanNang.HasValue && hoSo.CanNang.Value <= 0)
             {
-                ViewBag.ThongBao = "Cân nặng phải lớn hơn 0";
+                ViewBag.ThongBao = "CÃ¢n náº·ng pháº£i lá»›n hÆ¡n 0";
                 return false;
             }
 
             return true;
         }
 
+        // Mục đích: action GanThongTinTaiKhoanLenView xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
+        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
+        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
+        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private void GanThongTinTaiKhoanLenView(int maTaiKhoan)
         {
             var soDienThoai = HttpContext.Session.GetString("SoDienThoai");

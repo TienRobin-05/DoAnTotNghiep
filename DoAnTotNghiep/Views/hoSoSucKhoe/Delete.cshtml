@@ -1,21 +1,26 @@
+﻿@* Khu vực giao diện của view Delete.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model HoSoSucKhoe
 @{
-    ViewData["Title"] = "Xóa hồ sơ";
+    ViewData["Title"] = "XÃ³a há»“ sÆ¡";
 }
 
-<h2>Xóa hồ sơ sức khỏe</h2>
-<div class="alert alert-warning">Bạn có chắc muốn xóa hồ sơ này không?</div>
+<h2>XÃ³a há»“ sÆ¡ sá»©c khá»e</h2>
+@* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
+<div class="alert alert-warning">Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a há»“ sÆ¡ nÃ y khÃ´ng?</div>
 
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered col-md-8">
-    <tr><th>Họ tên</th><td>@Model.HoTen</td></tr>
-    <tr><th>Ngày sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
-    <tr><th>Giới tính</th><td>@Model.GioiTinh</td></tr>
-    <tr><th>Chiều cao</th><td>@Model.ChieuCao</td></tr>
-    <tr><th>Cân nặng</th><td>@Model.CanNang</td></tr>
+    <tr><th>Há» tÃªn</th><td>@Model.HoTen</td></tr>
+    <tr><th>NgÃ y sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>Giá»›i tÃ­nh</th><td>@Model.GioiTinh</td></tr>
+    <tr><th>Chiá»u cao</th><td>@Model.ChieuCao</td></tr>
+    <tr><th>CÃ¢n náº·ng</th><td>@Model.CanNang</td></tr>
 </table>
 
+@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">Xóa</button>
-    <a asp-action="Index" class="btn btn-link">Hủy</a>
+    <button type="submit" class="btn btn-danger">XÃ³a</button>
+    <a asp-action="Index" class="btn btn-link">Há»§y</a>
 </form>

@@ -1,18 +1,23 @@
+﻿@* Khu vực giao diện của view Create.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model HoSoSucKhoe
 @{
-    ViewData["Title"] = "Thêm hồ sơ sức khỏe";
+    ViewData["Title"] = "ThÃªm há»“ sÆ¡ sá»©c khá»e";
 }
 
-<h2>Thêm hồ sơ sức khỏe</h2>
+<h2>ThÃªm há»“ sÆ¡ sá»©c khá»e</h2>
 
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
 {
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     <div class="alert alert-danger">@ViewBag.ThongBao</div>
 }
 
+@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post" class="col-md-7">
     @Html.AntiForgeryToken()
     <partial name="_FormHoSo" model="Model" />
-    <button type="submit" class="btn btn-primary">Lưu</button>
-    <a asp-action="Index" class="btn btn-link">Quay lại</a>
+    <button type="submit" class="btn btn-primary">LÆ°u</button>
+    <a asp-action="Index" class="btn btn-link">Quay láº¡i</a>
 </form>

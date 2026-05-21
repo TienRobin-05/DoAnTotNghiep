@@ -1,31 +1,45 @@
+﻿@* Khu vực giao diện của view Index.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<LichTiem>
 @{
-    ViewData["Title"] = "Lịch tiêm";
+    ViewData["Title"] = "Lá»‹ch tiÃªm";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
-    <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
+    <h2>Lá»‹ch tiÃªm cá»§a @ViewBag.HoTenHoSo</h2>
+    <a asp-action="ChonHoSo" class="btn btn-link">Chá»n há»“ sÆ¡ khÃ¡c</a>
 </div>
 
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+@if (TempData["ThongBao"] != null)
+{
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
+}
+
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
-    <div class="alert alert-info">Hồ sơ này chưa có lịch tiêm.</div>
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
+    <div class="alert alert-info">Há»“ sÆ¡ nÃ y chÆ°a cÃ³ lá»‹ch tiÃªm.</div>
 }
 else
 {
+    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>Tên vaccine</th>
-                <th>Tên mũi tiêm</th>
-                <th>Số mũi</th>
-                <th>Ngày tiêm dự kiến</th>
-                <th>Trạng thái</th>
-                <th>Ghi chú</th>
+                <th>TÃªn vaccine</th>
+                <th>TÃªn mÅ©i tiÃªm</th>
+                <th>Sá»‘ mÅ©i</th>
+                <th>NgÃ y tiÃªm dá»± kiáº¿n</th>
+                <th>Tráº¡ng thÃ¡i</th>
+                <th>Ghi chÃº</th>
+                <th>Thao tÃ¡c</th>
             </tr>
         </thead>
         <tbody>
+        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
         @foreach (var item in Model)
         {
             <tr>
@@ -35,6 +49,13 @@ else
                 <td>@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
                 <td>@item.TrangThai</td>
                 <td>@item.GhiChu</td>
+                <td>
+                    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+                    @if (item.TrangThai != "ÄÃ£ tiÃªm")
+                    {
+                        <a asp-action="CapNhatDaTiem" asp-route-maLichTiem="@item.MaLichTiem" class="btn btn-sm btn-primary">Cáº­p nháº­t Ä‘Ã£ tiÃªm</a>
+                    }
+                </td>
             </tr>
         }
         </tbody>

@@ -1,53 +1,58 @@
+﻿@* Khu vực giao diện của view CapNhatThongTinCaNhan.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @{
-    ViewData["Title"] = "Cập nhật thông tin cá nhân";
+    ViewData["Title"] = "Cáº­p nháº­t thÃ´ng tin cÃ¡ nhÃ¢n";
 }
 
-<h2>Cập nhật thông tin cá nhân</h2>
+<h2>Cáº­p nháº­t thÃ´ng tin cÃ¡ nhÃ¢n</h2>
 
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
 {
+    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     <div class="alert alert-danger">@ViewBag.ThongBao</div>
 }
 
+@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post" class="col-md-7">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label class="form-label">Số điện thoại</label>
+        <label class="form-label">Sá»‘ Ä‘iá»‡n thoáº¡i</label>
         <input value="@ViewBag.SoDienThoai" class="form-control" readonly />
     </div>
     <div class="mb-3">
-        <label class="form-label">Họ tên</label>
+        <label class="form-label">Há» tÃªn</label>
         <input name="hoTen" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Ngày sinh</label>
+        <label class="form-label">NgÃ y sinh</label>
         <input name="ngaySinh" type="date" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Giới tính</label>
+        <label class="form-label">Giá»›i tÃ­nh</label>
         <select name="gioiTinh" class="form-select">
             <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
+            <option value="Ná»¯">Ná»¯</option>
+            <option value="KhÃ¡c">KhÃ¡c</option>
         </select>
     </div>
     <div class="row">
         <div class="col-md-6 mb-3">
-            <label class="form-label">Chiều cao</label>
+            <label class="form-label">Chiá»u cao</label>
             <input name="chieuCao" type="number" step="0.1" class="form-control" />
         </div>
         <div class="col-md-6 mb-3">
-            <label class="form-label">Cân nặng</label>
+            <label class="form-label">CÃ¢n náº·ng</label>
             <input name="canNang" type="number" step="0.1" class="form-control" />
         </div>
     </div>
     <div class="mb-3">
-        <label class="form-label">Tiền sử bệnh</label>
+        <label class="form-label">Tiá»n sá»­ bá»‡nh</label>
         <textarea name="tienSuBenh" class="form-control"></textarea>
     </div>
     <div class="mb-3">
-        <label class="form-label">Dị ứng</label>
+        <label class="form-label">Dá»‹ á»©ng</label>
         <textarea name="diUng" class="form-control"></textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+    <button type="submit" class="btn btn-primary">LÆ°u thÃ´ng tin</button>
 </form>

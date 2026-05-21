@@ -1,21 +1,24 @@
+﻿@* Khu vực giao diện của view Details.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model HoSoSucKhoe
 @{
-    ViewData["Title"] = "Chi tiết hồ sơ";
+    ViewData["Title"] = "Chi tiáº¿t há»“ sÆ¡";
 }
 
-<h2>Chi tiết hồ sơ sức khỏe</h2>
+<h2>Chi tiáº¿t há»“ sÆ¡ sá»©c khá»e</h2>
 
+@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered col-md-8">
-    <tr><th>Mã hồ sơ</th><td>@Model.MaHoSo</td></tr>
-    <tr><th>Họ tên</th><td>@Model.HoTen</td></tr>
-    <tr><th>Ngày sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
-    <tr><th>Giới tính</th><td>@Model.GioiTinh</td></tr>
-    <tr><th>Chiều cao</th><td>@Model.ChieuCao</td></tr>
-    <tr><th>Cân nặng</th><td>@Model.CanNang</td></tr>
-    <tr><th>Tiền sử bệnh</th><td>@Model.TienSuBenh</td></tr>
-    <tr><th>Dị ứng</th><td>@Model.DiUng</td></tr>
-    <tr><th>Ngày tạo</th><td>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</td></tr>
+    <tr><th>MÃ£ há»“ sÆ¡</th><td>@Model.MaHoSo</td></tr>
+    <tr><th>Há» tÃªn</th><td>@Model.HoTen</td></tr>
+    <tr><th>NgÃ y sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>Giá»›i tÃ­nh</th><td>@Model.GioiTinh</td></tr>
+    <tr><th>Chiá»u cao</th><td>@Model.ChieuCao</td></tr>
+    <tr><th>CÃ¢n náº·ng</th><td>@Model.CanNang</td></tr>
+    <tr><th>Tiá»n sá»­ bá»‡nh</th><td>@Model.TienSuBenh</td></tr>
+    <tr><th>Dá»‹ á»©ng</th><td>@Model.DiUng</td></tr>
+    <tr><th>NgÃ y táº¡o</th><td>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</td></tr>
 </table>
 
-<a asp-action="Edit" asp-route-id="@Model.MaHoSo" class="btn btn-primary">Sửa</a>
-<a asp-action="Index" class="btn btn-link">Quay lại</a>
+<a asp-action="Edit" asp-route-id="@Model.MaHoSo" class="btn btn-primary">Sá»­a</a>
+<a asp-action="Index" class="btn btn-link">Quay láº¡i</a>

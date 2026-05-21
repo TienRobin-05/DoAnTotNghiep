@@ -1,4 +1,6 @@
-﻿@model ErrorViewModel
+﻿@* Khu vực giao diện của view Error.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@model ErrorViewModel
 @{
     ViewData["Title"] = "Error";
 }
@@ -6,6 +8,7 @@
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
 
+@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.ShowRequestId)
 {
     <p>

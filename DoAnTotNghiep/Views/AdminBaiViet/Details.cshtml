@@ -1,0 +1,14 @@
+﻿@* Khu vực giao diện của view Details.
+   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@model BaiVietCamNang
+@{
+    ViewData["Title"] = "Chi tiáº¿t bÃ i viáº¿t";
+}
+
+<h2>@Model.TieuDe</h2>
+<p><strong>TÃ¡c giáº£:</strong> @Model.TenTacGia</p>
+<p><strong>NgÃ y táº¡o:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
+<p><strong>Tráº¡ng thÃ¡i:</strong> @(Model.TrangThai ? "Äang hiá»ƒn thá»‹" : "Äang áº©n")</p>
+<div class="border p-3 mb-3" style="white-space: pre-wrap">@Model.NoiDung</div>
+<a asp-action="Edit" asp-route-maBaiViet="@Model.MaBaiViet" class="btn btn-primary">Sá»­a</a>
+<a asp-action="Index" class="btn btn-secondary">Quay láº¡i</a>
