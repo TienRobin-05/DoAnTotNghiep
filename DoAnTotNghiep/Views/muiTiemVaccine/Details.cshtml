@@ -1,25 +1,25 @@
-﻿@* Khu vực giao diện của view Details.
+@* Khu vực giao diện của view Details.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model MuiTiemVaccine
 @{
-    ViewData["Title"] = "Chi tiáº¿t mÅ©i tiÃªm";
+    ViewData["Title"] = "Chi tiết mũi tiêm";
 }
 
-<h2>Chi tiáº¿t mÅ©i tiÃªm vaccine</h2>
+<h2>Chi tiết mũi tiêm vaccine</h2>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered col-md-8">
-    <tr><th>MÃ£ mÅ©i tiÃªm</th><td>@Model.MaMuiTiem</td></tr>
+    <tr><th>Mã mũi tiêm</th><td>@Model.MaMuiTiem</td></tr>
     <tr><th>Vaccine</th><td>@Model.TenVaccine</td></tr>
-    <tr><th>Sá»‘ mÅ©i</th><td>@Model.SoMui</td></tr>
-    <tr><th>TÃªn mÅ©i</th><td>@Model.TenMui</td></tr>
-    <tr><th>Äá»™ tuá»•i tá»‘i thiá»ƒu</th><td>@Model.DoTuoiToiThieu</td></tr>
-    <tr><th>Äá»™ tuá»•i tá»‘i Ä‘a</th><td>@Model.DoTuoiToiDa</td></tr>
-    <tr><th>Äá»™ tuá»•i khuyáº¿n nghá»‹</th><td>@Model.DoTuoiKhuyenNghi</td></tr>
-    <tr><th>ÄÆ¡n vá»‹ tuá»•i</th><td>@Model.DonViTuoi</td></tr>
-    <tr><th>Khoáº£ng cÃ¡ch ngÃ y</th><td>@Model.KhoangCachNgay</td></tr>
-    <tr><th>Ghi chÃº</th><td style="white-space: pre-wrap">@Model.GhiChu</td></tr>
+    <tr><th>Số mũi</th><td>@Model.SoMui</td></tr>
+    <tr><th>Tên mũi</th><td>@Model.TenMui</td></tr>
+    <tr><th>Độ tuổi tối thiểu</th><td>@Model.DoTuoiToiThieu</td></tr>
+    <tr><th>Độ tuổi tối đa</th><td>@Model.DoTuoiToiDa</td></tr>
+    <tr><th>Độ tuổi khuyến nghị</th><td>@Model.DoTuoiKhuyenNghi</td></tr>
+    <tr><th>Đơn vị tuổi</th><td>@Model.DonViTuoi</td></tr>
+    <tr><th>Khoảng cách ngày</th><td>@Model.KhoangCachNgay</td></tr>
+    <tr><th>Ghi chú</th><td style="white-space: pre-wrap">@Model.GhiChu</td></tr>
 </table>
 
-<a asp-action="Edit" asp-route-id="@Model.MaMuiTiem" class="btn btn-primary">Sá»­a</a>
-<a asp-action="Index" class="btn btn-link">Quay láº¡i</a>
+<a asp-action="Edit" asp-route-id="@Model.MaMuiTiem" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-link">Quay lại</a>

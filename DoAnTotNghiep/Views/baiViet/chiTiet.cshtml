@@ -1,4 +1,4 @@
-﻿@* Khu vực giao diện của view chiTiet.
+@* Khu vực giao diện của view chiTiet.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model baiVietCamNangModels
 @{
@@ -6,6 +6,6 @@
 }
 
 <h2>@Model.tieuDe</h2>
-<p class="text-muted">TÃ¡c giáº£: @Model.tenTacGia - @Model.ngayTao.ToString("dd/MM/yyyy")</p>
+<p class="text-muted">Tác giả: @Model.tenTacGia - @Model.ngayTao.ToString("dd/MM/yyyy")</p>
 <div class="border p-3 mb-3" style="white-space: pre-wrap">@Model.noiDung</div>
-<a asp-action="index" class="btn btn-link">Quay láº¡i</a>
+<a asp-action="index" class="btn btn-link">Quay lại</a>

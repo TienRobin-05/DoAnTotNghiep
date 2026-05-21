@@ -1,11 +1,11 @@
-﻿@* Khu vực giao diện của view _Layout.
+@* Khu vực giao diện của view _Layout.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Há»“ sÆ¡ sá»©c khá»e vÃ  tiÃªm chá»§ng</title>
+    <title>@ViewData["Title"] - Hồ sơ sức khỏe và tiêm chủng</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -19,7 +19,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
         <div class="container">
-            <a class="navbar-brand" asp-controller="TaiKhoan" asp-action="DangNhap">TiÃªm chá»§ng</a>
+            <a class="navbar-brand" asp-controller="TaiKhoan" asp-action="DangNhap">Tiêm chủng</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuChinh">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -28,21 +28,21 @@
                     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                     @if (daDangNhap && laAdmin)
                     {
-                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Quáº£n trá»‹</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="taiKhoan">TÃ i khoáº£n</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Quản trị</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="taiKhoan">Tài khoản</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="vaccine" asp-action="index">Vaccine</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="muiTiemVaccine" asp-action="index">MÅ©i tiÃªm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">BÃ i viáº¿t</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">TÆ° váº¥n</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="muiTiemVaccine" asp-action="index">Mũi tiêm</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">Bài viết</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
                     }
                     else if (daDangNhap)
                     {
-                        <li class="nav-item"><a class="nav-link" asp-controller="NguoiDung" asp-action="Index">Trang ngÆ°á»i dÃ¹ng</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="HoSoSucKhoe" asp-action="CapNhatThongTinCaNhan">Há»“ sÆ¡ sá»©c khá»e</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="index">Lá»‹ch tiÃªm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="lichSu">Lá»‹ch sá»­ tiÃªm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">Cáº©m nang</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">TÆ° váº¥n</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="NguoiDung" asp-action="Index">Trang người dùng</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="HoSoSucKhoe" asp-action="CapNhatThongTinCaNhan">Hồ sơ sức khỏe</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="index">Lịch tiêm</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="lichSu">Lịch sử tiêm</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">Cẩm nang</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
                     }
                 </ul>
                 <div class="d-flex gap-2 align-items-center">
@@ -50,12 +50,12 @@
                     @if (daDangNhap)
                     {
                         <span class="text-muted">@hoTen (@vaiTro)</span>
-                        <a class="btn btn-outline-danger btn-sm" asp-controller="TaiKhoan" asp-action="DangXuat">ÄÄƒng xuáº¥t</a>
+                        <a class="btn btn-outline-danger btn-sm" asp-controller="TaiKhoan" asp-action="DangXuat">Đăng xuất</a>
                     }
                     else
                     {
-                        <a class="btn btn-outline-primary btn-sm" asp-controller="TaiKhoan" asp-action="DangNhap">ÄÄƒng nháº­p</a>
-                        <a class="btn btn-primary btn-sm" asp-controller="TaiKhoan" asp-action="DangKy">ÄÄƒng kÃ½</a>
+                        <a class="btn btn-outline-primary btn-sm" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
+                        <a class="btn btn-primary btn-sm" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
                     }
                 </div>
             </div>

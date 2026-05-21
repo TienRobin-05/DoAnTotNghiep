@@ -1,11 +1,11 @@
-﻿@* Khu vực giao diện của view Create.
+@* Khu vực giao diện của view Create.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model Vaccine
 @{
-    ViewData["Title"] = "ThÃªm vaccine";
+    ViewData["Title"] = "Thêm vaccine";
 }
 
-<h2>ThÃªm vaccine</h2>
+<h2>Thêm vaccine</h2>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
@@ -18,6 +18,6 @@
 <form method="post" class="col-md-8">
     @Html.AntiForgeryToken()
     <partial name="_FormVaccine" model="Model" />
-    <button type="submit" class="btn btn-primary">LÆ°u</button>
-    <a asp-action="Index" class="btn btn-link">Quay láº¡i</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-link">Quay lại</a>
 </form>

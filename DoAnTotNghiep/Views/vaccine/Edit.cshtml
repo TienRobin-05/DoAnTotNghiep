@@ -1,11 +1,11 @@
-﻿@* Khu vực giao diện của view Edit.
+@* Khu vực giao diện của view Edit.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model Vaccine
 @{
-    ViewData["Title"] = "Sá»­a vaccine";
+    ViewData["Title"] = "Sửa vaccine";
 }
 
-<h2>Sá»­a vaccine</h2>
+<h2>Sửa vaccine</h2>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
@@ -19,6 +19,6 @@
     @Html.AntiForgeryToken()
     <input asp-for="MaVaccine" type="hidden" />
     <partial name="_FormVaccine" model="Model" />
-    <button type="submit" class="btn btn-primary">Cáº­p nháº­t</button>
-    <a asp-action="Index" class="btn btn-link">Quay láº¡i</a>
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-action="Index" class="btn btn-link">Quay lại</a>
 </form>

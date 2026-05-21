@@ -1,25 +1,25 @@
-﻿@* Khu vực giao diện của view Delete.
+@* Khu vực giao diện của view Delete.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model BaiVietCamNang
 @{
-    ViewData["Title"] = "XÃ³a bÃ i viáº¿t";
+    ViewData["Title"] = "Xóa bài viết";
 }
 
-<h2>XÃ³a bÃ i viáº¿t</h2>
+<h2>Xóa bài viết</h2>
 
 @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
 <div class="alert alert-warning">
-    Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a bÃ i viáº¿t nÃ y khÃ´ng?
+    Bạn có chắc muốn xóa bài viết này không?
 </div>
 
-<p><strong>TiÃªu Ä‘á»:</strong> @Model.TieuDe</p>
-<p><strong>TÃ¡c giáº£:</strong> @Model.TenTacGia</p>
-<p><strong>NgÃ y táº¡o:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</p>
+<p><strong>Tiêu đề:</strong> @Model.TieuDe</p>
+<p><strong>Tác giả:</strong> @Model.TenTacGia</p>
+<p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</p>
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form asp-action="DeleteConfirmed" method="post">
     @Html.AntiForgeryToken()
     <input type="hidden" name="maBaiViet" value="@Model.MaBaiViet" />
-    <button type="submit" class="btn btn-danger">XÃ³a</button>
-    <a asp-action="Index" class="btn btn-secondary">Há»§y</a>
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

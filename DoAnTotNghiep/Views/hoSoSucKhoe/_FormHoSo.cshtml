@@ -1,39 +1,39 @@
-﻿@* Khu vực giao diện của view _FormHoSo.
+@* Khu vực giao diện của view _FormHoSo.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model HoSoSucKhoe
 
 <div class="mb-3">
-    <label asp-for="HoTen" class="form-label">Há» tÃªn</label>
+    <label asp-for="HoTen" class="form-label">Họ tên</label>
     <input asp-for="HoTen" class="form-control" />
 </div>
 <div class="mb-3">
-    <label asp-for="NgaySinh" class="form-label">NgÃ y sinh</label>
+    <label asp-for="NgaySinh" class="form-label">Ngày sinh</label>
     <input asp-for="NgaySinh" type="date" class="form-control" />
 </div>
 <div class="mb-3">
-    <label asp-for="GioiTinh" class="form-label">Giá»›i tÃ­nh</label>
+    <label asp-for="GioiTinh" class="form-label">Giới tính</label>
     <select asp-for="GioiTinh" class="form-select">
-        <option value="">-- Chá»n giá»›i tÃ­nh --</option>
+        <option value="">-- Chọn giới tính --</option>
         <option value="Nam">Nam</option>
-        <option value="Ná»¯">Ná»¯</option>
-        <option value="KhÃ¡c">KhÃ¡c</option>
+        <option value="Nữ">Nữ</option>
+        <option value="Khác">Khác</option>
     </select>
 </div>
 <div class="row">
     <div class="col-md-6 mb-3">
-        <label asp-for="ChieuCao" class="form-label">Chiá»u cao</label>
+        <label asp-for="ChieuCao" class="form-label">Chiều cao</label>
         <input asp-for="ChieuCao" type="number" step="0.1" class="form-control" />
     </div>
     <div class="col-md-6 mb-3">
-        <label asp-for="CanNang" class="form-label">CÃ¢n náº·ng</label>
+        <label asp-for="CanNang" class="form-label">Cân nặng</label>
         <input asp-for="CanNang" type="number" step="0.1" class="form-control" />
     </div>
 </div>
 <div class="mb-3">
-    <label asp-for="TienSuBenh" class="form-label">Tiá»n sá»­ bá»‡nh</label>
+    <label asp-for="TienSuBenh" class="form-label">Tiền sử bệnh</label>
     <textarea asp-for="TienSuBenh" class="form-control"></textarea>
 </div>
 <div class="mb-3">
-    <label asp-for="DiUng" class="form-label">Dá»‹ á»©ng</label>
+    <label asp-for="DiUng" class="form-label">Dị ứng</label>
     <textarea asp-for="DiUng" class="form-control"></textarea>
 </div>

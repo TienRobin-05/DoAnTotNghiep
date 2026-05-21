@@ -1,13 +1,13 @@
-﻿@* Khu vực giao diện của view ChonHoSo.
+@* Khu vực giao diện của view ChonHoSo.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<HoSoSucKhoe>
 @{
-    ViewData["Title"] = "Chá»n há»“ sÆ¡ xem lá»‹ch tiÃªm";
+    ViewData["Title"] = "Chọn hồ sơ xem lịch tiêm";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Chá»n há»“ sÆ¡ xem lá»‹ch tiÃªm</h2>
-    <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">ThÃªm há»“ sÆ¡</a>
+    <h2>Chọn hồ sơ xem lịch tiêm</h2>
+    <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
@@ -15,7 +15,7 @@
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     <div class="alert alert-info">
-        Báº¡n chÆ°a cÃ³ há»“ sÆ¡ sá»©c khá»e. Vui lÃ²ng táº¡o há»“ sÆ¡ trÆ°á»›c khi xem lá»‹ch tiÃªm.
+        Bạn chưa có hồ sơ sức khỏe. Vui lòng tạo hồ sơ trước khi xem lịch tiêm.
     </div>
 }
 else
@@ -24,10 +24,10 @@ else
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>Há» tÃªn</th>
-                <th>NgÃ y sinh</th>
-                <th>Giá»›i tÃ­nh</th>
-                <th>Thao tÃ¡c</th>
+                <th>Họ tên</th>
+                <th>Ngày sinh</th>
+                <th>Giới tính</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@ else
                 <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
                 <td>@item.GioiTinh</td>
                 <td>
-                    <a asp-action="Index" asp-route-maHoSo="@item.MaHoSo" class="btn btn-sm btn-primary">Xem lá»‹ch tiÃªm</a>
+                    <a asp-action="Index" asp-route-maHoSo="@item.MaHoSo" class="btn btn-sm btn-primary">Xem lịch tiêm</a>
                 </td>
             </tr>
         }

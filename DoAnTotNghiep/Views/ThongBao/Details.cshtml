@@ -1,19 +1,19 @@
-﻿@* Khu vực giao diện của view Details.
+@* Khu vực giao diện của view Details.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model ThongBao
 @{
-    ViewData["Title"] = "Chi tiáº¿t thÃ´ng bÃ¡o";
+    ViewData["Title"] = "Chi tiết thông báo";
 }
 
-<h2>Chi tiáº¿t thÃ´ng bÃ¡o</h2>
+<h2>Chi tiết thông báo</h2>
 
 <div class="card">
     <div class="card-body">
-        <p><strong>TiÃªu Ä‘á»:</strong> @Model.TieuDe</p>
-        <p><strong>Ná»™i dung:</strong> @Model.NoiDung</p>
-        <p><strong>NgÃ y gá»­i:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
-        <p><strong>Tráº¡ng thÃ¡i:</strong> @Model.TrangThaiDoc</p>
+        <p><strong>Tiêu đề:</strong> @Model.TieuDe</p>
+        <p><strong>Nội dung:</strong> @Model.NoiDung</p>
+        <p><strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
+        <p><strong>Trạng thái:</strong> @Model.TrangThaiDoc</p>
     </div>
 </div>
 
-<a asp-action="Index" class="btn btn-secondary mt-3">Quay láº¡i danh sÃ¡ch thÃ´ng bÃ¡o</a>
+<a asp-action="Index" class="btn btn-secondary mt-3">Quay lại danh sách thông báo</a>

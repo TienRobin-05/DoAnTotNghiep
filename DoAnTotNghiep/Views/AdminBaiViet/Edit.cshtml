@@ -1,11 +1,11 @@
-﻿@* Khu vực giao diện của view Edit.
+@* Khu vực giao diện của view Edit.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model BaiVietCamNang
 @{
-    ViewData["Title"] = "Sá»­a bÃ i viáº¿t";
+    ViewData["Title"] = "Sửa bài viết";
 }
 
-<h2>Sá»­a bÃ i viáº¿t</h2>
+<h2>Sửa bài viết</h2>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
@@ -19,17 +19,17 @@
     @Html.AntiForgeryToken()
     <input asp-for="MaBaiViet" type="hidden" />
     <div class="mb-3">
-        <label class="form-label">TiÃªu Ä‘á»</label>
+        <label class="form-label">Tiêu đề</label>
         <input asp-for="TieuDe" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Ná»™i dung</label>
+        <label class="form-label">Nội dung</label>
         <textarea asp-for="NoiDung" rows="10" class="form-control"></textarea>
     </div>
     <div class="form-check mb-3">
         <input asp-for="TrangThai" class="form-check-input" />
-        <label class="form-check-label">Hiá»ƒn thá»‹</label>
+        <label class="form-check-label">Hiển thị</label>
     </div>
-    <button type="submit" class="btn btn-primary">LÆ°u</button>
-    <a asp-action="Index" class="btn btn-secondary">Quay láº¡i</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
 </form>

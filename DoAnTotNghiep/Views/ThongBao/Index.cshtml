@@ -1,20 +1,20 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<ThongBao>
 @{
-    ViewData["Title"] = "ThÃ´ng bÃ¡o cá»§a tÃ´i";
+    ViewData["Title"] = "Thông báo của tôi";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>ThÃ´ng bÃ¡o cá»§a tÃ´i</h2>
-    <a href="/NguoiDung/Index" class="btn btn-link">Quay láº¡i trang ngÆ°á»i dÃ¹ng</a>
+    <h2>Thông báo của tôi</h2>
+    <a href="/NguoiDung/Index" class="btn btn-link">Quay lại trang người dùng</a>
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Báº¡n chÆ°a cÃ³ thÃ´ng bÃ¡o nÃ o.</div>
+    <div class="alert alert-info">Bạn chưa có thông báo nào.</div>
 }
 else
 {
@@ -22,11 +22,11 @@ else
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>TiÃªu Ä‘á»</th>
-                <th>Ná»™i dung</th>
-                <th>NgÃ y gá»­i</th>
-                <th>Tráº¡ng thÃ¡i</th>
-                <th>Thao tÃ¡c</th>
+                <th>Tiêu đề</th>
+                <th>Nội dung</th>
+                <th>Ngày gửi</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@ else
                 <td>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@item.TrangThaiDoc</td>
                 <td>
-                    <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="btn btn-sm btn-primary">Xem chi tiáº¿t</a>
+                    <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="btn btn-sm btn-primary">Xem chi tiết</a>
                 </td>
             </tr>
         }

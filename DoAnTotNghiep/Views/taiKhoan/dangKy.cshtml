@@ -1,10 +1,10 @@
-﻿@* Khu vực giao diện của view DangKy.
+@* Khu vực giao diện của view DangKy.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @{
-    ViewData["Title"] = "ÄÄƒng kÃ½ tÃ i khoáº£n";
+    ViewData["Title"] = "Đăng ký tài khoản";
 }
 
-<h2>ÄÄƒng kÃ½ tÃ i khoáº£n</h2>
+<h2>Đăng ký tài khoản</h2>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
@@ -17,7 +17,7 @@
 <form method="post" class="col-md-6">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label class="form-label">Há» tÃªn</label>
+        <label class="form-label">Họ tên</label>
         <input name="hoTen" class="form-control" />
     </div>
     <div class="mb-3">
@@ -25,17 +25,17 @@
         <input name="email" type="email" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Sá»‘ Ä‘iá»‡n thoáº¡i</label>
+        <label class="form-label">Số điện thoại</label>
         <input name="soDienThoai" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Máº­t kháº©u</label>
+        <label class="form-label">Mật khẩu</label>
         <input name="matKhau" type="password" class="form-control" />
     </div>
     <div class="mb-3">
-        <label class="form-label">Nháº­p láº¡i máº­t kháº©u</label>
+        <label class="form-label">Nhập lại mật khẩu</label>
         <input name="nhapLaiMatKhau" type="password" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">ÄÄƒng kÃ½</button>
-    <a asp-action="DangNhap" class="btn btn-link">ÄÄƒng nháº­p</a>
+    <button type="submit" class="btn btn-primary">Đăng ký</button>
+    <a asp-action="DangNhap" class="btn btn-link">Đăng nhập</a>
 </form>

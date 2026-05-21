@@ -1,25 +1,25 @@
-﻿@* Khu vực giao diện của view Delete.
+@* Khu vực giao diện của view Delete.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model MuiTiemVaccine
 @{
-    ViewData["Title"] = "XÃ³a mÅ©i tiÃªm";
+    ViewData["Title"] = "Xóa mũi tiêm";
 }
 
-<h2>XÃ³a mÅ©i tiÃªm vaccine</h2>
+<h2>Xóa mũi tiêm vaccine</h2>
 @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-<div class="alert alert-warning">Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a mÅ©i tiÃªm nÃ y khÃ´ng?</div>
+<div class="alert alert-warning">Bạn có chắc muốn xóa mũi tiêm này không?</div>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered col-md-8">
     <tr><th>Vaccine</th><td>@Model.TenVaccine</td></tr>
-    <tr><th>Sá»‘ mÅ©i</th><td>@Model.SoMui</td></tr>
-    <tr><th>TÃªn mÅ©i</th><td>@Model.TenMui</td></tr>
-    <tr><th>Ghi chÃº</th><td>@Model.GhiChu</td></tr>
+    <tr><th>Số mũi</th><td>@Model.SoMui</td></tr>
+    <tr><th>Tên mũi</th><td>@Model.TenMui</td></tr>
+    <tr><th>Ghi chú</th><td>@Model.GhiChu</td></tr>
 </table>
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">XÃ³a</button>
-    <a asp-action="Index" class="btn btn-link">Há»§y</a>
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-link">Hủy</a>
 </form>

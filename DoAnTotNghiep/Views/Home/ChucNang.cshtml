@@ -1,30 +1,30 @@
-﻿@* Khu vực giao diện của view ChucNang.
+@* Khu vực giao diện của view ChucNang.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @{
-    ViewData["Title"] = "Chá»©c nÄƒng";
+    ViewData["Title"] = "Chức năng";
 
     var id = (ViewBag.MaChucNang as string) ?? "";
     var tenChucNang = id switch
     {
-        "quan-ly-vaccine" => "Quáº£n lÃ½ danh má»¥c Vaccine",
-        "quan-ly-mui-tiem" => "Quáº£n lÃ½ mÅ©i tiÃªm",
-        "quan-ly-bai-viet" => "Quáº£n lÃ½ bÃ i viáº¿t cáº©m nang",
-        "quan-ly-tu-van" => "Quáº£n lÃ½ cÃ¢u há»i tÆ° váº¥n",
-        "ho-so-suc-khoe" => "Quáº£n lÃ½ há»“ sÆ¡ sá»©c khá»e",
-        "lich-tiem" => "Xem lá»‹ch tiÃªm",
-        "cap-nhat-tiem" => "Cáº­p nháº­t tráº¡ng thÃ¡i tiÃªm",
-        "lich-su-tiem" => "Xem lá»‹ch sá»­ tiÃªm",
-        "thong-bao" => "ThÃ´ng bÃ¡o nháº¯c lá»‹ch",
-        "tra-cuu-vaccine" => "Tra cá»©u Vaccine",
-        "hoi-dap-tu-van" => "Há»i Ä‘Ã¡p tÆ° váº¥n",
-        _ => "Chá»©c nÄƒng há»‡ thá»‘ng"
+        "quan-ly-vaccine" => "Quản lý danh mục Vaccine",
+        "quan-ly-mui-tiem" => "Quản lý mũi tiêm",
+        "quan-ly-bai-viet" => "Quản lý bài viết cẩm nang",
+        "quan-ly-tu-van" => "Quản lý câu hỏi tư vấn",
+        "ho-so-suc-khoe" => "Quản lý hồ sơ sức khỏe",
+        "lich-tiem" => "Xem lịch tiêm",
+        "cap-nhat-tiem" => "Cập nhật trạng thái tiêm",
+        "lich-su-tiem" => "Xem lịch sử tiêm",
+        "thong-bao" => "Thông báo nhắc lịch",
+        "tra-cuu-vaccine" => "Tra cứu Vaccine",
+        "hoi-dap-tu-van" => "Hỏi đáp tư vấn",
+        _ => "Chức năng hệ thống"
     };
 }
 
 <section class="module-page">
-    <a class="back-link" asp-controller="Home" asp-action="Index">Quay láº¡i trang chá»§</a>
+    <a class="back-link" asp-controller="Home" asp-action="Index">Quay lại trang chủ</a>
     <h1>@tenChucNang</h1>
     <p>
-        MÃ n hÃ¬nh nÃ y Ä‘Ã£ Ä‘Æ°á»£c ná»‘i tá»« trang chá»§. BÆ°á»›c tiáº¿p theo lÃ  táº¡o controller, model vÃ  view xá»­ lÃ½ dá»¯ liá»‡u tÆ°Æ¡ng á»©ng.
+        Màn hình này đã được nối từ trang chủ. Bước tiếp theo là tạo controller, model và view xử lý dữ liệu tương ứng.
     </p>
 </section>

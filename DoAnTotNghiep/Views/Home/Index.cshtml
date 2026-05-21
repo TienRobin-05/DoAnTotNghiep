@@ -1,4 +1,4 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @{
     Layout = null;
@@ -15,7 +15,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Há»’ SÆ  Sá»¨C KHá»ŽE VÃ€ TIÃŠM CHá»¦NG</title>
+    <title>HỒ SƠ SỨC KHỎE VÀ TIÊM CHỦNG</title>
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: linear-gradient(180deg, #e4f6f8, #f1f5ff); color: #102f38; }
@@ -95,12 +95,12 @@
         <div class="topbar-inner">
             <a class="brand" href="/">
                 <span class="brand-mark"></span>
-                <span>Há»’ SÆ  Sá»¨C KHá»ŽE<br />VÃ€ TIÃŠM CHá»¦NG</span>
+                <span>HỒ SƠ SỨC KHỎE<br />VÀ TIÊM CHỦNG</span>
             </a>
             @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
             <form class="search-box" action="/Vaccine/TraCuu" method="get">
-                <input name="tuKhoa" placeholder="Báº¡n cáº§n tÃ¬m gÃ¬?" />
-                <button type="submit">âŒ•</button>
+                <input name="tuKhoa" placeholder="Bạn cần tìm gì?" />
+                <button type="submit">⌕</button>
             </form>
             @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
             @if (daDangNhap)
@@ -109,21 +109,21 @@
             }
             else
             {
-                <a class="login-btn" href="/TaiKhoan/DangNhap"><span class="login-dot">TK</span>ÄÄƒng nháº­p</a>
+                <a class="login-btn" href="/TaiKhoan/DangNhap"><span class="login-dot">TK</span>Đăng nhập</a>
             }
-            <a class="consult-btn" href="/TaiKhoan/DangNhap"><span class="headset-dot">TV</span>YÃªu cáº§u tÆ° váº¥n</a>
+            <a class="consult-btn" href="/TaiKhoan/DangNhap"><span class="headset-dot">TV</span>Yêu cầu tư vấn</a>
         </div>
     </header>
 
     <nav class="menu">
         <div class="menu-inner">
-            <a href="/Vaccine/TraCuu">Váº¯c xin phÃ²ng bá»‡nh</a>
-            <a href="/TaiKhoan/DangNhap">GÃ³i váº¯c xin</a>
-            <a href="/BaiVietCamNang/Index">Khuyáº¿n mÃ£i</a>
-            <a href="/">Há»‡ thá»‘ng tiÃªm chá»§ng</a>
-            <a href="/Vaccine/TraCuu">TÃ´i nÃªn tiÃªm gÃ¬</a>
-            <a href="/TaiKhoan/DangNhap">Äá»™i ngÅ© chuyÃªn mÃ´n</a>
-            <a href="/BaiVietCamNang/Index">Kiáº¿n thá»©c tiÃªm chá»§ng</a>
+            <a href="/Vaccine/TraCuu">Vắc xin phòng bệnh</a>
+            <a href="/TaiKhoan/DangNhap">Gói vắc xin</a>
+            <a href="/BaiVietCamNang/Index">Khuyến mãi</a>
+            <a href="/">Hệ thống tiêm chủng</a>
+            <a href="/Vaccine/TraCuu">Tôi nên tiêm gì</a>
+            <a href="/TaiKhoan/DangNhap">Đội ngũ chuyên môn</a>
+            <a href="/BaiVietCamNang/Index">Kiến thức tiêm chủng</a>
         </div>
     </nav>
 
@@ -132,65 +132,65 @@
             <div>
                 <article class="hero-card">
                     <div class="hero-content">
-                        <div class="hero-brand"><span></span>Há»’ SÆ  Sá»¨C KHá»ŽE VÃ€ TIÃŠM CHá»¦NG <b class="green-sm">GREEN SM</b></div>
-                        <h1>TiÃªm chá»§ng TIáº¾N <strong>ÄÃ³n Ä‘Æ°a</strong></h1>
-                        <div class="coupon"><span>Æ¯u Ä‘Ã£i Ä‘áº¿n 20%</span><b>50K</b></div>
+                        <div class="hero-brand"><span></span>HỒ SƠ SỨC KHỎE VÀ TIÊM CHỦNG <b class="green-sm">GREEN SM</b></div>
+                        <h1>Tiêm chủng TIẾN <strong>Đón đưa</strong></h1>
+                        <div class="coupon"><span>Ưu đãi đến 20%</span><b>50K</b></div>
                     </div>
-                    <div class="clinic">TIÃŠM CHá»¦NG<br />Sá»¨C KHá»ŽE</div>
+                    <div class="clinic">TIÊM CHỦNG<br />SỨC KHỎE</div>
                     <div class="vehicle"></div>
                     <div class="rider"></div>
                     <div class="dots"><span></span><span></span><span></span><span></span><span></span></div>
                 </article>
                 <div class="benefits">
-                    <div class="benefit"><span class="benefit-icon">GSP</span><div><strong>Báº£o quáº£n chuáº©n GSP</strong><small>Váº¯c xin luÃ´n Ä‘Æ°á»£c Ä‘áº£m báº£o cháº¥t lÆ°á»£ng...</small></div></div>
-                    <div class="benefit"><span class="benefit-icon">BS</span><div><strong>Äá»™i ngÅ© bÃ¡c sÄ© giÃ u kinh nghiá»‡m</strong><small>Tá»« bá»‡nh viá»‡n Nhi Äá»“ng, Pasteur,...</small></div></div>
-                    <div class="benefit"><span class="benefit-icon">Sá»•</span><div><strong>Sá»• tiÃªm chá»§ng Ä‘iá»‡n tá»­</strong><small>Nháº¯c lá»‹ch háº¹n khoa há»c cho cáº£ gia...</small></div></div>
-                    <div class="benefit"><span class="benefit-icon">%</span><div><strong>Mua váº¯c xin giáº£m giÃ¡ mua thuá»‘c</strong><small>CÃ¹ng nhá»¯ng Æ°u Ä‘Ã£i háº¥p dáº«n</small></div></div>
+                    <div class="benefit"><span class="benefit-icon">GSP</span><div><strong>Bảo quản chuẩn GSP</strong><small>Vắc xin luôn được đảm bảo chất lượng...</small></div></div>
+                    <div class="benefit"><span class="benefit-icon">BS</span><div><strong>Đội ngũ bác sĩ giàu kinh nghiệm</strong><small>Từ bệnh viện Nhi Đồng, Pasteur,...</small></div></div>
+                    <div class="benefit"><span class="benefit-icon">Sổ</span><div><strong>Sổ tiêm chủng điện tử</strong><small>Nhắc lịch hẹn khoa học cho cả gia...</small></div></div>
+                    <div class="benefit"><span class="benefit-icon">%</span><div><strong>Mua vắc xin giảm giá mua thuốc</strong><small>Cùng những ưu đãi hấp dẫn</small></div></div>
                 </div>
             </div>
 
             <aside class="warning">
-                <h2>Cáº¢NH BÃO QUAN TRá»ŒNG</h2>
+                <h2>CẢNH BÁO QUAN TRỌNG</h2>
                 <div class="warning-grid">
-                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">â–¶</span><small>Radar sá»©c khá»e</small><strong>KhÃ¡nh HÃ²a ghi nháº­n hÆ¡n 2.200 ca tay chÃ¢n miá»‡ng...</strong></a>
-                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">â–¶</span><small>Khuyáº¿n cÃ¡o</small><strong>Ebola cÃ³ thá»ƒ khá»Ÿi phÃ¡t giá»‘ng cáº£m cÃºm nhÆ°ng diá»…n tiáº¿n ráº¥t...</strong></a>
-                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">â–¶</span><small>Virus má»›i</small><strong>NhÃ³m virus corona má»›i vá»«a Ä‘Æ°á»£c phÃ¡t hiá»‡n...</strong></a>
+                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">▶</span><small>Radar sức khỏe</small><strong>Khánh Hòa ghi nhận hơn 2.200 ca tay chân miệng...</strong></a>
+                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">▶</span><small>Khuyến cáo</small><strong>Ebola có thể khởi phát giống cảm cúm nhưng diễn tiến rất...</strong></a>
+                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">▶</span><small>Virus mới</small><strong>Nhóm virus corona mới vừa được phát hiện...</strong></a>
                 </div>
             </aside>
         </section>
 
         <section class="quick-grid">
-            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">?</span><span>TÃ´i nÃªn tiÃªm gÃ¬?</span></a>
-            <a class="quick-card" href="/TaiKhoan/DangNhap"><span class="quick-icon">BS</span><span>Chat vá»›i bÃ¡c sÄ©</span></a>
-            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">VX</span><span>Danh má»¥c váº¯c xin</span></a>
-            <a class="quick-card" href="/TaiKhoan/DangNhap"><span class="quick-icon">Sá»•</span><span>Sá»• tiÃªm cá»§a tÃ´i</span></a>
-            <a class="quick-card" href="/TaiKhoan/DangNhap"><span class="quick-icon">TT</span><span>Trung tÃ¢m gáº§n tÃ´i</span></a>
-            <a class="quick-card" href="/BaiVietCamNang/Index"><span class="quick-icon">KN</span><span>Kiáº¿n thá»©c tiÃªm chá»§ng</span></a>
+            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">?</span><span>Tôi nên tiêm gì?</span></a>
+            <a class="quick-card" href="/TaiKhoan/DangNhap"><span class="quick-icon">BS</span><span>Chat với bác sĩ</span></a>
+            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">VX</span><span>Danh mục vắc xin</span></a>
+            <a class="quick-card" href="/TaiKhoan/DangNhap"><span class="quick-icon">Sổ</span><span>Sổ tiêm của tôi</span></a>
+            <a class="quick-card" href="/TaiKhoan/DangNhap"><span class="quick-icon">TT</span><span>Trung tâm gần tôi</span></a>
+            <a class="quick-card" href="/BaiVietCamNang/Index"><span class="quick-icon">KN</span><span>Kiến thức tiêm chủng</span></a>
         </section>
 
-        <div class="section-head"><span>Äá»™i ngÅ© chuyÃªn mÃ´n</span><a href="/TaiKhoan/DangNhap">Xem táº¥t cáº£</a></div>
+        <div class="section-head"><span>Đội ngũ chuyên môn</span><a href="/TaiKhoan/DangNhap">Xem tất cả</a></div>
         <section class="doctor-row">
-            <article class="doctor-card"><div class="avatar"></div><strong>TÆ° váº¥n lá»‹ch tiÃªm phÃ¹ há»£p</strong><p>Há»— trá»£ giáº£i Ä‘Ã¡p cÃ¢u há»i vá» há»“ sÆ¡ vÃ  mÅ©i tiÃªm.</p></article>
-            <article class="doctor-card"><div class="avatar"></div><strong>Theo dÃµi sau tiÃªm</strong><p>Ghi nháº­n lá»‹ch sá»­ vÃ  tÃ¬nh tráº¡ng sá»©c khá»e sau tiÃªm.</p></article>
-            <article class="doctor-card"><div class="avatar"></div><strong>Nháº¯c lá»‹ch khoa há»c</strong><p>GiÃºp ngÆ°á»i dÃ¹ng khÃ´ng bá» sÃ³t cÃ¡c mÅ©i tiÃªm quan trá»ng.</p></article>
-            <article class="doctor-card"><div class="avatar"></div><strong>Cáº©m nang sá»©c khá»e</strong><p>Cung cáº¥p kiáº¿n thá»©c cÆ¡ báº£n vá» phÃ²ng bá»‡nh.</p></article>
+            <article class="doctor-card"><div class="avatar"></div><strong>Tư vấn lịch tiêm phù hợp</strong><p>Hỗ trợ giải đáp câu hỏi về hồ sơ và mũi tiêm.</p></article>
+            <article class="doctor-card"><div class="avatar"></div><strong>Theo dõi sau tiêm</strong><p>Ghi nhận lịch sử và tình trạng sức khỏe sau tiêm.</p></article>
+            <article class="doctor-card"><div class="avatar"></div><strong>Nhắc lịch khoa học</strong><p>Giúp người dùng không bỏ sót các mũi tiêm quan trọng.</p></article>
+            <article class="doctor-card"><div class="avatar"></div><strong>Cẩm nang sức khỏe</strong><p>Cung cấp kiến thức cơ bản về phòng bệnh.</p></article>
         </section>
 
-        <div class="section-head"><span>Kiáº¿n thá»©c tiÃªm chá»§ng</span><a href="/BaiVietCamNang/Index">Xem táº¥t cáº£</a></div>
+        <div class="section-head"><span>Kiến thức tiêm chủng</span><a href="/BaiVietCamNang/Index">Xem tất cả</a></div>
         <section class="guide-row">
-            <article class="guide-card"><h3>Nhá»¯ng Ä‘iá»u cáº§n biáº¿t trÆ°á»›c khi tiÃªm vaccine</h3><p>Chuáº©n bá»‹ thÃ´ng tin sá»©c khá»e vÃ  tiá»n sá»­ dá»‹ á»©ng trÆ°á»›c khi tiÃªm.</p><a href="/BaiVietCamNang/Index">Xem bÃ i viáº¿t</a></article>
-            <article class="guide-card"><h3>CÃ¡ch theo dÃµi sau tiÃªm</h3><p>Ghi nháº­n pháº£n á»©ng sau tiÃªm vÃ  liÃªn há»‡ tÆ° váº¥n khi cáº§n.</p><a href="/BaiVietCamNang/Index">Xem bÃ i viáº¿t</a></article>
-            <article class="guide-card"><h3>VÃ¬ sao cáº§n tiÃªm Ä‘Ãºng lá»‹ch?</h3><p>TiÃªm Ä‘Ãºng lá»‹ch giÃºp duy trÃ¬ hiá»‡u quáº£ phÃ²ng bá»‡nh tá»‘t hÆ¡n.</p><a href="/BaiVietCamNang/Index">Xem bÃ i viáº¿t</a></article>
-            <article class="guide-card"><h3>Quáº£n lÃ½ há»“ sÆ¡ sá»©c khá»e gia Ä‘Ã¬nh</h3><p>LÆ°u há»“ sÆ¡ Ä‘á»ƒ theo dÃµi chá»‰ sá»‘ vÃ  lá»‹ch tiÃªm thuáº­n tiá»‡n hÆ¡n.</p><a href="/TaiKhoan/DangNhap">Xem há»“ sÆ¡</a></article>
+            <article class="guide-card"><h3>Những điều cần biết trước khi tiêm vaccine</h3><p>Chuẩn bị thông tin sức khỏe và tiền sử dị ứng trước khi tiêm.</p><a href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            <article class="guide-card"><h3>Cách theo dõi sau tiêm</h3><p>Ghi nhận phản ứng sau tiêm và liên hệ tư vấn khi cần.</p><a href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            <article class="guide-card"><h3>Vì sao cần tiêm đúng lịch?</h3><p>Tiêm đúng lịch giúp duy trì hiệu quả phòng bệnh tốt hơn.</p><a href="/BaiVietCamNang/Index">Xem bài viết</a></article>
+            <article class="guide-card"><h3>Quản lý hồ sơ sức khỏe gia đình</h3><p>Lưu hồ sơ để theo dõi chỉ số và lịch tiêm thuận tiện hơn.</p><a href="/TaiKhoan/DangNhap">Xem hồ sơ</a></article>
         </section>
 
         <footer class="footer">
-            <div><strong>Há»’ SÆ  Sá»¨C KHá»ŽE VÃ€ TIÃŠM CHá»¦NG</strong><p>Trang chá»§ cÃ´ng khai cho há»‡ thá»‘ng quáº£n lÃ½ há»“ sÆ¡ sá»©c khá»e vÃ  tiÃªm chá»§ng.</p></div>
+            <div><strong>HỒ SƠ SỨC KHỎE VÀ TIÊM CHỦNG</strong><p>Trang chủ công khai cho hệ thống quản lý hồ sơ sức khỏe và tiêm chủng.</p></div>
             <div class="footer-links">
-                <a href="/TaiKhoan/DangNhap">Há»“ sÆ¡ sá»©c khá»e</a>
-                <a href="/TaiKhoan/DangNhap">Lá»‹ch tiÃªm</a>
-                <a href="/TaiKhoan/DangNhap">TÆ° váº¥n</a>
-                <a href="/TaiKhoan/DangNhap">ÄÄƒng nháº­p</a>
+                <a href="/TaiKhoan/DangNhap">Hồ sơ sức khỏe</a>
+                <a href="/TaiKhoan/DangNhap">Lịch tiêm</a>
+                <a href="/TaiKhoan/DangNhap">Tư vấn</a>
+                <a href="/TaiKhoan/DangNhap">Đăng nhập</a>
             </div>
         </footer>
     </main>

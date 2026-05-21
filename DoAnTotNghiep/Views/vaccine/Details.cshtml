@@ -1,24 +1,24 @@
-﻿@* Khu vực giao diện của view Details.
+@* Khu vực giao diện của view Details.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model Vaccine
 @{
-    ViewData["Title"] = "Chi tiáº¿t vaccine";
+    ViewData["Title"] = "Chi tiết vaccine";
 }
 
-<h2>Chi tiáº¿t vaccine</h2>
+<h2>Chi tiết vaccine</h2>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered col-md-8">
-    <tr><th>MÃ£ vaccine</th><td>@Model.MaVaccine</td></tr>
-    <tr><th>TÃªn vaccine</th><td>@Model.TenVaccine</td></tr>
-    <tr><th>NhÃ³m vaccine</th><td>@Model.NhomVaccine</td></tr>
-    <tr><th>Äá»™ tuá»•i tá»‘i thiá»ƒu</th><td>@Model.DoTuoiToiThieu</td></tr>
-    <tr><th>Äá»™ tuá»•i tá»‘i Ä‘a</th><td>@Model.DoTuoiToiDa</td></tr>
-    <tr><th>ÄÆ¡n vá»‹ tuá»•i</th><td>@Model.DonViTuoi</td></tr>
-    <tr><th>MÃ´ táº£</th><td style="white-space: pre-wrap">@Model.MoTa</td></tr>
-    <tr><th>LÆ°u Ã½</th><td style="white-space: pre-wrap">@Model.LuuY</td></tr>
-    <tr><th>Tráº¡ng thÃ¡i</th><td>@(Model.TrangThai ? "Äang dÃ¹ng" : "ÄÃ£ áº©n")</td></tr>
+    <tr><th>Mã vaccine</th><td>@Model.MaVaccine</td></tr>
+    <tr><th>Tên vaccine</th><td>@Model.TenVaccine</td></tr>
+    <tr><th>Nhóm vaccine</th><td>@Model.NhomVaccine</td></tr>
+    <tr><th>Độ tuổi tối thiểu</th><td>@Model.DoTuoiToiThieu</td></tr>
+    <tr><th>Độ tuổi tối đa</th><td>@Model.DoTuoiToiDa</td></tr>
+    <tr><th>Đơn vị tuổi</th><td>@Model.DonViTuoi</td></tr>
+    <tr><th>Mô tả</th><td style="white-space: pre-wrap">@Model.MoTa</td></tr>
+    <tr><th>Lưu ý</th><td style="white-space: pre-wrap">@Model.LuuY</td></tr>
+    <tr><th>Trạng thái</th><td>@(Model.TrangThai ? "Đang dùng" : "Đã ẩn")</td></tr>
 </table>
 
-<a asp-action="Edit" asp-route-id="@Model.MaVaccine" class="btn btn-primary">Sá»­a</a>
-<a asp-action="Index" class="btn btn-link">Quay láº¡i</a>
+<a asp-action="Edit" asp-route-id="@Model.MaVaccine" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-link">Quay lại</a>

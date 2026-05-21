@@ -1,7 +1,7 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @{
-    ViewData["Title"] = "Trang quáº£n trá»‹";
+    ViewData["Title"] = "Trang quản trị";
     var hoTen = ViewBag.HoTen as string ?? "Admin";
 }
 
@@ -25,52 +25,52 @@
     <div class="admin-wrap">
         <header class="admin-top">
             <div>
-                <h1>Trang quáº£n trá»‹ há»‡ thá»‘ng</h1>
-                <span>Xin chÃ o Admin @hoTen</span>
+                <h1>Trang quản trị hệ thống</h1>
+                <span>Xin chào Admin @hoTen</span>
             </div>
-            <a class="admin-logout" href="/TaiKhoan/DangXuat">ÄÄƒng xuáº¥t</a>
+            <a class="admin-logout" href="/TaiKhoan/DangXuat">Đăng xuất</a>
         </header>
 
-        <h2 class="admin-section-title">Thá»‘ng kÃª nhanh</h2>
+        <h2 class="admin-section-title">Thống kê nhanh</h2>
         <section class="stats-grid">
-            <div class="stat-card"><strong>@(ViewBag.SoTaiKhoan ?? 0)</strong><span>TÃ i khoáº£n</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoHoSoSucKhoe ?? 0)</strong><span>Há»“ sÆ¡ sá»©c khá»e</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoTaiKhoan ?? 0)</strong><span>Tài khoản</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoHoSoSucKhoe ?? 0)</strong><span>Hồ sơ sức khỏe</span></div>
             <div class="stat-card"><strong>@(ViewBag.SoVaccine ?? 0)</strong><span>Vaccine</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoLichTiem ?? 0)</strong><span>Lá»‹ch tiÃªm</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoCauHoiChoTraLoi ?? 0)</strong><span>CÃ¢u há»i chá» tráº£ lá»i</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoLichTiem ?? 0)</strong><span>Lịch tiêm</span></div>
+            <div class="stat-card"><strong>@(ViewBag.SoCauHoiChoTraLoi ?? 0)</strong><span>Câu hỏi chờ trả lời</span></div>
         </section>
 
-        <h2 class="admin-section-title">Chá»©c nÄƒng quáº£n trá»‹</h2>
+        <h2 class="admin-section-title">Chức năng quản trị</h2>
         <section class="admin-grid">
             <article class="admin-card">
-                <h3>Quáº£n lÃ½ tÃ i khoáº£n</h3>
-                <p>Xem, khÃ³a hoáº·c má»Ÿ khÃ³a tÃ i khoáº£n ngÆ°á»i dÃ¹ng.</p>
-                <a href="/Admin/taiKhoan">Má»Ÿ quáº£n lÃ½</a>
+                <h3>Quản lý tài khoản</h3>
+                <p>Xem, khóa hoặc mở khóa tài khoản người dùng.</p>
+                <a href="/Admin/taiKhoan">Mở quản lý</a>
             </article>
             <article class="admin-card">
-                <h3>Quáº£n lÃ½ vaccine</h3>
-                <p>ThÃªm, sá»­a, áº©n hoáº·c xem danh má»¥c vaccine.</p>
-                <a href="/Vaccine/Index">Má»Ÿ quáº£n lÃ½</a>
+                <h3>Quản lý vaccine</h3>
+                <p>Thêm, sửa, ẩn hoặc xem danh mục vaccine.</p>
+                <a href="/Vaccine/Index">Mở quản lý</a>
             </article>
             <article class="admin-card">
-                <h3>Quáº£n lÃ½ mÅ©i tiÃªm vaccine</h3>
-                <p>Cáº¥u hÃ¬nh sá»‘ mÅ©i, Ä‘á»™ tuá»•i vÃ  khoáº£ng cÃ¡ch tiÃªm.</p>
-                <a href="/MuiTiemVaccine/Index">Má»Ÿ quáº£n lÃ½</a>
+                <h3>Quản lý mũi tiêm vaccine</h3>
+                <p>Cấu hình số mũi, độ tuổi và khoảng cách tiêm.</p>
+                <a href="/MuiTiemVaccine/Index">Mở quản lý</a>
             </article>
             <article class="admin-card">
-                <h3>Quáº£n lÃ½ bÃ i viáº¿t cáº©m nang</h3>
-                <p>ThÃªm, sá»­a vÃ  áº©n hiá»‡n bÃ i viáº¿t sá»©c khá»e.</p>
-                <a href="/BaiViet/Index">Má»Ÿ quáº£n lÃ½</a>
+                <h3>Quản lý bài viết cẩm nang</h3>
+                <p>Thêm, sửa và ẩn hiện bài viết sức khỏe.</p>
+                <a href="/BaiViet/Index">Mở quản lý</a>
             </article>
             <article class="admin-card">
-                <h3>Quáº£n lÃ½ cÃ¢u há»i tÆ° váº¥n</h3>
-                <p>Xem vÃ  pháº£n há»“i cÃ¢u há»i cá»§a ngÆ°á»i dÃ¹ng.</p>
-                <a href="/CauHoiTuVan/Index">Má»Ÿ quáº£n lÃ½</a>
+                <h3>Quản lý câu hỏi tư vấn</h3>
+                <p>Xem và phản hồi câu hỏi của người dùng.</p>
+                <a href="/CauHoiTuVan/Index">Mở quản lý</a>
             </article>
             <article class="admin-card">
-                <h3>Thá»‘ng kÃª</h3>
-                <p>Xem tá»•ng quan dá»¯ liá»‡u há»‡ thá»‘ng.</p>
-                <a href="/Admin/Index">Xem thá»‘ng kÃª</a>
+                <h3>Thống kê</h3>
+                <p>Xem tổng quan dữ liệu hệ thống.</p>
+                <a href="/Admin/Index">Xem thống kê</a>
             </article>
         </section>
     </div>

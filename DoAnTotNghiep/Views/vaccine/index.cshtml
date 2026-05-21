@@ -1,8 +1,8 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<Vaccine>
 @{
-    ViewData["Title"] = ViewBag.LaTraCuu == true ? "Tra cá»©u vaccine" : "Quáº£n lÃ½ vaccine";
+    ViewData["Title"] = ViewBag.LaTraCuu == true ? "Tra cứu vaccine" : "Quản lý vaccine";
     var laTraCuu = ViewBag.LaTraCuu == true;
 }
 
@@ -11,7 +11,7 @@
     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
     @if (!laTraCuu)
     {
-        <a asp-action="Create" class="btn btn-primary">ThÃªm vaccine</a>
+        <a asp-action="Create" class="btn btn-primary">Thêm vaccine</a>
     }
 </div>
 
@@ -19,13 +19,13 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>MÃ£</th>
-            <th>TÃªn vaccine</th>
-            <th>NhÃ³m</th>
-            <th>Äá»™ tuá»•i</th>
-            <th>ÄÆ¡n vá»‹ tuá»•i</th>
-            <th>Tráº¡ng thÃ¡i</th>
-            <th>Thao tÃ¡c</th>
+            <th>Mã</th>
+            <th>Tên vaccine</th>
+            <th>Nhóm</th>
+            <th>Độ tuổi</th>
+            <th>Đơn vị tuổi</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
         </tr>
     </thead>
     <tbody>
@@ -38,18 +38,18 @@
             <td>@item.NhomVaccine</td>
             <td>@item.DoTuoiToiThieu - @item.DoTuoiToiDa</td>
             <td>@item.DonViTuoi</td>
-            <td>@(item.TrangThai ? "Äang dÃ¹ng" : "ÄÃ£ áº©n")</td>
+            <td>@(item.TrangThai ? "Đang dùng" : "Đã ẩn")</td>
             <td>
                 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                 @if (!laTraCuu)
                 {
-                    <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiáº¿t</a>
-                    <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sá»­a</a>
-                    <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">áº¨n</a>
+                    <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                    <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Ẩn</a>
                 }
                 else
                 {
-                    <span class="text-muted">Äang hiá»ƒn thá»‹</span>
+                    <span class="text-muted">Đang hiển thị</span>
                 }
             </td>
         </tr>

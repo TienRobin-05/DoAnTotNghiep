@@ -1,34 +1,34 @@
-﻿@* Khu vực giao diện của view Details.
+@* Khu vực giao diện của view Details.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model CauHoiTuVan
 @{
-    ViewData["Title"] = "Chi tiáº¿t cÃ¢u há»i tÆ° váº¥n";
+    ViewData["Title"] = "Chi tiết câu hỏi tư vấn";
 }
 
-<h2>Chi tiáº¿t cÃ¢u há»i tÆ° váº¥n</h2>
+<h2>Chi tiết câu hỏi tư vấn</h2>
 
 <div class="card">
     <div class="card-body">
-        <p><strong>NgÆ°á»i gá»­i:</strong> @Model.TenNguoiGui</p>
-        <p><strong>NgÃ y gá»­i:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
-        <p><strong>Tráº¡ng thÃ¡i:</strong> @Model.TrangThai</p>
+        <p><strong>Người gửi:</strong> @Model.TenNguoiGui</p>
+        <p><strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
+        <p><strong>Trạng thái:</strong> @Model.TrangThai</p>
         <hr />
-        <p><strong>CÃ¢u há»i:</strong></p>
+        <p><strong>Câu hỏi:</strong></p>
         <p>@Model.CauHoi</p>
         <hr />
-        <p><strong>CÃ¢u tráº£ lá»i:</strong></p>
+        <p><strong>Câu trả lời:</strong></p>
         @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
         @if (string.IsNullOrWhiteSpace(Model.CauTraLoi))
         {
-            <p class="text-muted">ChÆ°a cÃ³ cÃ¢u tráº£ lá»i.</p>
+            <p class="text-muted">Chưa có câu trả lời.</p>
         }
         else
         {
             <p>@Model.CauTraLoi</p>
-            <p><strong>NgÆ°á»i tráº£ lá»i:</strong> @Model.TenNguoiTraLoi</p>
-            <p><strong>NgÃ y tráº£ lá»i:</strong> @Model.NgayTraLoi?.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><strong>Người trả lời:</strong> @Model.TenNguoiTraLoi</p>
+            <p><strong>Ngày trả lời:</strong> @Model.NgayTraLoi?.ToString("dd/MM/yyyy HH:mm")</p>
         }
     </div>
 </div>
 
-<a asp-action="Index" class="btn btn-secondary mt-3">Quay láº¡i</a>
+<a asp-action="Index" class="btn btn-secondary mt-3">Quay lại</a>

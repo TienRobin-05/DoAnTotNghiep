@@ -1,20 +1,20 @@
-﻿@* Khu vực giao diện của view index.
+@* Khu vực giao diện của view index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<CauHoiTuVan>
 @{
-    ViewData["Title"] = "CÃ¢u há»i tÆ° váº¥n";
+    ViewData["Title"] = "Câu hỏi tư vấn";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>CÃ¢u há»i tÆ° váº¥n cá»§a tÃ´i</h2>
-    <a asp-action="Create" class="btn btn-primary">Gá»­i cÃ¢u há»i má»›i</a>
+    <h2>Câu hỏi tư vấn của tôi</h2>
+    <a asp-action="Create" class="btn btn-primary">Gửi câu hỏi mới</a>
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Báº¡n chÆ°a gá»­i cÃ¢u há»i tÆ° váº¥n nÃ o.</div>
+    <div class="alert alert-info">Bạn chưa gửi câu hỏi tư vấn nào.</div>
 }
 else
 {
@@ -22,11 +22,11 @@ else
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>CÃ¢u há»i</th>
-                <th>NgÃ y gá»­i</th>
-                <th>Tráº¡ng thÃ¡i</th>
-                <th>NgÃ y tráº£ lá»i</th>
-                <th>Thao tÃ¡c</th>
+                <th>Câu hỏi</th>
+                <th>Ngày gửi</th>
+                <th>Trạng thái</th>
+                <th>Ngày trả lời</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@ else
                 <td>@item.TrangThai</td>
                 <td>@(item.NgayTraLoi.HasValue ? item.NgayTraLoi.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                 <td>
-                    <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="btn btn-sm btn-primary">Xem chi tiáº¿t</a>
+                    <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="btn btn-sm btn-primary">Xem chi tiết</a>
                 </td>
             </tr>
         }

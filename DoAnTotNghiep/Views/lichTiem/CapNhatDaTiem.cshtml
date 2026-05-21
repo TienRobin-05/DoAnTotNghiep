@@ -1,13 +1,13 @@
-﻿@* Khu vực giao diện của view CapNhatDaTiem.
+@* Khu vực giao diện của view CapNhatDaTiem.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model LichTiem
 @{
-    ViewData["Title"] = "Cáº­p nháº­t Ä‘Ã£ tiÃªm";
+    ViewData["Title"] = "Cập nhật đã tiêm";
     var ngayTiemThucTe = ViewBag.NgayTiemThucTe as string ?? DateTime.Today.ToString("yyyy-MM-dd");
     var ghiChu = ViewBag.GhiChu as string ?? string.Empty;
 }
 
-<h2>Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Ã£ tiÃªm</h2>
+<h2>Cập nhật trạng thái đã tiêm</h2>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
@@ -18,11 +18,11 @@
 
 <div class="card mb-3">
     <div class="card-body">
-        <p><strong>Há»“ sÆ¡:</strong> @Model.HoTenHoSo</p>
+        <p><strong>Hồ sơ:</strong> @Model.HoTenHoSo</p>
         <p><strong>Vaccine:</strong> @Model.TenVaccine</p>
-        <p><strong>MÅ©i tiÃªm:</strong> @Model.TenMui - MÅ©i @Model.SoMui</p>
-        <p><strong>NgÃ y tiÃªm dá»± kiáº¿n:</strong> @Model.NgayTiemDuKien.ToString("dd/MM/yyyy")</p>
-        <p><strong>Tráº¡ng thÃ¡i hiá»‡n táº¡i:</strong> @Model.TrangThai</p>
+        <p><strong>Mũi tiêm:</strong> @Model.TenMui - Mũi @Model.SoMui</p>
+        <p><strong>Ngày tiêm dự kiến:</strong> @Model.NgayTiemDuKien.ToString("dd/MM/yyyy")</p>
+        <p><strong>Trạng thái hiện tại:</strong> @Model.TrangThai</p>
     </div>
 </div>
 
@@ -32,15 +32,15 @@
     <input type="hidden" name="maLichTiem" value="@Model.MaLichTiem" />
 
     <div class="mb-3">
-        <label class="form-label">NgÃ y tiÃªm thá»±c táº¿</label>
+        <label class="form-label">Ngày tiêm thực tế</label>
         <input name="ngayTiemThucTe" type="date" class="form-control" value="@ngayTiemThucTe" required />
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Ghi chÃº</label>
+        <label class="form-label">Ghi chú</label>
         <textarea name="ghiChu" class="form-control" rows="4">@ghiChu</textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">LÆ°u cáº­p nháº­t</button>
-    <a asp-action="Index" asp-route-maHoSo="@Model.MaHoSo" class="btn btn-secondary">Quay láº¡i</a>
+    <button type="submit" class="btn btn-primary">Lưu cập nhật</button>
+    <a asp-action="Index" asp-route-maHoSo="@Model.MaHoSo" class="btn btn-secondary">Quay lại</a>
 </form>

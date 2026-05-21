@@ -1,20 +1,20 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<LichSuTiem>
 @{
-    ViewData["Title"] = "Lá»‹ch sá»­ tiÃªm";
+    ViewData["Title"] = "Lịch sử tiêm";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Lá»‹ch sá»­ tiÃªm cá»§a @ViewBag.HoTenHoSo</h2>
-    <a asp-action="ChonHoSo" class="btn btn-link">Chá»n há»“ sÆ¡ khÃ¡c</a>
+    <h2>Lịch sử tiêm của @ViewBag.HoTenHoSo</h2>
+    <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">ChÆ°a cÃ³ lá»‹ch sá»­ tiÃªm</div>
+    <div class="alert alert-info">Chưa có lịch sử tiêm</div>
 }
 else
 {
@@ -22,14 +22,14 @@ else
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>TÃªn há»“ sÆ¡</th>
-                <th>TÃªn vaccine</th>
-                <th>TÃªn mÅ©i</th>
-                <th>Sá»‘ mÅ©i</th>
-                <th>NgÃ y tiÃªm dá»± kiáº¿n</th>
-                <th>NgÃ y tiÃªm thá»±c táº¿</th>
-                <th>Ghi chÃº</th>
-                <th>NgÃ y cáº­p nháº­t</th>
+                <th>Tên hồ sơ</th>
+                <th>Tên vaccine</th>
+                <th>Tên mũi</th>
+                <th>Số mũi</th>
+                <th>Ngày tiêm dự kiến</th>
+                <th>Ngày tiêm thực tế</th>
+                <th>Ghi chú</th>
+                <th>Ngày cập nhật</th>
             </tr>
         </thead>
         <tbody>

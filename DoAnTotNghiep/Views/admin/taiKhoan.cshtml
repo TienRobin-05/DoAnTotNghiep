@@ -1,16 +1,16 @@
-﻿@* Khu vực giao diện của view taiKhoan.
+@* Khu vực giao diện của view taiKhoan.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<taiKhoanModels>
 @{
-    ViewData["Title"] = "Quáº£n lÃ½ tÃ i khoáº£n";
+    ViewData["Title"] = "Quản lý tài khoản";
 }
 
-<h2>Quáº£n lÃ½ tÃ i khoáº£n</h2>
+<h2>Quản lý tài khoản</h2>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <table class="table table-bordered table-striped">
     <thead>
-        <tr><th>MÃ£</th><th>Há» tÃªn</th><th>Email</th><th>Sá»‘ Ä‘iá»‡n thoáº¡i</th><th>Vai trÃ²</th><th>Tráº¡ng thÃ¡i</th><th></th></tr>
+        <tr><th>Mã</th><th>Họ tên</th><th>Email</th><th>Số điện thoại</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr>
     </thead>
     <tbody>
     @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
@@ -22,14 +22,14 @@
             <td>@item.email</td>
             <td>@item.soDienThoai</td>
             <td>@item.vaiTro</td>
-            <td>@(item.trangThai ? "Hoáº¡t Ä‘á»™ng" : "KhÃ³a")</td>
+            <td>@(item.trangThai ? "Hoạt động" : "Khóa")</td>
             <td>
                 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
                 <form asp-action="doiTrangThaiTaiKhoan" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="maTaiKhoan" value="@item.maTaiKhoan" />
                     <input type="hidden" name="trangThai" value="@(!item.trangThai)" />
-                    <button class="btn btn-sm btn-outline-secondary" type="submit">Äá»•i tráº¡ng thÃ¡i</button>
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">Đổi trạng thái</button>
                 </form>
             </td>
         </tr>

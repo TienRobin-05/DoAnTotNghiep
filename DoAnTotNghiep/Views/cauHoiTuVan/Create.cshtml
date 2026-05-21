@@ -1,11 +1,11 @@
-﻿@* Khu vực giao diện của view Create.
+@* Khu vực giao diện của view Create.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model CauHoiTuVan
 @{
-    ViewData["Title"] = "Gá»­i cÃ¢u há»i tÆ° váº¥n";
+    ViewData["Title"] = "Gửi câu hỏi tư vấn";
 }
 
-<h2>Gá»­i cÃ¢u há»i tÆ° váº¥n</h2>
+<h2>Gửi câu hỏi tư vấn</h2>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (ViewBag.ThongBao != null)
@@ -19,10 +19,10 @@
     @Html.AntiForgeryToken()
 
     <div class="mb-3">
-        <label class="form-label">Ná»™i dung cÃ¢u há»i</label>
+        <label class="form-label">Nội dung câu hỏi</label>
         <textarea name="CauHoi" rows="6" class="form-control">@Model.CauHoi</textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">Gá»­i cÃ¢u há»i</button>
-    <a asp-action="Index" class="btn btn-secondary">Quay láº¡i</a>
+    <button type="submit" class="btn btn-primary">Gửi câu hỏi</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
 </form>

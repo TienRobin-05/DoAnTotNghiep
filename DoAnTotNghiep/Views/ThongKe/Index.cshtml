@@ -1,11 +1,11 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model ThongKeViewModel
 @{
-    ViewData["Title"] = "Thá»‘ng kÃª";
+    ViewData["Title"] = "Thống kê";
 }
 
-<h2>Thá»‘ng kÃª tá»•ng quan</h2>
+<h2>Thống kê tổng quan</h2>
 
 <style>
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
@@ -15,16 +15,16 @@
 </style>
 
 <div class="stat-grid">
-    <div class="stat-box"><strong>@Model.TongSoTaiKhoan</strong><span>Tá»•ng sá»‘ tÃ i khoáº£n</span></div>
-    <div class="stat-box"><strong>@Model.TongSoNguoiDung</strong><span>Tá»•ng sá»‘ ngÆ°á»i dÃ¹ng</span></div>
-    <div class="stat-box"><strong>@Model.TongSoAdmin</strong><span>Tá»•ng sá»‘ admin</span></div>
-    <div class="stat-box"><strong>@Model.TongSoHoSoSucKhoe</strong><span>Tá»•ng sá»‘ há»“ sÆ¡ sá»©c khá»e</span></div>
-    <div class="stat-box"><strong>@Model.TongSoVaccineDangSuDung</strong><span>Vaccine Ä‘ang sá»­ dá»¥ng</span></div>
-    <div class="stat-box"><strong>@Model.TongSoLichTiem</strong><span>Tá»•ng sá»‘ lá»‹ch tiÃªm</span></div>
-    <div class="stat-box"><strong>@Model.TongSoLichTiemChuaTiem</strong><span>Lá»‹ch tiÃªm chÆ°a tiÃªm</span></div>
-    <div class="stat-box"><strong>@Model.TongSoLichTiemDaTiem</strong><span>Lá»‹ch tiÃªm Ä‘Ã£ tiÃªm</span></div>
-    <div class="stat-box"><strong>@Model.TongSoLichTiemQuaHan</strong><span>Lá»‹ch tiÃªm quÃ¡ háº¡n</span></div>
-    <div class="stat-box"><strong>@Model.TongSoCauHoiChuaTraLoi</strong><span>CÃ¢u há»i chÆ°a tráº£ lá»i</span></div>
-    <div class="stat-box"><strong>@Model.TongSoCauHoiDaTraLoi</strong><span>CÃ¢u há»i Ä‘Ã£ tráº£ lá»i</span></div>
-    <div class="stat-box"><strong>@Model.TongSoBaiVietDangHienThi</strong><span>BÃ i viáº¿t Ä‘ang hiá»ƒn thá»‹</span></div>
+    <div class="stat-box"><strong>@Model.TongSoTaiKhoan</strong><span>Tổng số tài khoản</span></div>
+    <div class="stat-box"><strong>@Model.TongSoNguoiDung</strong><span>Tổng số người dùng</span></div>
+    <div class="stat-box"><strong>@Model.TongSoAdmin</strong><span>Tổng số admin</span></div>
+    <div class="stat-box"><strong>@Model.TongSoHoSoSucKhoe</strong><span>Tổng số hồ sơ sức khỏe</span></div>
+    <div class="stat-box"><strong>@Model.TongSoVaccineDangSuDung</strong><span>Vaccine đang sử dụng</span></div>
+    <div class="stat-box"><strong>@Model.TongSoLichTiem</strong><span>Tổng số lịch tiêm</span></div>
+    <div class="stat-box"><strong>@Model.TongSoLichTiemChuaTiem</strong><span>Lịch tiêm chưa tiêm</span></div>
+    <div class="stat-box"><strong>@Model.TongSoLichTiemDaTiem</strong><span>Lịch tiêm đã tiêm</span></div>
+    <div class="stat-box"><strong>@Model.TongSoLichTiemQuaHan</strong><span>Lịch tiêm quá hạn</span></div>
+    <div class="stat-box"><strong>@Model.TongSoCauHoiChuaTraLoi</strong><span>Câu hỏi chưa trả lời</span></div>
+    <div class="stat-box"><strong>@Model.TongSoCauHoiDaTraLoi</strong><span>Câu hỏi đã trả lời</span></div>
+    <div class="stat-box"><strong>@Model.TongSoBaiVietDangHienThi</strong><span>Bài viết đang hiển thị</span></div>
 </div>

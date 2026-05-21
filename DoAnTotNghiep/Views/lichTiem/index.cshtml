@@ -1,13 +1,13 @@
-﻿@* Khu vực giao diện của view Index.
+@* Khu vực giao diện của view Index.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<LichTiem>
 @{
-    ViewData["Title"] = "Lá»‹ch tiÃªm";
+    ViewData["Title"] = "Lịch tiêm";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Lá»‹ch tiÃªm cá»§a @ViewBag.HoTenHoSo</h2>
-    <a asp-action="ChonHoSo" class="btn btn-link">Chá»n há»“ sÆ¡ khÃ¡c</a>
+    <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
+    <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
@@ -21,7 +21,7 @@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Há»“ sÆ¡ nÃ y chÆ°a cÃ³ lá»‹ch tiÃªm.</div>
+    <div class="alert alert-info">Hồ sơ này chưa có lịch tiêm.</div>
 }
 else
 {
@@ -29,13 +29,13 @@ else
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>TÃªn vaccine</th>
-                <th>TÃªn mÅ©i tiÃªm</th>
-                <th>Sá»‘ mÅ©i</th>
-                <th>NgÃ y tiÃªm dá»± kiáº¿n</th>
-                <th>Tráº¡ng thÃ¡i</th>
-                <th>Ghi chÃº</th>
-                <th>Thao tÃ¡c</th>
+                <th>Tên vaccine</th>
+                <th>Tên mũi tiêm</th>
+                <th>Số mũi</th>
+                <th>Ngày tiêm dự kiến</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -51,9 +51,9 @@ else
                 <td>@item.GhiChu</td>
                 <td>
                     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-                    @if (item.TrangThai != "ÄÃ£ tiÃªm")
+                    @if (item.TrangThai != "Đã tiêm")
                     {
-                        <a asp-action="CapNhatDaTiem" asp-route-maLichTiem="@item.MaLichTiem" class="btn btn-sm btn-primary">Cáº­p nháº­t Ä‘Ã£ tiÃªm</a>
+                        <a asp-action="CapNhatDaTiem" asp-route-maLichTiem="@item.MaLichTiem" class="btn btn-sm btn-primary">Cập nhật đã tiêm</a>
                     }
                 </td>
             </tr>

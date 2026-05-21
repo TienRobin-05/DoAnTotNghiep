@@ -1,4 +1,4 @@
-﻿@* Khu vực giao diện của view Details.
+@* Khu vực giao diện của view Details.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model BaiVietCamNang
 @{
@@ -6,6 +6,6 @@
 }
 
 <h2>@Model.TieuDe</h2>
-<p class="text-muted">TÃ¡c giáº£: @Model.TenTacGia - @Model.NgayTao.ToString("dd/MM/yyyy")</p>
+<p class="text-muted">Tác giả: @Model.TenTacGia - @Model.NgayTao.ToString("dd/MM/yyyy")</p>
 <div class="border p-3 mb-3" style="white-space: pre-wrap">@Model.NoiDung</div>
-<a asp-action="Index" class="btn btn-secondary">Quay láº¡i</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại</a>
