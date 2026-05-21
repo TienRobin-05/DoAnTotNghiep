@@ -74,7 +74,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!vaccineDAL.Them(vaccine))
             {
-                ViewBag.ThongBao = "ThÃªm vaccine tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+                ViewBag.ThongBao = "Thêm vaccine thất bại, vui lòng thử lại";
                 return View(vaccine);
             }
 
@@ -109,7 +109,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!vaccineDAL.CapNhat(vaccine))
             {
-                ViewBag.ThongBao = "Cáº­p nháº­t vaccine tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+                ViewBag.ThongBao = "Cập nhật vaccine thất bại, vui lòng thử lại";
                 return View(vaccine);
             }
 
@@ -152,13 +152,13 @@ namespace DoAnTotNghiep.Controllers
         {
             if (string.IsNullOrWhiteSpace(vaccine.TenVaccine))
             {
-                ViewBag.ThongBao = "TÃªn vaccine khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Tên vaccine không được bỏ trống";
                 return false;
             }
 
             if (vaccine.DoTuoiToiThieu.HasValue && vaccine.DoTuoiToiThieu.Value < 0)
             {
-                ViewBag.ThongBao = "Äá»™ tuá»•i tá»‘i thiá»ƒu khÃ´ng Ä‘Æ°á»£c Ã¢m";
+                ViewBag.ThongBao = "Độ tuổi tối thiểu không được âm";
                 return false;
             }
 
@@ -166,16 +166,16 @@ namespace DoAnTotNghiep.Controllers
                 && vaccine.DoTuoiToiThieu.HasValue
                 && vaccine.DoTuoiToiDa.Value < vaccine.DoTuoiToiThieu.Value)
             {
-                ViewBag.ThongBao = "Äá»™ tuá»•i tá»‘i Ä‘a pháº£i lá»›n hÆ¡n hoáº·c báº±ng Ä‘á»™ tuá»•i tá»‘i thiá»ƒu";
+                ViewBag.ThongBao = "Độ tuổi tối đa phải lớn hơn hoặc bằng độ tuổi tối thiểu";
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(vaccine.DonViTuoi))
             {
-                var donViHopLe = new[] { "ngÃ y", "thÃ¡ng", "nÄƒm" };
+                var donViHopLe = new[] { "ngày", "tháng", "năm" };
                 if (!donViHopLe.Contains(vaccine.DonViTuoi.Trim(), StringComparer.OrdinalIgnoreCase))
                 {
-                    ViewBag.ThongBao = "ÄÆ¡n vá»‹ tuá»•i chá»‰ gá»“m: ngÃ y, thÃ¡ng, nÄƒm";
+                    ViewBag.ThongBao = "Đơn vị tuổi chỉ gồm: ngày, tháng, năm";
                     return false;
                 }
             }

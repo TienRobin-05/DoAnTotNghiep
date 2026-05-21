@@ -39,7 +39,7 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
-            // Kiá»ƒm tra há»“ sÆ¡ thuá»™c Ä‘Ãºng tÃ i khoáº£n Ä‘ang Ä‘Äƒng nháº­p trÆ°á»›c khi xem lá»‹ch sá»­ tiÃªm.
+            // Kiểm tra hồ sơ thuộc đúng tài khoản đang đăng nhập trước khi xem lịch sử tiêm.
             var hoSo = hoSoSucKhoeDAL.LayTheoId(maHoSo, maTaiKhoan.Value);
             if (hoSo == null) return NotFound();
 

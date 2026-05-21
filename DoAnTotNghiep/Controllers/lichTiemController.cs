@@ -49,11 +49,11 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
-            // Chá»‰ cho user xem lá»‹ch tiÃªm cá»§a há»“ sÆ¡ thuá»™c tÃ i khoáº£n Ä‘ang Ä‘Äƒng nháº­p.
+            // Chỉ cho user xem lịch tiêm của hồ sơ thuộc tài khoản đang đăng nhập.
             var hoSo = hoSoSucKhoeDAL.LayTheoId(maHoSo, maTaiKhoan.Value);
             if (hoSo == null) return NotFound();
 
-            // Náº¿u há»“ sÆ¡ chÆ°a cÃ³ lá»‹ch, há»‡ thá»‘ng tá»± táº¡o lá»‹ch dá»± kiáº¿n tá»« phÃ¡c Ä‘á»“ mÅ©i tiÃªm vaccine.
+            // Nếu hồ sơ chưa có lịch, hệ thống tự tạo lịch dự kiến từ phác đồ mũi tiêm vaccine.
             if (!lichTiemDAL.KiemTraHoSoCoLichTiem(maHoSo))
             {
                 taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
@@ -78,7 +78,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
             {
-                TempData["ThongBao"] = "Lá»‹ch tiÃªm nÃ y Ä‘Ã£ Ä‘Æ°á»£c cáº­p nháº­t lá»‹ch sá»­ tiÃªm.";
+                TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
                 return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
             }
 
@@ -100,10 +100,10 @@ namespace DoAnTotNghiep.Controllers
             var lichTiem = lichTiemDAL.LayChiTietCoKiemTraChuSoHuu(maLichTiem, maTaiKhoan.Value);
             if (lichTiem == null) return NotFound();
 
-            // NgÃ y tiÃªm thá»±c táº¿ pháº£i náº±m trong khoáº£ng tá»« ngÃ y sinh Ä‘áº¿n ngÃ y hiá»‡n táº¡i.
+            // Ngày tiêm thực tế phải nằm trong khoảng từ ngày sinh đến ngày hiện tại.
             if (ngayTiemThucTe.Date < lichTiem.NgaySinhHoSo.Date)
             {
-                ViewBag.ThongBao = "NgÃ y tiÃªm thá»±c táº¿ khÃ´ng Ä‘Æ°á»£c nhá» hÆ¡n ngÃ y sinh cá»§a há»“ sÆ¡.";
+                ViewBag.ThongBao = "Ngày tiêm thực tế không được nhỏ hơn ngày sinh của hồ sơ.";
                 ViewBag.NgayTiemThucTe = ngayTiemThucTe.ToString("yyyy-MM-dd");
                 ViewBag.GhiChu = ghiChu;
                 return View(lichTiem);
@@ -111,16 +111,16 @@ namespace DoAnTotNghiep.Controllers
 
             if (ngayTiemThucTe.Date > DateTime.Today)
             {
-                ViewBag.ThongBao = "NgÃ y tiÃªm thá»±c táº¿ khÃ´ng Ä‘Æ°á»£c lá»›n hÆ¡n ngÃ y hiá»‡n táº¡i.";
+                ViewBag.ThongBao = "Ngày tiêm thực tế không được lớn hơn ngày hiện tại.";
                 ViewBag.NgayTiemThucTe = ngayTiemThucTe.ToString("yyyy-MM-dd");
                 ViewBag.GhiChu = ghiChu;
                 return View(lichTiem);
             }
 
-            // KhÃ´ng táº¡o láº¡i lá»‹ch sá»­ náº¿u lá»‹ch tiÃªm nÃ y Ä‘Ã£ Ä‘Æ°á»£c ghi nháº­n trÆ°á»›c Ä‘Ã³.
+            // Không tạo lại lịch sử nếu lịch tiêm này đã được ghi nhận trước đó.
             if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
             {
-                TempData["ThongBao"] = "Lá»‹ch tiÃªm nÃ y Ä‘Ã£ Ä‘Æ°á»£c cáº­p nháº­t lá»‹ch sá»­ tiÃªm.";
+                TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
                 return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
             }
 
@@ -133,7 +133,7 @@ namespace DoAnTotNghiep.Controllers
                 NgayCapNhat = DateTime.Now
             });
 
-            TempData["ThongBao"] = "Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Ã£ tiÃªm thÃ nh cÃ´ng.";
+            TempData["ThongBao"] = "Cập nhật trạng thái đã tiêm thành công.";
             return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
         }
 

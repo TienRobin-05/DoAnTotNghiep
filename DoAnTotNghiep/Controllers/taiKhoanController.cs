@@ -38,42 +38,42 @@ namespace DoAnTotNghiep.Controllers
         {
             if (string.IsNullOrWhiteSpace(hoTen))
             {
-                ViewBag.ThongBao = "Há» tÃªn khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Họ tên không được bỏ trống";
                 return View();
             }
             if (string.IsNullOrWhiteSpace(email))
             {
-                ViewBag.ThongBao = "Email khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Email không được bỏ trống";
                 return View();
             }
             if (string.IsNullOrWhiteSpace(soDienThoai))
             {
-                ViewBag.ThongBao = "Sá»‘ Ä‘iá»‡n thoáº¡i khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
                 return View();
             }
             if (string.IsNullOrWhiteSpace(matKhau))
             {
-                ViewBag.ThongBao = "Máº­t kháº©u khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Mật khẩu không được bỏ trống";
                 return View();
             }
             if (string.IsNullOrWhiteSpace(nhapLaiMatKhau))
             {
-                ViewBag.ThongBao = "Nháº­p láº¡i máº­t kháº©u khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Nhập lại mật khẩu không được bỏ trống";
                 return View();
             }
             if (matKhau != nhapLaiMatKhau)
             {
-                ViewBag.ThongBao = "Nháº­p láº¡i máº­t kháº©u khÃ´ng trÃ¹ng khá»›p";
+                ViewBag.ThongBao = "Nhập lại mật khẩu không trùng khớp";
                 return View();
             }
             if (taiKhoanDAL.KiemTraSoDienThoaiTonTai(soDienThoai))
             {
-                ViewBag.ThongBao = "Sá»‘ Ä‘iá»‡n thoáº¡i Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng";
+                ViewBag.ThongBao = "Số điện thoại đã được sử dụng";
                 return View();
             }
             if (taiKhoanDAL.KiemTraEmailTonTai(email))
             {
-                ViewBag.ThongBao = "Email Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng";
+                ViewBag.ThongBao = "Email đã được sử dụng";
                 return View();
             }
 
@@ -90,11 +90,11 @@ namespace DoAnTotNghiep.Controllers
 
             if (taiKhoanDAL.DangKy(taiKhoan))
             {
-                TempData["ThongBao"] = "ÄÄƒng kÃ½ thÃ nh cÃ´ng. Vui lÃ²ng Ä‘Äƒng nháº­p.";
+                TempData["ThongBao"] = "Đăng ký thành công. Vui lòng đăng nhập.";
                 return RedirectToAction(nameof(DangNhap));
             }
 
-            ViewBag.ThongBao = "ÄÄƒng kÃ½ tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+            ViewBag.ThongBao = "Đăng ký thất bại, vui lòng thử lại";
             return View();
         }
 
@@ -116,23 +116,23 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DangNhap(string soDienThoai, string matKhau)
         {
-            // ÄÄƒng nháº­p chá»‰ dÃ¹ng sá»‘ Ä‘iá»‡n thoáº¡i vÃ  máº­t kháº©u, khÃ´ng dÃ¹ng email.
+            // Đăng nhập chỉ dùng số điện thoại và mật khẩu, không dùng email.
             if (string.IsNullOrWhiteSpace(soDienThoai) || string.IsNullOrWhiteSpace(matKhau))
             {
-                ViewBag.ThongBao = "Sá»‘ Ä‘iá»‡n thoáº¡i hoáº·c máº­t kháº©u khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Số điện thoại hoặc mật khẩu không được bỏ trống";
                 return View();
             }
 
             var taiKhoan = taiKhoanDAL.DangNhap(soDienThoai, matKhau);
             if (taiKhoan == null)
             {
-                ViewBag.ThongBao = "Sá»‘ Ä‘iá»‡n thoáº¡i hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng";
+                ViewBag.ThongBao = "Số điện thoại hoặc mật khẩu không đúng";
                 return View();
             }
 
             if (!taiKhoan.TrangThai)
             {
-                ViewBag.ThongBao = "TÃ i khoáº£n Ä‘Ã£ bá»‹ khÃ³a";
+                ViewBag.ThongBao = "Tài khoản đã bị khóa";
                 return View();
             }
 
@@ -142,7 +142,7 @@ namespace DoAnTotNghiep.Controllers
             HttpContext.Session.SetString("SoDienThoai", taiKhoan.SoDienThoai ?? "");
             HttpContext.Session.SetString("Email", taiKhoan.Email ?? "");
 
-            // Chá»‰ cháº¥p nháº­n Ä‘Ãºng hai vai trÃ² trong database: Admin vÃ  User.
+            // Chỉ chấp nhận đúng hai vai trò trong database: Admin và User.
             if (taiKhoan.VaiTro == "Admin")
             {
                 return RedirectToAction("Index", "Admin");
@@ -158,7 +158,7 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction("Index", "NguoiDung");
             }
 
-            ViewBag.ThongBao = "Vai trÃ² tÃ i khoáº£n khÃ´ng há»£p lá»‡";
+            ViewBag.ThongBao = "Vai trò tài khoản không hợp lệ";
             HttpContext.Session.Clear();
             return View();
         }

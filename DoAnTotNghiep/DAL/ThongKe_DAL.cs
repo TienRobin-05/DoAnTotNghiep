@@ -29,11 +29,11 @@ namespace DoAnTotNghiep.DAL
                 TongSoHoSoSucKhoe = Dem("SELECT COUNT(*) FROM HoSoSucKhoe"),
                 TongSoVaccineDangSuDung = Dem("SELECT COUNT(*) FROM Vaccine WHERE trangThai = 1"),
                 TongSoLichTiem = Dem("SELECT COUNT(*) FROM LichTiem"),
-                TongSoLichTiemChuaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'ChÆ°a tiÃªm'"),
-                TongSoLichTiemDaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'ÄÃ£ tiÃªm'"),
-                TongSoLichTiemQuaHan = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'QuÃ¡ háº¡n'"),
-                TongSoCauHoiChuaTraLoi = Dem("SELECT COUNT(*) FROM CauHoiTuVan WHERE trangThai = N'ChÆ°a tráº£ lá»i'"),
-                TongSoCauHoiDaTraLoi = Dem("SELECT COUNT(*) FROM CauHoiTuVan WHERE trangThai = N'ÄÃ£ tráº£ lá»i'"),
+                TongSoLichTiemChuaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Chưa tiêm'"),
+                TongSoLichTiemDaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Đã tiêm'"),
+                TongSoLichTiemQuaHan = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Quá hạn'"),
+                TongSoCauHoiChuaTraLoi = Dem("SELECT COUNT(*) FROM CauHoiTuVan WHERE trangThai = N'Chưa trả lời'"),
+                TongSoCauHoiDaTraLoi = Dem("SELECT COUNT(*) FROM CauHoiTuVan WHERE trangThai = N'Đã trả lời'"),
                 TongSoBaiVietDangHienThi = Dem("SELECT COUNT(*) FROM BaiVietCamNang WHERE trangThai = 1")
             };
         }

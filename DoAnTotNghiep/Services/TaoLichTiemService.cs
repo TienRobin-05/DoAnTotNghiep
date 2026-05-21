@@ -31,13 +31,13 @@ namespace DoAnTotNghiep.Services
 
             foreach (var muiTiem in danhSachMuiTiem)
             {
-                // KhÃ´ng táº¡o trÃ¹ng lá»‹ch tiÃªm cho cÃ¹ng má»™t há»“ sÆ¡ vÃ  cÃ¹ng má»™t mÅ©i tiÃªm.
+                // Không tạo trùng lịch tiêm cho cùng một hồ sơ và cùng một mũi tiêm.
                 if (KiemTraLichTiemDaTonTai(maHoSo, muiTiem.MaMuiTiem))
                 {
                     continue;
                 }
 
-                // Æ¯u tiÃªn Ä‘á»™ tuá»•i khuyáº¿n nghá»‹, náº¿u chÆ°a cÃ³ thÃ¬ dÃ¹ng Ä‘á»™ tuá»•i tá»‘i thiá»ƒu.
+                // Ưu tiên độ tuổi khuyến nghị, nếu chưa có thì dùng độ tuổi tối thiểu.
                 var doTuoiTinhLich = muiTiem.DoTuoiKhuyenNghi ?? muiTiem.DoTuoiToiThieu ?? 0;
                 var ngayTiemDuKien = TinhNgayTiemDuKien(hoSo.NgaySinh, doTuoiTinhLich, muiTiem.DonViTuoi);
 
@@ -145,7 +145,7 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
             lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
             lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
-            lenh.Parameters.AddWithValue("@TrangThai", "ChÆ°a tiÃªm");
+            lenh.Parameters.AddWithValue("@TrangThai", "Chưa tiêm");
             lenh.Parameters.AddWithValue("@GhiChu", string.Empty);
 
             ketNoi.Open();
@@ -162,8 +162,8 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
 
             return donVi switch
             {
-                "nÄƒm" => ngaySinh.AddYears(doTuoi),
-                "thÃ¡ng" => ngaySinh.AddMonths(doTuoi),
+                "năm" => ngaySinh.AddYears(doTuoi),
+                "tháng" => ngaySinh.AddMonths(doTuoi),
                 _ => ngaySinh.AddDays(doTuoi)
             };
         }
@@ -178,15 +178,15 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
 
             if (donVi == "nam")
             {
-                return "nÄƒm";
+                return "năm";
             }
 
             if (donVi == "thang")
             {
-                return "thÃ¡ng";
+                return "tháng";
             }
 
-            return string.IsNullOrWhiteSpace(donVi) ? "ngÃ y" : donVi;
+            return string.IsNullOrWhiteSpace(donVi) ? "ngày" : donVi;
         }
 
         /// <summary>

@@ -57,7 +57,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!baiVietDAL.Them(model))
             {
-                ViewBag.ThongBao = "ThÃªm bÃ i viáº¿t tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i.";
+                ViewBag.ThongBao = "Thêm bài viết thất bại, vui lòng thử lại.";
                 return View(model);
             }
 
@@ -94,7 +94,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!baiVietDAL.CapNhat(model))
             {
-                ViewBag.ThongBao = "Cáº­p nháº­t bÃ i viáº¿t tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i.";
+                ViewBag.ThongBao = "Cập nhật bài viết thất bại, vui lòng thử lại.";
                 return View(model);
             }
 
@@ -162,13 +162,13 @@ namespace DoAnTotNghiep.Controllers
         {
             if (string.IsNullOrWhiteSpace(model.TieuDe))
             {
-                ViewBag.ThongBao = "TiÃªu Ä‘á» khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng.";
+                ViewBag.ThongBao = "Tiêu đề không được bỏ trống.";
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(model.NoiDung))
             {
-                ViewBag.ThongBao = "Ná»™i dung khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng.";
+                ViewBag.ThongBao = "Nội dung không được bỏ trống.";
                 return false;
             }
 

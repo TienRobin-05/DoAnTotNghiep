@@ -43,7 +43,7 @@ namespace DoAnTotNghiep.Controllers
             ViewBag.SoTaiKhoan = taiKhoanDAL.layTatCa().Count;
             ViewBag.SoVaccine = vaccineDAL.layTatCa().Count;
             ViewBag.SoLichTiem = lichTiemDAL.layTatCa().Count;
-            ViewBag.SoCauHoiChoTraLoi = cauHoiTuVanDAL.layTatCa().Count(x => x.trangThai != "ÄÃ£ tráº£ lá»i");
+            ViewBag.SoCauHoiChoTraLoi = cauHoiTuVanDAL.layTatCa().Count(x => x.trangThai != "Đã trả lời");
             return View();
         }
 

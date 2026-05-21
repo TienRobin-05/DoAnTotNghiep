@@ -14,13 +14,13 @@ namespace DoAnTotNghiep.Models
         // Thuộc tính maMuiTiem lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public int maMuiTiem { get; set; }
 
-        [Required(ErrorMessage = "Vui lÃ²ng chá»n ngÃ y tiÃªm dá»± kiáº¿n")]
+        [Required(ErrorMessage = "Vui lòng chọn ngày tiêm dự kiến")]
         [DataType(DataType.Date)]
         // Thuộc tính ngayTiemDuKien lưu một phần thông tin của đối tượng model. Dữ liệu này được dùng khi đọc/ghi database, truyền sang Controller hoặc hiển thị ra View.
         public DateTime ngayTiemDuKien { get; set; }
 
         // Thuộc tính trangThai lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
-        public string trangThai { get; set; } = "ChÆ°a tiÃªm";
+        public string trangThai { get; set; } = "Chưa tiêm";
         // Thuộc tính ghiChu lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string? ghiChu { get; set; }
         // Thuộc tính tenHoSo lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.

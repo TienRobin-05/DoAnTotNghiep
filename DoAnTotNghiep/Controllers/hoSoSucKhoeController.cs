@@ -75,7 +75,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!hoSoSucKhoeDAL.Them(hoSo))
             {
-                ViewBag.ThongBao = "ThÃªm há»“ sÆ¡ tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+                ViewBag.ThongBao = "Thêm hồ sơ thất bại, vui lòng thử lại";
                 return View(hoSo);
             }
 
@@ -114,7 +114,7 @@ namespace DoAnTotNghiep.Controllers
             hoSo.MaTaiKhoan = maTaiKhoan.Value;
             if (!hoSoSucKhoeDAL.CapNhat(hoSo))
             {
-                ViewBag.ThongBao = "Cáº­p nháº­t há»“ sÆ¡ tháº¥t báº¡i hoáº·c há»“ sÆ¡ khÃ´ng thuá»™c tÃ i khoáº£n cá»§a báº¡n";
+                ViewBag.ThongBao = "Cập nhật hồ sơ thất bại hoặc hồ sơ không thuộc tài khoản của bạn";
                 return View(hoSo);
             }
 
@@ -221,7 +221,7 @@ namespace DoAnTotNghiep.Controllers
             }
 
             GanThongTinTaiKhoanLenView(maTaiKhoan.Value);
-            ViewBag.ThongBao = "LÆ°u thÃ´ng tin cÃ¡ nhÃ¢n tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+            ViewBag.ThongBao = "Lưu thông tin cá nhân thất bại, vui lòng thử lại";
             return View();
         }
 
@@ -248,32 +248,32 @@ namespace DoAnTotNghiep.Controllers
         {
             if (string.IsNullOrWhiteSpace(hoSo.HoTen))
             {
-                ViewBag.ThongBao = "Há» tÃªn khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Họ tên không được bỏ trống";
                 return false;
             }
 
             var ngaySinh = ngaySinhNhap ?? hoSo.NgaySinh;
             if (ngaySinh == default)
             {
-                ViewBag.ThongBao = "NgÃ y sinh khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng";
+                ViewBag.ThongBao = "Ngày sinh không được bỏ trống";
                 return false;
             }
 
             if (ngaySinh.Date > DateTime.Today)
             {
-                ViewBag.ThongBao = "NgÃ y sinh khÃ´ng Ä‘Æ°á»£c lá»›n hÆ¡n ngÃ y hiá»‡n táº¡i";
+                ViewBag.ThongBao = "Ngày sinh không được lớn hơn ngày hiện tại";
                 return false;
             }
 
             if (hoSo.ChieuCao.HasValue && hoSo.ChieuCao.Value <= 0)
             {
-                ViewBag.ThongBao = "Chiá»u cao pháº£i lá»›n hÆ¡n 0";
+                ViewBag.ThongBao = "Chiều cao phải lớn hơn 0";
                 return false;
             }
 
             if (hoSo.CanNang.HasValue && hoSo.CanNang.Value <= 0)
             {
-                ViewBag.ThongBao = "CÃ¢n náº·ng pháº£i lá»›n hÆ¡n 0";
+                ViewBag.ThongBao = "Cân nặng phải lớn hơn 0";
                 return false;
             }
 

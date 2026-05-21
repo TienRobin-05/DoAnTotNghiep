@@ -167,7 +167,7 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
             // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
-            lenh.Parameters.AddWithValue("@TrangThai", "ÄÃ£ tiÃªm");
+            lenh.Parameters.AddWithValue("@TrangThai", "Đã tiêm");
 
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();

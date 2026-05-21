@@ -11,7 +11,7 @@
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
         public void KiemTraVaTaoThongBaoNhacLich(int maTaiKhoan)
         {
-            // Báº£ng ThongBao hiá»‡n táº¡i khÃ´ng cÃ³ maLichTiem, nÃªn chá»©c nÄƒng thÃ´ng bÃ¡o chá»‰ Ä‘á»c dá»¯ liá»‡u cÃ³ sáºµn theo maTaiKhoan.
+            // Bảng ThongBao hiện tại không có maLichTiem, nên chức năng thông báo chỉ đọc dữ liệu có sẵn theo maTaiKhoan.
         }
     }
 }

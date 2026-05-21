@@ -87,7 +87,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!muiTiemVaccineDAL.Them(mt))
             {
-                ViewBag.ThongBao = "ThÃªm mÅ©i tiÃªm tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+                ViewBag.ThongBao = "Thêm mũi tiêm thất bại, vui lòng thử lại";
                 NapDanhSachVaccine(mt.MaVaccine);
                 return View(mt);
             }
@@ -129,7 +129,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!muiTiemVaccineDAL.CapNhat(mt))
             {
-                ViewBag.ThongBao = "Cáº­p nháº­t mÅ©i tiÃªm tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i";
+                ViewBag.ThongBao = "Cập nhật mũi tiêm thất bại, vui lòng thử lại";
                 NapDanhSachVaccine(mt.MaVaccine);
                 return View(mt);
             }
@@ -186,35 +186,35 @@ namespace DoAnTotNghiep.Controllers
         {
             if (mt.MaVaccine <= 0)
             {
-                ViewBag.ThongBao = "Vui lÃ²ng chá»n vaccine";
+                ViewBag.ThongBao = "Vui lòng chọn vaccine";
                 return false;
             }
 
             if (mt.SoMui <= 0)
             {
-                ViewBag.ThongBao = "Sá»‘ mÅ©i khÃ´ng Ä‘Æ°á»£c bá» trá»‘ng vÃ  pháº£i lá»›n hÆ¡n 0";
+                ViewBag.ThongBao = "Số mũi không được bỏ trống và phải lớn hơn 0";
                 return false;
             }
 
             if (muiTiemVaccineDAL.KiemTraTrungSoMui(mt.MaVaccine, mt.SoMui, maMuiTiemBoQua))
             {
-                ViewBag.ThongBao = "Sá»‘ mÅ©i Ä‘Ã£ tá»“n táº¡i trong vaccine nÃ y";
+                ViewBag.ThongBao = "Số mũi đã tồn tại trong vaccine này";
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(mt.DonViTuoi))
             {
-                var donViHopLe = new[] { "ngÃ y", "thÃ¡ng", "nÄƒm" };
+                var donViHopLe = new[] { "ngày", "tháng", "năm" };
                 if (!donViHopLe.Contains(mt.DonViTuoi.Trim(), StringComparer.OrdinalIgnoreCase))
                 {
-                    ViewBag.ThongBao = "ÄÆ¡n vá»‹ tuá»•i chá»‰ gá»“m: ngÃ y, thÃ¡ng, nÄƒm";
+                    ViewBag.ThongBao = "Đơn vị tuổi chỉ gồm: ngày, tháng, năm";
                     return false;
                 }
             }
 
             if (mt.KhoangCachNgay.HasValue && mt.KhoangCachNgay.Value < 0)
             {
-                ViewBag.ThongBao = "Khoáº£ng cÃ¡ch ngÃ y khÃ´ng Ä‘Æ°á»£c Ã¢m";
+                ViewBag.ThongBao = "Khoảng cách ngày không được âm";
                 return false;
             }
 

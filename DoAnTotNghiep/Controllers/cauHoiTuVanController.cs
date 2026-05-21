@@ -54,7 +54,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (string.IsNullOrWhiteSpace(model.CauHoi))
             {
-                ViewBag.ThongBao = "Vui lÃ²ng nháº­p ná»™i dung cÃ¢u há»i.";
+                ViewBag.ThongBao = "Vui lòng nhập nội dung câu hỏi.";
                 return View(model);
             }
 
@@ -66,12 +66,12 @@ namespace DoAnTotNghiep.Controllers
                 CauTraLoi = string.Empty,
                 NgayGui = DateTime.Now,
                 NgayTraLoi = null,
-                TrangThai = "ChÆ°a tráº£ lá»i"
+                TrangThai = "Chưa trả lời"
             };
 
             if (!cauHoiTuVanDAL.GuiCauHoi(cauHoi))
             {
-                ViewBag.ThongBao = "Gá»­i cÃ¢u há»i tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i.";
+                ViewBag.ThongBao = "Gửi câu hỏi thất bại, vui lòng thử lại.";
                 return View(model);
             }
 

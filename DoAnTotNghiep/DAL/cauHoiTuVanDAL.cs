@@ -116,7 +116,7 @@ values(@maNguoiGui, null, @cauHoi, null, @ngayGui, null, @trangThai)";
             lenh.Parameters.AddWithValue("@maNguoiGui", cauHoi.maNguoiGui);
             lenh.Parameters.AddWithValue("@cauHoi", cauHoi.cauHoi);
             lenh.Parameters.AddWithValue("@ngayGui", DateTime.Now);
-            lenh.Parameters.AddWithValue("@trangThai", "Chá» tráº£ lá»i");
+            lenh.Parameters.AddWithValue("@trangThai", "Chờ trả lời");
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
             lenh.ExecuteNonQuery();
@@ -140,7 +140,7 @@ where maCauHoi = @maCauHoi";
             lenh.Parameters.AddWithValue("@maNguoiTraLoi", maNguoiTraLoi);
             lenh.Parameters.AddWithValue("@cauTraLoi", cauTraLoi);
             lenh.Parameters.AddWithValue("@ngayTraLoi", DateTime.Now);
-            lenh.Parameters.AddWithValue("@trangThai", "ÄÃ£ tráº£ lá»i");
+            lenh.Parameters.AddWithValue("@trangThai", "Đã trả lời");
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
             lenh.ExecuteNonQuery();

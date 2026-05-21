@@ -14,7 +14,7 @@ namespace DoAnTotNghiep.Models
         // Thuộc tính maNguoiTraLoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public int? maNguoiTraLoi { get; set; }
 
-        [Required(ErrorMessage = "Vui lÃ²ng nháº­p cÃ¢u há»i")]
+        [Required(ErrorMessage = "Vui lòng nhập câu hỏi")]
         // Thuộc tính cauHoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string cauHoi { get; set; } = string.Empty;
 
@@ -25,7 +25,7 @@ namespace DoAnTotNghiep.Models
         // Thuộc tính ngayTraLoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public DateTime? ngayTraLoi { get; set; }
         // Thuộc tính trangThai lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
-        public string trangThai { get; set; } = "Chá» tráº£ lá»i";
+        public string trangThai { get; set; } = "Chờ trả lời";
         // Thuộc tính tenNguoiGui lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string? tenNguoiGui { get; set; }
         // Thuộc tính tenNguoiTraLoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
