@@ -1,4 +1,5 @@
 ﻿using DoAnTotNghiep.DAL;
+using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
@@ -10,15 +11,25 @@ namespace DoAnTotNghiep.Controllers
     {
         private readonly taiKhoanDAL taiKhoanDAL;
         private readonly vaccineDAL vaccineDAL;
+        private readonly muiTiemVaccineDAL muiTiemVaccineDAL;
         private readonly lichTiemDAL lichTiemDAL;
         private readonly cauHoiTuVanDAL cauHoiTuVanDAL;
+        private readonly baiVietCamNangDAL baiVietCamNangDAL;
 
-        public AdminController(taiKhoanDAL taiKhoanDAL, vaccineDAL vaccineDAL, lichTiemDAL lichTiemDAL, cauHoiTuVanDAL cauHoiTuVanDAL)
+        public AdminController(
+            taiKhoanDAL taiKhoanDAL,
+            vaccineDAL vaccineDAL,
+            muiTiemVaccineDAL muiTiemVaccineDAL,
+            lichTiemDAL lichTiemDAL,
+            cauHoiTuVanDAL cauHoiTuVanDAL,
+            baiVietCamNangDAL baiVietCamNangDAL)
         {
             this.taiKhoanDAL = taiKhoanDAL;
             this.vaccineDAL = vaccineDAL;
+            this.muiTiemVaccineDAL = muiTiemVaccineDAL;
             this.lichTiemDAL = lichTiemDAL;
             this.cauHoiTuVanDAL = cauHoiTuVanDAL;
+            this.baiVietCamNangDAL = baiVietCamNangDAL;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -39,11 +50,21 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
+            var danhSachVaccine = vaccineDAL.layTatCa();
+            var danhSachMuiTiem = muiTiemVaccineDAL.layTatCa();
+            var danhSachCauHoi = cauHoiTuVanDAL.layTatCa();
+            var danhSachBaiViet = baiVietCamNangDAL.layTatCa();
+
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
             ViewBag.SoTaiKhoan = taiKhoanDAL.layTatCa().Count;
-            ViewBag.SoVaccine = vaccineDAL.layTatCa().Count;
+            ViewBag.SoVaccine = danhSachVaccine.Count;
+            ViewBag.SoMuiTiem = danhSachMuiTiem.Count;
             ViewBag.SoLichTiem = lichTiemDAL.layTatCa().Count;
-            ViewBag.SoCauHoiChoTraLoi = cauHoiTuVanDAL.layTatCa().Count(x => x.trangThai != "Đã trả lời");
+            ViewBag.SoBaiViet = danhSachBaiViet.Count;
+            ViewBag.SoCauHoiChoTraLoi = danhSachCauHoi.Count(x => x.trangThai != "Đã trả lời");
+            ViewBag.DanhSachVaccine = danhSachVaccine.Take(5).ToList();
+            ViewBag.CauHoiMoi = danhSachCauHoi.Take(5).ToList();
+            ViewBag.BaiVietMoi = danhSachBaiViet.Take(4).ToList();
             return View();
         }
 

@@ -1,23 +1,33 @@
-﻿@* Khu vực giao diện của view traLoi.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model cauHoiTuVanModels
+@* View cho phép quản trị viên trả lời câu hỏi tư vấn của người dùng. *@
+@model CauHoiTuVan
 @{
     ViewData["Title"] = "Trả lời tư vấn";
 }
 
-<h2>Trả lời câu hỏi</h2>
+<h2>Trả lời câu hỏi tư vấn</h2>
+
+@if (ViewBag.ThongBao != null)
+{
+    <div class="alert alert-danger">@ViewBag.ThongBao</div>
+}
+
 <div class="mb-3">
-    <strong>Người gửi:</strong> @Model.tenNguoiGui
+    <strong>Người gửi:</strong> @Model.TenNguoiGui
 </div>
-<div class="border p-3 mb-3">@Model.cauHoi</div>
-@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
+<div class="mb-3">
+    <strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")
+</div>
+<div class="border rounded p-3 mb-3">
+    @Model.CauHoi
+</div>
+
 <form asp-action="traLoi" method="post" class="col-md-8">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="maCauHoi" value="@Model.maCauHoi" />
+    <input type="hidden" name="maCauHoi" value="@Model.MaCauHoi" />
     <div class="mb-3">
         <label class="form-label">Câu trả lời</label>
-        <textarea name="cauTraLoi" rows="5" class="form-control">@Model.cauTraLoi</textarea>
+        <textarea name="cauTraLoi" rows="5" class="form-control">@Model.CauTraLoi</textarea>
     </div>
     <button type="submit" class="btn btn-primary">Lưu trả lời</button>
-    <a asp-action="index" class="btn btn-link">Quay lại</a>
+    <a asp-action="Index" class="btn btn-link">Quay lại</a>
 </form>

@@ -1,211 +1,259 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang chủ chính sau khi người dùng đăng nhập. *@
 @{
-    Layout = null;
+    Layout = "_UserLayout";
+    ViewData["Title"] = "Trang chủ người dùng";
     var hoTen = ViewBag.HoTen as string ?? "Người dùng";
     var soThongBaoChuaDoc = ViewBag.SoThongBaoChuaDoc is int soThongBao ? soThongBao : 0;
-    var thongBaoMoiNhat = ViewBag.ThongBaoMoiNhat as List<ThongBao>;
+    var soMuiSapDenHan = ViewBag.SoMuiSapDenHan is int sapDenHan ? sapDenHan : 0;
+    var soMuiHoanThanh = ViewBag.SoMuiHoanThanh is int hoanThanh ? hoanThanh : 0;
+    var thongBaoMoiNhat = ViewBag.ThongBaoMoiNhat as List<ThongBao> ?? new List<ThongBao>();
+    var danhSachHoSo = ViewBag.DanhSachHoSo as List<HoSoSucKhoe> ?? new List<HoSoSucKhoe>();
+    var lichTiemSapToi = ViewBag.LichTiemSapToi as List<LichTiem> ?? new List<LichTiem>();
 }
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trang người dùng - Tiêm Chủng Sức Khỏe</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: linear-gradient(180deg, #e4f6f8, #f1f5ff); color: #102f38; }
-        a { color: inherit; text-decoration: none; }
-        .topbar { background: linear-gradient(90deg, #02aaa5, #05b7a8); color: #fff; }
-        .topbar-inner { max-width: 1520px; height: 74px; margin: 0 auto; padding: 0 32px; display: grid; grid-template-columns: 220px minmax(280px, 600px) 56px 130px 210px; gap: 16px; align-items: center; }
-        .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 25px; line-height: 1.05; }
-        .brand-mark { width: 48px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #2b62db 0 33%, #ff7d1a 33% 66%, #4fbd38 66%); box-shadow: inset 0 -8px 0 rgba(255,255,255,.12); }
-        .search-box { height: 50px; border-radius: 28px; background: #fff; display: flex; align-items: center; padding: 0 8px 0 20px; box-shadow: 0 2px 0 rgba(0,0,0,.04); }
-        .search-box input { flex: 1; border: 0; outline: 0; font-size: 17px; color: #425d67; }
-        .search-box button { width: 42px; height: 42px; border: 0; border-radius: 50%; background: #e7f8fb; color: #057f90; font-size: 22px; cursor: pointer; }
-        .user-pill, .selected-btn { height: 50px; border-radius: 28px; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; white-space: nowrap; }
-        .user-pill { background: #078989; padding: 0 16px; }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #b8eced 48%, #0797a8 50%); border: 3px solid rgba(255,255,255,.35); }
-        .selected-btn { background: #ff921f; padding: 0 22px; }
-        .notification-bell { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #fff; color: #00a99d; text-decoration: none; font-size: 22px; margin-left: 10px; }
-        .notification-count { position: absolute; top: -4px; right: -4px; background: #ff4d4f; color: white; font-size: 12px; font-weight: bold; min-width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .menu { background: rgba(255,255,255,.94); border-bottom: 1px solid #d8e7ee; }
-        .menu-inner { max-width: 1520px; height: 50px; margin: 0 auto; display: flex; justify-content: center; overflow-x: auto; }
-        .menu a { min-width: 150px; padding: 15px 22px; text-align: center; font-size: 17px; font-weight: 800; border-left: 1px solid #e2edf3; white-space: nowrap; }
-        .page { max-width: 1520px; margin: 0 auto; padding: 46px 32px; }
-        .hero-layout { display: grid; grid-template-columns: minmax(0, 2.08fr) minmax(410px, .95fr); gap: 18px; align-items: stretch; }
-        .hero-card { min-height: 374px; border: 3px solid #fff; border-radius: 14px; overflow: hidden; position: relative; background: radial-gradient(circle at 73% 20%, rgba(255,255,255,.28), transparent 23%), linear-gradient(135deg, #071fbe 0%, #004ee4 45%, #0cb7ec 100%); box-shadow: 0 12px 34px rgba(9, 92, 125, .14); }
-        .hero-card:before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 18% 13%, rgba(255,255,255,.18), transparent 12%), repeating-linear-gradient(0deg, transparent 0 52px, rgba(255,255,255,.08) 53px 54px); }
-        .hero-content { position: relative; z-index: 2; width: 57%; padding: 38px 48px; color: #fff; }
-        .hero-logo-line { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; font-weight: 800; }
-        .hero-logo-line span { display: inline-block; padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,.14); }
-        .hero-card h1 { margin: 0; font-size: 50px; line-height: 1.05; text-transform: uppercase; text-shadow: 0 3px 0 rgba(0,0,0,.16); }
-        .hero-card h1 strong { display: block; margin-top: 8px; background: #ef1e3d; color: #fff; padding: 10px 18px; border-radius: 10px; width: fit-content; }
-        .hero-photo { position: absolute; right: 72px; top: 78px; width: 410px; height: 235px; border: 8px solid rgba(255,255,255,.82); border-radius: 10px; background: linear-gradient(135deg, #dff5ff, #ffffff 45%, #3d86d8); box-shadow: 0 18px 34px rgba(0,0,0,.25); display: grid; place-items: center; color: #075aa4; font-weight: 900; text-align: center; }
-        .hero-photo:before { content: ""; position: absolute; inset: 28px 36px auto; height: 78px; background: repeating-linear-gradient(90deg, #173b62 0 26px, transparent 26px 48px); opacity: .72; border-radius: 14px; }
-        .hero-photo span { position: relative; z-index: 2; background: rgba(255,255,255,.86); border-radius: 999px; padding: 10px 16px; }
-        .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border-radius: 50%; background: #fff; color: #07839a; display: grid; place-items: center; font-size: 35px; z-index: 3; box-shadow: 0 8px 18px rgba(0,0,0,.16); }
-        .arrow.left { left: 22px; }
-        .arrow.right { right: 22px; }
-        .dots { position: absolute; left: 50%; bottom: 17px; display: flex; gap: 8px; transform: translateX(-50%); }
-        .dots span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.35); }
-        .dots span:nth-child(3) { background: #ffb21f; }
-        .warning { background: #fff; border-radius: 14px; padding: 18px; overflow: hidden; }
-        .warning h2 { margin: 0 0 15px; color: #ff781b; font-size: 18px; }
-        .warning-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-        .warning-card { min-height: 320px; border-radius: 10px; overflow: hidden; color: #fff; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; background: linear-gradient(180deg, #ffc8b8 0%, #163653 68%, #071f34 100%); }
-        .warning-card:nth-child(2) { background: linear-gradient(180deg, #b9d4de 0%, #25445b 65%, #071f34 100%); }
-        .warning-card:nth-child(3) { background: linear-gradient(180deg, #b9edf5 0%, #1b5870 65%, #071f34 100%); }
-        .warning-card:before { content: ""; position: absolute; left: 14px; top: 14px; right: 14px; height: 118px; border-radius: 12px; background: rgba(255,255,255,.35); }
-        .play { position: absolute; top: 22px; left: 22px; width: 28px; height: 28px; border-radius: 50%; background: #fff; color: #0a6c8a; display: grid; place-items: center; font-size: 12px; font-weight: 900; }
-        .warning-card small, .warning-card strong { position: relative; z-index: 2; }
-        .warning-card small { color: #f7d45c; font-weight: 800; }
-        .warning-card strong { display: block; margin-top: 8px; line-height: 1.35; font-size: 17px; }
-        .benefits { margin-top: 0; background: #fff; border-radius: 0 0 14px 14px; display: grid; grid-template-columns: repeat(4, 1fr); }
-        .benefit { padding: 14px 18px; display: grid; grid-template-columns: 46px 1fr; gap: 12px; align-items: center; border-right: 1px dashed #cbdce4; }
-        .benefit-icon { width: 42px; height: 42px; border-radius: 50%; background: #ddfbf6; color: #0797a8; display: grid; place-items: center; font-weight: 900; }
-        .benefit strong { display: block; font-size: 16px; }
-        .benefit small { color: #4a6470; }
-        .quick-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-        .quick-card { background: #fff; min-height: 150px; border-radius: 10px; display: grid; place-items: center; text-align: center; padding: 16px; font-size: 18px; font-weight: 900; box-shadow: 0 10px 22px rgba(30, 73, 103, .07); transition: .18s; }
-        .quick-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(30, 73, 103, .12); }
-        .quick-icon { width: 66px; height: 66px; border-radius: 18px; background: linear-gradient(135deg, #d6fbf6, #e9f4ff); color: #0696a5; display: grid; place-items: center; font-size: 18px; font-weight: 900; }
-        .section-head { margin: 34px 0 14px; display: flex; align-items: center; gap: 16px; color: #ff7716; text-transform: uppercase; font-size: 20px; font-weight: 900; }
-        .section-head a { color: #4d6470; font-size: 15px; text-transform: none; font-weight: 700; }
-        .doctor-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-        .doctor-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 8px 18px rgba(30, 73, 103, .06); }
-        .doctor-card .avatar-doctor { height: 96px; border-radius: 12px; margin-bottom: 12px; background: linear-gradient(135deg, #d4fbf4, #edf4ff); position: relative; }
-        .doctor-card .avatar-doctor:after { content: "BS"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; border-radius: 50%; background: #fff; color: #0797a8; display: grid; place-items: center; font-weight: 900; }
-        .notification-box { background: white; border-radius: 16px; padding: 20px; margin: 20px 0; box-shadow: 0 6px 20px rgba(0,0,0,.08); }
-        .notification-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .notification-box-header h3 { margin: 0; color: #007f78; }
-        .notification-box-header a { color: #00a99d; font-weight: bold; text-decoration: none; }
-        .notification-item { display: block; padding: 12px; border-radius: 12px; background: #f4fbfb; margin-bottom: 10px; text-decoration: none; color: #123; position: relative; }
-        .notification-item:hover { background: #e4f7f5; }
-        .notification-item strong { display: block; margin-bottom: 4px; padding-right: 48px; }
-        .notification-item p { margin: 0 0 6px 0; color: #456; }
-        .notification-item small { color: #777; }
-        .unread-label { position: absolute; right: 12px; top: 12px; background: #ff4d4f; color: white; font-size: 12px; padding: 3px 8px; border-radius: 999px; }
-        .empty-notification { color: #777; margin: 0; }
-        @@media (max-width: 1100px) { .topbar-inner { height: auto; padding: 12px 18px; grid-template-columns: 1fr; } .hero-layout, .doctor-row { grid-template-columns: 1fr; } .quick-grid { grid-template-columns: repeat(2, 1fr); } .benefits { grid-template-columns: repeat(2, 1fr); } .hero-photo { opacity: .32; } .hero-content { width: 78%; } }
-        @@media (max-width: 640px) { .page { padding: 24px 12px; } .menu-inner { justify-content: flex-start; } .hero-card h1 { font-size: 30px; } .hero-content { width: 100%; padding: 24px; } .warning-grid, .benefits, .quick-grid { grid-template-columns: 1fr; } .hero-photo { display: none; } }
-    </style>
-</head>
-<body>
-    <header class="topbar">
-        <div class="topbar-inner">
-            <a class="brand" href="/NguoiDung/Index">
-                <span class="brand-mark"></span>
-                <span>TIÊM CHỦNG<br />SỨC KHỎE</span>
-            </a>
-            @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-            <form class="search-box" action="/Vaccine/TraCuu" method="get">
-                <input name="tuKhoa" placeholder="Trung tâm nào gần tôi?" />
-                <button type="submit">⌕</button>
-            </form>
-            <a href="/ThongBao/Index" class="notification-bell">
-                🔔
-                @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-                @if (soThongBaoChuaDoc > 0)
-                {
-                    <span class="notification-count">@soThongBaoChuaDoc</span>
-                }
-            </a>
-            <a class="user-pill" href="/NguoiDung/Index"><span class="avatar"></span>@hoTen</a>
-            <a class="selected-btn" href="/LichTiem/ChonHoSo">Vắc xin đã chọn</a>
+<style>
+    .welcome {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: center;
+    }
+    .welcome h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+    }
+    .welcome p {
+        margin: 0;
+        color: #6b7280;
+    }
+    .today {
+        color: #4b5563;
+        text-align: right;
+        line-height: 1.5;
+    }
+    .stats {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .stat-title {
+        color: #374151;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .stat-number {
+        font-size: 34px;
+        color: #0b63ce;
+        font-weight: bold;
+    }
+    .stat-note {
+        color: #6b7280;
+        margin-top: 4px;
+    }
+    .content {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 20px;
+    }
+    .right-column {
+        display: grid;
+        gap: 20px;
+    }
+    .status {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 6px;
+        background: #eef2f7;
+        color: #374151;
+        font-weight: bold;
+    }
+    .status-due { background: #fff2d8; color: #b45309; }
+    .status-done { background: #dcfce7; color: #15803d; }
+    .status-late { background: #fee2e2; color: #b91c1c; }
+    .list {
+        display: grid;
+        gap: 12px;
+    }
+    .list-item {
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .list-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+    .list-item strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+    .list-item span,
+    .list-item small {
+        color: #6b7280;
+    }
+    .profile-actions {
+        margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .note {
+        margin-top: 20px;
+        padding: 14px 18px;
+        border-radius: 8px;
+        background: #eaf4ff;
+        color: #0b4f9c;
+    }
+
+    @@media (max-width: 900px) {
+        .welcome { align-items: flex-start; flex-direction: column; }
+        .today { text-align: left; }
+        .stats { grid-template-columns: repeat(2, 1fr); }
+        .content { grid-template-columns: 1fr; }
+    }
+
+    @@media (max-width: 600px) {
+        .stats { grid-template-columns: 1fr; }
+    }
+</style>
+
+<section class="card welcome">
+    <div>
+        <h1>Xin chào, @hoTen</h1>
+        <p>Đây là trang tổng quan giúp bạn theo dõi hồ sơ, lịch tiêm và thông báo nhắc lịch.</p>
+    </div>
+    <div class="today">
+        <div>@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
+        <div>@DateTime.Now.ToString("HH:mm")</div>
+    </div>
+</section>
+
+<section class="stats">
+    <article class="stat-card">
+        <div class="stat-title">Hồ sơ sức khỏe</div>
+        <div class="stat-number">@danhSachHoSo.Count</div>
+        <div class="stat-note">Hồ sơ</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-title">Mũi sắp đến hạn</div>
+        <div class="stat-number">@soMuiSapDenHan</div>
+        <div class="stat-note">Mũi tiêm</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-title">Mũi đã hoàn thành</div>
+        <div class="stat-number">@soMuiHoanThanh</div>
+        <div class="stat-note">Mũi tiêm</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-title">Thông báo chưa đọc</div>
+        <div class="stat-number">@soThongBaoChuaDoc</div>
+        <div class="stat-note">Thông báo</div>
+    </article>
+</section>
+
+<section class="content">
+    <article class="card">
+        <div class="section-head">
+            <h2 class="section-title">Lịch tiêm sắp tới</h2>
+            <a class="btn btn-primary" href="/LichTiem/ChonHoSo">Xem tất cả</a>
         </div>
-    </header>
 
-    <nav class="menu">
-        <div class="menu-inner">
-            <a href="/Vaccine/TraCuu">Vắc xin phòng bệnh</a>
-            <a href="/LichTiem/ChonHoSo">Gói vắc xin</a>
-            <a href="/BaiVietCamNang/Index">Khuyến mãi</a>
-            <a href="/NguoiDung/Index">Hệ thống tiêm chủng</a>
-            <a href="/Vaccine/TraCuu">Tôi nên tiêm gì</a>
-            <a href="/CauHoiTuVan/Index">Đội ngũ chuyên môn</a>
-            <a href="/BaiVietCamNang/Index">Kiến thức tiêm chủng</a>
-        </div>
-    </nav>
+        @if (lichTiemSapToi.Count == 0)
+        {
+            <div class="empty">Chưa có lịch tiêm sắp tới.</div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hồ sơ</th>
+                        <th>Vaccine</th>
+                        <th>Mũi tiêm</th>
+                        <th>Ngày dự kiến</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lich in lichTiemSapToi)
+                    {
+                        var cssTrangThai = lich.TrangThai == "Sắp đến hạn" ? "status-due" : lich.TrangThai == "Quá hạn" ? "status-late" : lich.TrangThai == "Đã tiêm" ? "status-done" : "";
+                        <tr>
+                            <td>@lich.HoTenHoSo</td>
+                            <td>@lich.TenVaccine</td>
+                            <td>@lich.TenMui</td>
+                            <td>@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
+                            <td><span class="status @cssTrangThai">@lich.TrangThai</span></td>
+                            <td><a class="btn" href="/LichTiem/CapNhatDaTiem?maLichTiem=@lich.MaLichTiem">Cập nhật</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </article>
 
-    <main class="page">
-        <section class="hero-layout">
-            <div>
-                <article class="hero-card">
-                    <span class="arrow left">‹</span>
-                    <span class="arrow right">›</span>
-                    <div class="hero-content">
-                        <div class="hero-logo-line"><span>Viện Pasteur TP.HCM</span><span>Tiêm Chủng Sức Khỏe</span></div>
-                        <h1>Chính thức ký kết <strong>Hợp tác toàn diện</strong></h1>
-                    </div>
-                    <div class="hero-photo"><span>Đội ngũ chuyên môn</span></div>
-                    <div class="dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                </article>
-                <div class="benefits">
-                    <div class="benefit"><span class="benefit-icon">GSP</span><div><strong>Bảo quản chuẩn GSP</strong><small>Vắc xin luôn được đảm bảo chất lượng...</small></div></div>
-                    <div class="benefit"><span class="benefit-icon">BS</span><div><strong>Đội ngũ bác sĩ giàu kinh nghiệm</strong><small>Từ bệnh viện Nhi Đồng, Pasteur,...</small></div></div>
-                    <div class="benefit"><span class="benefit-icon">Sổ</span><div><strong>Sổ tiêm chủng điện tử</strong><small>Nhắc lịch hẹn khoa học cho cả gia...</small></div></div>
-                    <div class="benefit"><span class="benefit-icon">%</span><div><strong>Mua vắc xin giảm giá mua thuốc</strong><small>Cùng những ưu đãi hấp dẫn</small></div></div>
-                </div>
+    <div class="right-column">
+        <article class="card">
+            <div class="section-head">
+                <h2 class="section-title">Thông báo gần đây</h2>
+                <a class="btn" href="/ThongBao/Index">Xem tất cả</a>
             </div>
-
-            <aside class="warning">
-                <h2>CẢNH BÁO QUAN TRỌNG</h2>
-                <div class="warning-grid">
-                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">▶</span><small>Radar sức khỏe</small><strong>Khánh Hòa ghi nhận hơn 2.200 ca tay chân miệng...</strong></a>
-                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">▶</span><small>Khuyến cáo</small><strong>Ebola có thể khởi phát giống cảm cúm nhưng diễn tiến rất...</strong></a>
-                    <a class="warning-card" href="/BaiVietCamNang/Index"><span class="play">▶</span><small>Virus mới</small><strong>Nhóm virus corona mới vừa được phát hiện...</strong></a>
-                </div>
-            </aside>
-        </section>
-
-        <section class="notification-box">
-            <div class="notification-box-header">
-                <h3>🔔 Thông báo nhắc lịch</h3>
-                <a href="/ThongBao/Index">Xem tất cả</a>
-            </div>
-
-            @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-            @if (thongBaoMoiNhat != null && thongBaoMoiNhat.Count > 0)
+            @if (thongBaoMoiNhat.Count == 0)
             {
-                foreach (var tb in thongBaoMoiNhat)
-                {
-                    <a href="/ThongBao/Details/@tb.MaThongBao" class="notification-item">
-                        <strong>@tb.TieuDe</strong>
-                        <p>@tb.NoiDung</p>
-                        <small>@tb.NgayGui.ToString("dd/MM/yyyy HH:mm")</small>
-
-                        @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-                        @if (!tb.DaDoc)
-                        {
-                            <span class="unread-label">Mới</span>
-                        }
-                    </a>
-                }
+                <div class="empty">Bạn chưa có thông báo mới.</div>
             }
             else
             {
-                <p class="empty-notification">Bạn chưa có thông báo mới.</p>
+                <div class="list">
+                    @foreach (var tb in thongBaoMoiNhat)
+                    {
+                        <a class="list-item" href="/ThongBao/Details/@tb.MaThongBao">
+                            <strong>@tb.TieuDe</strong>
+                            <span>@tb.NoiDung</span>
+                            <small>@tb.NgayGui.ToString("dd/MM/yyyy HH:mm")</small>
+                        </a>
+                    }
+                </div>
             }
-        </section>
+        </article>
 
-        <section class="quick-grid">
-            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">?</span><span>Tôi nên tiêm gì?</span></a>
-            <a class="quick-card" href="/CauHoiTuVan/Create"><span class="quick-icon">BS</span><span>Chat với bác sĩ</span></a>
-            <a class="quick-card" href="/Vaccine/TraCuu"><span class="quick-icon">VX</span><span>Danh mục vắc xin</span></a>
-            <a class="quick-card" href="/HoSoSucKhoe/Index"><span class="quick-icon">Sổ</span><span>Sổ tiêm của tôi</span></a>
-            <a class="quick-card" href="/LichTiem/ChonHoSo"><span class="quick-icon">TT</span><span>Trung tâm gần tôi</span></a>
-            <a class="quick-card" href="/BaiVietCamNang/Index"><span class="quick-icon">KN</span><span>Kiến thức tiêm chủng</span></a>
-        </section>
+        <article class="card">
+            <div class="section-head">
+                <h2 class="section-title">Hồ sơ sức khỏe</h2>
+                <a class="btn btn-primary" href="/HoSoSucKhoe/Create">Thêm hồ sơ</a>
+            </div>
+            @if (danhSachHoSo.Count == 0)
+            {
+                <div class="empty">Bạn chưa có hồ sơ sức khỏe.</div>
+            }
+            else
+            {
+                <div class="list">
+                    @foreach (var hoSo in danhSachHoSo.Take(4))
+                    {
+                        <div class="list-item">
+                            <strong>@hoSo.HoTen</strong>
+                            <span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span>
+                            <div class="profile-actions">
+                                <a class="btn btn-primary" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem lịch</a>
+                                <a class="btn" href="/HoSoSucKhoe/Edit/@hoSo.MaHoSo">Cập nhật</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </article>
+    </div>
+</section>
 
-        <div class="section-head"><span>Đội ngũ chuyên môn</span><a href="/CauHoiTuVan/Index">Xem tất cả</a></div>
-        <section class="doctor-row">
-            <article class="doctor-card"><div class="avatar-doctor"></div><strong>Tư vấn lịch tiêm phù hợp</strong><p>Hỗ trợ giải đáp câu hỏi về hồ sơ và mũi tiêm.</p></article>
-            <article class="doctor-card"><div class="avatar-doctor"></div><strong>Theo dõi sau tiêm</strong><p>Ghi nhận lịch sử và tình trạng sức khỏe sau tiêm.</p></article>
-            <article class="doctor-card"><div class="avatar-doctor"></div><strong>Nhắc lịch khoa học</strong><p>Giúp người dùng không bỏ sót các mũi tiêm quan trọng.</p></article>
-            <article class="doctor-card"><div class="avatar-doctor"></div><strong>Cẩm nang sức khỏe</strong><p>Cung cấp kiến thức cơ bản về phòng bệnh.</p></article>
-        </section>
-    </main>
-</body>
-</html>
+<div class="note">
+    Lưu ý: Hãy cập nhật đầy đủ thông tin sức khỏe để hệ thống tạo lịch tiêm và nhắc lịch chính xác hơn.
+</div>

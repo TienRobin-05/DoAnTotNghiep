@@ -1,77 +1,426 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang chủ quản trị viên sau khi đăng nhập bằng tài khoản Admin. *@
 @{
-    ViewData["Title"] = "Trang quản trị";
-    var hoTen = ViewBag.HoTen as string ?? "Admin";
+    Layout = null;
+    var hoTen = ViewBag.HoTen as string ?? "Quản trị viên";
+    var danhSachVaccine = ViewBag.DanhSachVaccine as List<vaccineModels> ?? new List<vaccineModels>();
+    var cauHoiMoi = ViewBag.CauHoiMoi as List<cauHoiTuVanModels> ?? new List<cauHoiTuVanModels>();
+    var baiVietMoi = ViewBag.BaiVietMoi as List<baiVietCamNangModels> ?? new List<baiVietCamNangModels>();
 }
 
-<style>
-    .admin-dashboard { background: #f7fbff; margin: -1.5rem calc(50% - 50vw) -1.5rem; min-height: 80vh; padding: 28px calc(50vw - 50%) 40px; color: #14343b; }
-    .admin-wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
-    .admin-top { background: #fff; border: 1px solid #dceeee; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: 0 8px 22px rgba(22, 88, 96, .07); }
-    .admin-top h1 { margin: 0 0 6px; font-size: 28px; }
-    .admin-logout, .admin-card a { background: #0797a8; color: #fff; text-decoration: none; border-radius: 8px; padding: 10px 14px; font-weight: 700; display: inline-block; }
-    .admin-section-title { margin: 28px 0 14px; font-size: 22px; }
-    .stats-grid, .admin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-    .stat-card, .admin-card { background: #fff; border: 1px solid #dceeee; border-radius: 12px; padding: 18px; box-shadow: 0 8px 22px rgba(22, 88, 96, .07); }
-    .stat-card strong { display: block; font-size: 28px; color: #07839a; }
-    .admin-card h3 { margin-top: 0; }
-    .admin-card p { color: #4d6b72; min-height: 48px; }
-    .admin-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(22, 88, 96, .11); }
-    @@media (max-width: 850px) { .stats-grid, .admin-grid { grid-template-columns: 1fr; } }
-</style>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trang quản trị</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1f2937;
+            background: #f4f6f9;
+        }
+        a { text-decoration: none; }
 
-<div class="admin-dashboard">
-    <div class="admin-wrap">
-        <header class="admin-top">
+        .navbar {
+            background: #0b63ce;
+            color: #ffffff;
+        }
+        .navbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .brand {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .menu {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .menu a {
+            color: #ffffff;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .menu a:hover,
+        .menu a.active {
+            background: rgba(255, 255, 255, .18);
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+        }
+        .welcome {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+        }
+        .welcome h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+        .welcome p {
+            margin: 0;
+            color: #6b7280;
+        }
+        .today {
+            color: #4b5563;
+            text-align: right;
+            line-height: 1.5;
+        }
+
+        .stats {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .stat-title {
+            color: #374151;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .stat-number {
+            font-size: 34px;
+            color: #0b63ce;
+            font-weight: bold;
+        }
+        .stat-note {
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .content {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 20px;
+        }
+        .right-column {
+            display: grid;
+            gap: 20px;
+        }
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .section-title {
+            margin: 0;
+            font-size: 22px;
+            color: #111827;
+        }
+        .btn {
+            display: inline-block;
+            padding: 9px 14px;
+            border-radius: 6px;
+            border: 1px solid #0b63ce;
+            color: #0b63ce;
+            background: #ffffff;
+            font-weight: bold;
+        }
+        .btn-primary {
+            color: #ffffff;
+            background: #0b63ce;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        th { background: #f9fafb; }
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .status-active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .status-hide {
+            background: #fff2d8;
+            color: #b45309;
+        }
+
+        .list {
+            display: grid;
+            gap: 12px;
+        }
+        .list-item {
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .list-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+        .list-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+        .list-item span,
+        .list-item small {
+            color: #6b7280;
+        }
+        .note {
+            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            background: #eaf4ff;
+            color: #0b4f9c;
+        }
+        .empty {
+            color: #6b7280;
+            padding: 18px 0;
+        }
+
+        @@media (max-width: 900px) {
+            .welcome { align-items: flex-start; flex-direction: column; }
+            .today { text-align: left; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .content { grid-template-columns: 1fr; }
+        }
+
+        @@media (max-width: 600px) {
+            .stats { grid-template-columns: 1fr; }
+            .page { padding: 16px; }
+            th, td { padding: 10px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="/Admin/Index">Quản trị hệ thống tiêm chủng</a>
+            <nav class="menu">
+                <a class="active" href="/Admin/Index">Trang chủ</a>
+                <a href="/vaccine/index">Vaccine</a>
+                <a href="/muiTiemVaccine/index">Mũi tiêm</a>
+                <a href="/baiViet/index">Bài viết</a>
+                <a href="/cauHoiTuVan/index">Câu hỏi tư vấn</a>
+                <a href="/Admin/taiKhoan">Tài khoản</a>
+                <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page">
+        <section class="card welcome">
             <div>
-                <h1>Trang quản trị hệ thống</h1>
-                <span>Xin chào Admin @hoTen</span>
+                <h1>Xin chào, @hoTen</h1>
+                <p>Đây là trang tổng quan dành cho quản trị viên.</p>
             </div>
-            <a class="admin-logout" href="/TaiKhoan/DangXuat">Đăng xuất</a>
-        </header>
-
-        <h2 class="admin-section-title">Thống kê nhanh</h2>
-        <section class="stats-grid">
-            <div class="stat-card"><strong>@(ViewBag.SoTaiKhoan ?? 0)</strong><span>Tài khoản</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoHoSoSucKhoe ?? 0)</strong><span>Hồ sơ sức khỏe</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoVaccine ?? 0)</strong><span>Vaccine</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoLichTiem ?? 0)</strong><span>Lịch tiêm</span></div>
-            <div class="stat-card"><strong>@(ViewBag.SoCauHoiChoTraLoi ?? 0)</strong><span>Câu hỏi chờ trả lời</span></div>
+            <div class="today">
+                <div>@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
+                <div>@DateTime.Now.ToString("HH:mm")</div>
+            </div>
         </section>
 
-        <h2 class="admin-section-title">Chức năng quản trị</h2>
-        <section class="admin-grid">
-            <article class="admin-card">
-                <h3>Quản lý tài khoản</h3>
-                <p>Xem, khóa hoặc mở khóa tài khoản người dùng.</p>
-                <a href="/Admin/taiKhoan">Mở quản lý</a>
+        <section class="stats">
+            <article class="stat-card">
+                <div class="stat-title">Tổng vaccine</div>
+                <div class="stat-number">@(ViewBag.SoVaccine ?? 0)</div>
+                <div class="stat-note">Vaccine</div>
             </article>
-            <article class="admin-card">
-                <h3>Quản lý vaccine</h3>
-                <p>Thêm, sửa, ẩn hoặc xem danh mục vaccine.</p>
-                <a href="/Vaccine/Index">Mở quản lý</a>
+            <article class="stat-card">
+                <div class="stat-title">Tổng mũi tiêm</div>
+                <div class="stat-number">@(ViewBag.SoMuiTiem ?? 0)</div>
+                <div class="stat-note">Mũi tiêm</div>
             </article>
-            <article class="admin-card">
-                <h3>Quản lý mũi tiêm vaccine</h3>
-                <p>Cấu hình số mũi, độ tuổi và khoảng cách tiêm.</p>
-                <a href="/MuiTiemVaccine/Index">Mở quản lý</a>
+            <article class="stat-card">
+                <div class="stat-title">Bài viết cẩm nang</div>
+                <div class="stat-number">@(ViewBag.SoBaiViet ?? 0)</div>
+                <div class="stat-note">Bài viết</div>
             </article>
-            <article class="admin-card">
-                <h3>Quản lý bài viết cẩm nang</h3>
-                <p>Thêm, sửa và ẩn hiện bài viết sức khỏe.</p>
-                <a href="/BaiViet/Index">Mở quản lý</a>
-            </article>
-            <article class="admin-card">
-                <h3>Quản lý câu hỏi tư vấn</h3>
-                <p>Xem và phản hồi câu hỏi của người dùng.</p>
-                <a href="/CauHoiTuVan/Index">Mở quản lý</a>
-            </article>
-            <article class="admin-card">
-                <h3>Thống kê</h3>
-                <p>Xem tổng quan dữ liệu hệ thống.</p>
-                <a href="/Admin/Index">Xem thống kê</a>
+            <article class="stat-card">
+                <div class="stat-title">Câu hỏi chờ trả lời</div>
+                <div class="stat-number">@(ViewBag.SoCauHoiChoTraLoi ?? 0)</div>
+                <div class="stat-note">Câu hỏi</div>
             </article>
         </section>
-    </div>
-</div>
+
+        <section class="content">
+            <article class="card">
+                <div class="section-head">
+                    <h2 class="section-title">Danh mục vaccine</h2>
+                    <a class="btn btn-primary" href="/vaccine/create">Thêm vaccine</a>
+                </div>
+
+                @if (danhSachVaccine.Count == 0)
+                {
+                    <div class="empty">Chưa có dữ liệu vaccine.</div>
+                }
+                else
+                {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên vaccine</th>
+                                <th>Nhóm</th>
+                                <th>Độ tuổi áp dụng</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var vaccine in danhSachVaccine)
+                            {
+                                <tr>
+                                    <td>@vaccine.tenVaccine</td>
+                                    <td>@(vaccine.nhomVaccine ?? "Chưa phân nhóm")</td>
+                                    <td>@HienThiDoTuoi(vaccine)</td>
+                                    <td>
+                                        @if (vaccine.trangThai)
+                                        {
+                                            <span class="status status-active">Đang dùng</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status status-hide">Tạm ẩn</span>
+                                        }
+                                    </td>
+                                    <td><a class="btn" href="/vaccine/edit/@vaccine.maVaccine">Sửa</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </article>
+
+            <div class="right-column">
+                <article class="card">
+                    <div class="section-head">
+                        <h2 class="section-title">Câu hỏi tư vấn mới</h2>
+                        <a class="btn" href="/cauHoiTuVan/index">Xem tất cả</a>
+                    </div>
+
+                    @if (cauHoiMoi.Count == 0)
+                    {
+                        <div class="empty">Chưa có câu hỏi tư vấn.</div>
+                    }
+                    else
+                    {
+                        <div class="list">
+                            @foreach (var cauHoi in cauHoiMoi)
+                            {
+                                <a class="list-item" href="/cauHoiTuVan/traLoi/@cauHoi.maCauHoi">
+                                    <strong>@(cauHoi.tenNguoiGui ?? "Người dùng")</strong>
+                                    <span>@cauHoi.cauHoi</span><br />
+                                    <small>@cauHoi.ngayGui.ToString("dd/MM/yyyy HH:mm") - @cauHoi.trangThai</small>
+                                </a>
+                            }
+                        </div>
+                    }
+                </article>
+
+                <article class="card">
+                    <div class="section-head">
+                        <h2 class="section-title">Bài viết cẩm nang</h2>
+                        <a class="btn" href="/baiViet/index">Xem tất cả</a>
+                    </div>
+
+                    @if (baiVietMoi.Count == 0)
+                    {
+                        <div class="empty">Chưa có bài viết cẩm nang.</div>
+                    }
+                    else
+                    {
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var baiViet in baiVietMoi)
+                                {
+                                    <tr>
+                                        <td>@baiViet.tieuDe</td>
+                                        <td>
+                                            @if (baiViet.trangThai)
+                                            {
+                                                <span class="status status-active">Đã đăng</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status status-hide">Bản nháp</span>
+                                            }
+                                        </td>
+                                        <td><a class="btn" href="/baiViet/sua/@baiViet.maBaiViet">Sửa</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </article>
+            </div>
+        </section>
+
+        <div class="note">
+            Lưu ý: Quản trị viên cần cập nhật đầy đủ vaccine, mũi tiêm, bài viết và phản hồi câu hỏi tư vấn để hệ thống hoạt động chính xác.
+        </div>
+    </main>
+</body>
+</html>
+
+@functions {
+    private static string HienThiDoTuoi(vaccineModels vaccine)
+    {
+        if (vaccine.doTuoiToiThieu == null && vaccine.doTuoiToiDa == null)
+        {
+            return "Chưa nhập";
+        }
+
+        var donVi = string.IsNullOrWhiteSpace(vaccine.donViTuoi) ? "tháng" : vaccine.donViTuoi;
+        if (vaccine.doTuoiToiThieu != null && vaccine.doTuoiToiDa != null)
+        {
+            return $"{vaccine.doTuoiToiThieu}-{vaccine.doTuoiToiDa} {donVi}";
+        }
+
+        if (vaccine.doTuoiToiThieu != null)
+        {
+            return $"Từ {vaccine.doTuoiToiThieu} {donVi}";
+        }
+
+        return $"Đến {vaccine.doTuoiToiDa} {donVi}";
+    }
+}

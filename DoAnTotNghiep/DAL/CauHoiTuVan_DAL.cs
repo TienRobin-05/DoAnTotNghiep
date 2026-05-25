@@ -60,6 +60,38 @@ ORDER BY ch.ngayGui DESC";
             return danhSach;
         }
 
+        public List<CauHoiTuVan> LayTatCa()
+        {
+            const string sql = @"SELECT
+    ch.maCauHoi,
+    ch.maNguoiGui,
+    ch.maNguoiTraLoi,
+    ch.cauHoi,
+    ch.cauTraLoi,
+    ch.ngayGui,
+    ch.ngayTraLoi,
+    ch.trangThai,
+    gui.hoTen AS tenNguoiGui,
+    traLoi.hoTen AS tenNguoiTraLoi
+FROM CauHoiTuVan ch
+INNER JOIN TaiKhoan gui ON ch.maNguoiGui = gui.maTaiKhoan
+LEFT JOIN TaiKhoan traLoi ON ch.maNguoiTraLoi = traLoi.maTaiKhoan
+ORDER BY ch.ngayGui DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<CauHoiTuVan>();
+            while (doc.Read())
+            {
+                danhSach.Add(DocCauHoi(doc));
+            }
+
+            return danhSach;
+        }
+
         // Mục đích: phương thức LayTheoIdCuaNguoiGui thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -95,6 +127,32 @@ AND ch.maNguoiGui = @MaTaiKhoan";
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
             // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
+            using var doc = lenh.ExecuteReader();
+            return doc.Read() ? DocCauHoi(doc) : null;
+        }
+
+        public CauHoiTuVan? LayTheoId(int maCauHoi)
+        {
+            const string sql = @"SELECT
+    ch.maCauHoi,
+    ch.maNguoiGui,
+    ch.maNguoiTraLoi,
+    ch.cauHoi,
+    ch.cauTraLoi,
+    ch.ngayGui,
+    ch.ngayTraLoi,
+    ch.trangThai,
+    gui.hoTen AS tenNguoiGui,
+    traLoi.hoTen AS tenNguoiTraLoi
+FROM CauHoiTuVan ch
+INNER JOIN TaiKhoan gui ON ch.maNguoiGui = gui.maTaiKhoan
+LEFT JOIN TaiKhoan traLoi ON ch.maNguoiTraLoi = traLoi.maTaiKhoan
+WHERE ch.maCauHoi = @MaCauHoi";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaCauHoi", maCauHoi);
+            ketNoi.Open();
             using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocCauHoi(doc) : null;
         }
@@ -143,6 +201,26 @@ VALUES
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
             // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
+        public bool TraLoi(int maCauHoi, int maNguoiTraLoi, string cauTraLoi)
+        {
+            const string sql = @"UPDATE CauHoiTuVan
+SET maNguoiTraLoi = @MaNguoiTraLoi,
+    cauTraLoi = @CauTraLoi,
+    ngayTraLoi = @NgayTraLoi,
+    trangThai = @TrangThai
+WHERE maCauHoi = @MaCauHoi";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaCauHoi", maCauHoi);
+            lenh.Parameters.AddWithValue("@MaNguoiTraLoi", maNguoiTraLoi);
+            lenh.Parameters.AddWithValue("@CauTraLoi", cauTraLoi);
+            lenh.Parameters.AddWithValue("@NgayTraLoi", DateTime.Now);
+            lenh.Parameters.AddWithValue("@TrangThai", "Đã trả lời");
+            ketNoi.Open();
             return lenh.ExecuteNonQuery() > 0;
         }
 

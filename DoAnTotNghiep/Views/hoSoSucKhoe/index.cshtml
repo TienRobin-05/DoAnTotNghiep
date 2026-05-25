@@ -1,54 +1,52 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang danh sách hồ sơ sức khỏe của người dùng. *@
 @model List<HoSoSucKhoe>
 @{
+    Layout = "_UserLayout";
     ViewData["Title"] = "Hồ sơ sức khỏe";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Hồ sơ sức khỏe</h2>
-    <a asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-</div>
+<section class="card">
+    <div class="section-head">
+        <h2 class="section-title">Hồ sơ sức khỏe</h2>
+        <a asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
+    </div>
 
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (Model.Count == 0)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Bạn chưa có hồ sơ sức khỏe nào.</div>
-}
-else
-{
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Họ tên</th>
-                <th>Ngày sinh</th>
-                <th>Giới tính</th>
-                <th>Chiều cao</th>
-                <th>Cân nặng</th>
-                <th>Ngày tạo</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.HoTen</td>
-                <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
-                <td>@item.GioiTinh</td>
-                <td>@item.ChieuCao</td>
-                <td>@item.CanNang</td>
-                <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                    <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-danger">Xóa</a>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+    @if (Model.Count == 0)
+    {
+        <div class="empty">Bạn chưa có hồ sơ sức khỏe nào.</div>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Ngày sinh</th>
+                    <th>Giới tính</th>
+                    <th>Chiều cao</th>
+                    <th>Cân nặng</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.HoTen</td>
+                        <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
+                        <td>@item.GioiTinh</td>
+                        <td>@(item.ChieuCao.HasValue ? item.ChieuCao.Value.ToString() : "")</td>
+                        <td>@(item.CanNang.HasValue ? item.CanNang.Value.ToString() : "")</td>
+                        <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.MaHoSo" class="btn">Chi tiết</a>
+                            <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="btn">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="btn btn-danger">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>

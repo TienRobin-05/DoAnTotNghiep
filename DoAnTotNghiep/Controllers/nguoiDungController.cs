@@ -1,4 +1,5 @@
 ﻿using DoAnTotNghiep.DAL;
+using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
@@ -9,10 +10,17 @@ namespace DoAnTotNghiep.Controllers
     public class NguoiDungController : Controller
     {
         private readonly ThongBao_DAL thongBaoDAL;
+        private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
+        private readonly LichTiem_DAL lichTiemDAL;
 
-        public NguoiDungController(ThongBao_DAL thongBaoDAL)
+        public NguoiDungController(
+            ThongBao_DAL thongBaoDAL,
+            HoSoSucKhoe_DAL hoSoSucKhoeDAL,
+            LichTiem_DAL lichTiemDAL)
         {
             this.thongBaoDAL = thongBaoDAL;
+            this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
+            this.lichTiemDAL = lichTiemDAL;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -35,7 +43,23 @@ namespace DoAnTotNghiep.Controllers
 
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
             ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
-            ViewBag.ThongBaoMoiNhat = thongBaoDAL.LayThongBaoMoiNhat(maTaiKhoan.Value, 3);
+            ViewBag.ThongBaoMoiNhat = thongBaoDAL.LayThongBaoMoiNhat(maTaiKhoan.Value, 4);
+
+            var danhSachHoSo = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
+            var tatCaLichTiem = new List<LichTiem>();
+            foreach (var hoSo in danhSachHoSo)
+            {
+                tatCaLichTiem.AddRange(lichTiemDAL.LayDanhSachTheoHoSo(hoSo.MaHoSo, maTaiKhoan.Value));
+            }
+
+            ViewBag.DanhSachHoSo = danhSachHoSo;
+            ViewBag.LichTiemSapToi = tatCaLichTiem
+                .Where(lich => lich.TrangThai != "Đã tiêm")
+                .OrderBy(lich => lich.NgayTiemDuKien)
+                .Take(5)
+                .ToList();
+            ViewBag.SoMuiSapDenHan = tatCaLichTiem.Count(lich => lich.TrangThai == "Sắp đến hạn");
+            ViewBag.SoMuiHoanThanh = tatCaLichTiem.Count(lich => lich.TrangThai == "Đã tiêm");
             return View();
         }
     }

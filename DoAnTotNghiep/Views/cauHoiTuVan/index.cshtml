@@ -3,18 +3,26 @@
 @model List<CauHoiTuVan>
 @{
     ViewData["Title"] = "Câu hỏi tư vấn";
+    var laAdmin = ViewBag.LaAdmin is bool admin && admin;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Câu hỏi tư vấn của tôi</h2>
-    <a asp-action="Create" class="btn btn-primary">Gửi câu hỏi mới</a>
+    <h2>@(laAdmin ? "Quản lý câu hỏi tư vấn" : "Câu hỏi tư vấn của tôi")</h2>
+    @if (laAdmin)
+    {
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-link">Về trang quản trị</a>
+    }
+    else
+    {
+        <a asp-action="Create" class="btn btn-primary">Gửi câu hỏi mới</a>
+    }
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Bạn chưa gửi câu hỏi tư vấn nào.</div>
+    <div class="alert alert-info">@(laAdmin ? "Chưa có câu hỏi tư vấn nào." : "Bạn chưa gửi câu hỏi tư vấn nào.")</div>
 }
 else
 {
@@ -23,6 +31,10 @@ else
         <thead>
             <tr>
                 <th>Câu hỏi</th>
+                @if (laAdmin)
+                {
+                    <th>Người gửi</th>
+                }
                 <th>Ngày gửi</th>
                 <th>Trạng thái</th>
                 <th>Ngày trả lời</th>
@@ -35,11 +47,22 @@ else
         {
             <tr>
                 <td>@item.CauHoi</td>
+                @if (laAdmin)
+                {
+                    <td>@item.TenNguoiGui</td>
+                }
                 <td>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@item.TrangThai</td>
                 <td>@(item.NgayTraLoi.HasValue ? item.NgayTraLoi.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                 <td>
-                    <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="btn btn-sm btn-primary">Xem chi tiết</a>
+                    @if (laAdmin)
+                    {
+                        <a asp-action="traLoi" asp-route-id="@item.MaCauHoi" class="btn btn-sm btn-primary">Trả lời</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="btn btn-sm btn-primary">Xem chi tiết</a>
+                    }
                 </td>
             </tr>
         }

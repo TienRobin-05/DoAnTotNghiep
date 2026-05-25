@@ -1,0 +1,162 @@
+@* Layout dùng chung cho các trang của người dùng sau khi đăng nhập. *@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var thongBaoChuaDoc = ViewBag.SoThongBaoChuaDoc is int soThongBao ? soThongBao : 0;
+
+    string Active(string tenController, string? tenAction = null)
+    {
+        var dungController = string.Equals(controller, tenController, StringComparison.OrdinalIgnoreCase);
+        var dungAction = tenAction == null || string.Equals(action, tenAction, StringComparison.OrdinalIgnoreCase);
+        return dungController && dungAction ? "active" : "";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1f2937;
+            background: #f4f6f9;
+        }
+        a { text-decoration: none; }
+
+        .navbar {
+            background: #0b63ce;
+            color: #ffffff;
+        }
+        .navbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .brand {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .menu {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .menu a {
+            color: #ffffff;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .menu a:hover,
+        .menu a.active {
+            background: rgba(255, 255, 255, .18);
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+        }
+        .btn {
+            display: inline-block;
+            padding: 9px 14px;
+            border-radius: 6px;
+            border: 1px solid #0b63ce;
+            color: #0b63ce;
+            background: #ffffff;
+            font-weight: bold;
+        }
+        .btn-primary {
+            color: #ffffff;
+            background: #0b63ce;
+        }
+        .btn-danger {
+            color: #ffffff;
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            margin: 0;
+            font-size: 22px;
+            color: #111827;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        th { background: #f9fafb; }
+        .empty {
+            color: #6b7280;
+            padding: 18px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding: 18px 24px;
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        @@media (max-width: 900px) {
+            .page { padding: 16px; }
+            th, td { padding: 10px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="/NguoiDung/Index">Quản lý sức khỏe và lịch tiêm chủng</a>
+            <nav class="menu">
+                <a class="@Active("NguoiDung", "Index")" href="/NguoiDung/Index">Trang chủ</a>
+                <a class="@Active("HoSoSucKhoe")" href="/HoSoSucKhoe/Index">Hồ sơ</a>
+                <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
+                <a href="/LichSuTiem/ChonHoSo">Lịch sử</a>
+                <a href="/ThongBao/Index">Thông báo (@thongBaoChuaDoc)</a>
+                <a href="/BaiVietCamNang/Index">Cẩm nang</a>
+                <a href="/CauHoiTuVan/Index">Tư vấn</a>
+                <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        Hệ thống quản lý sức khỏe và lịch tiêm chủng
+    </footer>
+</body>
+</html>

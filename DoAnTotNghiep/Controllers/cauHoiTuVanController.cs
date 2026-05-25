@@ -22,9 +22,16 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Index()
         {
+            if (LaAdmin())
+            {
+                ViewBag.LaAdmin = true;
+                return View(cauHoiTuVanDAL.LayTatCa());
+            }
+
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            ViewBag.LaAdmin = false;
             return View(cauHoiTuVanDAL.LayDanhSachTheoNguoiGui(maTaiKhoan.Value));
         }
 
@@ -92,6 +99,34 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        public IActionResult traLoi(int id, int maCauHoi = 0)
+        {
+            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            var maCauHoiCanTraLoi = maCauHoi > 0 ? maCauHoi : id;
+            var cauHoi = cauHoiTuVanDAL.LayTheoId(maCauHoiCanTraLoi);
+            return cauHoi == null ? NotFound() : View(cauHoi);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult traLoi(int maCauHoi, string cauTraLoi)
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (!LaAdmin() || maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            if (string.IsNullOrWhiteSpace(cauTraLoi))
+            {
+                var cauHoi = cauHoiTuVanDAL.LayTheoId(maCauHoi);
+                ViewBag.ThongBao = "Vui lòng nhập câu trả lời.";
+                return cauHoi == null ? NotFound() : View(cauHoi);
+            }
+
+            cauHoiTuVanDAL.TraLoi(maCauHoi, maTaiKhoan.Value, cauTraLoi.Trim());
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
         // Mục đích: action guiCauHoi xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
@@ -125,6 +160,12 @@ namespace DoAnTotNghiep.Controllers
             if (vaiTro != "User") return null;
 
             return maTaiKhoan.Value;
+        }
+
+        private bool LaAdmin()
+        {
+            return HttpContext.Session.GetInt32("MaTaiKhoan") != null
+                && HttpContext.Session.GetString("VaiTro") == "Admin";
         }
     }
 }
