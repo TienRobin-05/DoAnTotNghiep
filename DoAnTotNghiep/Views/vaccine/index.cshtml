@@ -15,44 +15,46 @@
     }
 </div>
 
-@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Mã</th>
-            <th>Tên vaccine</th>
-            <th>Nhóm</th>
-            <th>Độ tuổi</th>
-            <th>Đơn vị tuổi</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>@item.MaVaccine</td>
-            <td>@item.TenVaccine</td>
-            <td>@item.NhomVaccine</td>
-            <td>@item.DoTuoiToiThieu - @item.DoTuoiToiDa</td>
-            <td>@item.DonViTuoi</td>
-            <td>@(item.TrangThai ? "Đang dùng" : "Đã ẩn")</td>
-            <td>
-                @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-                @if (!laTraCuu)
-                {
-                    <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                    <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Ẩn</a>
-                }
-                else
-                {
-                    <span class="text-muted">Đang hiển thị</span>
-                }
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+<section class="card">
+    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Tên vaccine</th>
+                <th>Nhóm</th>
+                <th>Độ tuổi</th>
+                <th>Đơn vị tuổi</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.MaVaccine</td>
+                <td>@item.TenVaccine</td>
+                <td>@item.NhomVaccine</td>
+                <td>@item.DoTuoiToiThieu - @item.DoTuoiToiDa</td>
+                <td>@item.DonViTuoi</td>
+                <td>@(item.TrangThai ? "Đang dùng" : "Đã ẩn")</td>
+                <td>
+                    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+                    @if (!laTraCuu)
+                    {
+                        <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                        <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Ẩn</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Đang hiển thị</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>

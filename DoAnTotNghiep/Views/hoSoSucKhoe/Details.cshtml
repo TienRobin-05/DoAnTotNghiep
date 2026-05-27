@@ -8,6 +8,7 @@
 <h2>Chi tiết hồ sơ sức khỏe</h2>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+<section class="card">
 <table class="table table-bordered col-md-8">
     <tr><th>Mã hồ sơ</th><td>@Model.MaHoSo</td></tr>
     <tr><th>Họ tên</th><td>@Model.HoTen</td></tr>
@@ -19,6 +20,7 @@
     <tr><th>Dị ứng</th><td>@Model.DiUng</td></tr>
     <tr><th>Ngày tạo</th><td>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</td></tr>
 </table>
+</section>
 
 <a asp-action="Edit" asp-route-id="@Model.MaHoSo" class="btn btn-primary">Sửa</a>
 <a asp-action="Index" class="btn btn-link">Quay lại</a>

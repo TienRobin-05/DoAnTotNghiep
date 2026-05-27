@@ -8,6 +8,7 @@
 <h2>Chi tiết vaccine</h2>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+<section class="card">
 <table class="table table-bordered col-md-8">
     <tr><th>Mã vaccine</th><td>@Model.MaVaccine</td></tr>
     <tr><th>Tên vaccine</th><td>@Model.TenVaccine</td></tr>
@@ -19,6 +20,7 @@
     <tr><th>Lưu ý</th><td style="white-space: pre-wrap">@Model.LuuY</td></tr>
     <tr><th>Trạng thái</th><td>@(Model.TrangThai ? "Đang dùng" : "Đã ẩn")</td></tr>
 </table>
+</section>
 
 <a asp-action="Edit" asp-route-id="@Model.MaVaccine" class="btn btn-primary">Sửa</a>
 <a asp-action="Index" class="btn btn-link">Quay lại</a>

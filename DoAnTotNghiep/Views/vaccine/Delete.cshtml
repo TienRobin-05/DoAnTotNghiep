@@ -12,12 +12,14 @@
 </div>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+<section class="card">
 <table class="table table-bordered col-md-8">
     <tr><th>Mã vaccine</th><td>@Model.MaVaccine</td></tr>
     <tr><th>Tên vaccine</th><td>@Model.TenVaccine</td></tr>
     <tr><th>Nhóm vaccine</th><td>@Model.NhomVaccine</td></tr>
     <tr><th>Trạng thái hiện tại</th><td>@(Model.TrangThai ? "Đang dùng" : "Đã ẩn")</td></tr>
 </table>
+</section>
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">

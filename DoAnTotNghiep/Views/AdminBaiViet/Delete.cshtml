@@ -12,9 +12,11 @@
     Bạn có chắc muốn xóa bài viết này không?
 </div>
 
-<p><strong>Tiêu đề:</strong> @Model.TieuDe</p>
-<p><strong>Tác giả:</strong> @Model.TenTacGia</p>
-<p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</p>
+<section class="detail-card">
+    <p><strong>Tiêu đề:</strong> @Model.TieuDe</p>
+    <p><strong>Tác giả:</strong> @Model.TenTacGia</p>
+    <p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</p>
+</section>
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form asp-action="DeleteConfirmed" method="post">

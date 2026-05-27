@@ -1,4 +1,3 @@
-@* View cho phép quản trị viên trả lời câu hỏi tư vấn của người dùng. *@
 @model CauHoiTuVan
 @{
     ViewData["Title"] = "Trả lời tư vấn";
@@ -11,15 +10,13 @@
     <div class="alert alert-danger">@ViewBag.ThongBao</div>
 }
 
-<div class="mb-3">
-    <strong>Người gửi:</strong> @Model.TenNguoiGui
-</div>
-<div class="mb-3">
-    <strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")
-</div>
-<div class="border rounded p-3 mb-3">
-    @Model.CauHoi
-</div>
+<section class="detail-card mb-3">
+    <p><strong>Người gửi:</strong> @Model.TenNguoiGui</p>
+    <p><strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
+    <hr />
+    <p><strong>Câu hỏi:</strong></p>
+    <p>@Model.CauHoi</p>
+</section>
 
 <form asp-action="traLoi" method="post" class="col-md-8">
     @Html.AntiForgeryToken()

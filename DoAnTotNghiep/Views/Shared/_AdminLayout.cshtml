@@ -1,7 +1,6 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    var thongBaoChuaDoc = ViewBag.SoThongBaoChuaDoc is int soThongBao ? soThongBao : 0;
 
     string Active(string tenController, string? tenAction = null)
     {
@@ -9,6 +8,8 @@
         var dungAction = tenAction == null || string.Equals(action, tenAction, StringComparison.OrdinalIgnoreCase);
         return dungController && dungAction ? "active" : "";
     }
+
+    var activeBaiViet = Active("baiViet") == "active" || Active("AdminBaiViet") == "active" ? "active" : "";
 }
 
 <!DOCTYPE html>
@@ -16,7 +17,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng</title>
+    <title>@ViewData["Title"] - Quản trị hệ thống</title>
     <style>
         * {
             box-sizing: border-box;
@@ -97,6 +98,85 @@
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
         }
 
+        .welcome {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .welcome h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .welcome p,
+        .today {
+            color: #6b7280;
+        }
+
+        .today {
+            text-align: right;
+            line-height: 1.5;
+        }
+
+        .stats {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .stat-title {
+            color: #374151;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 34px;
+            color: #0b63ce;
+            font-weight: 700;
+        }
+
+        .stat-note,
+        .empty {
+            color: #6b7280;
+        }
+
+        .content {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 20px;
+        }
+
+        .right-column {
+            display: grid;
+            gap: 20px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 22px;
+            color: #111827;
+        }
+
         .btn {
             display: inline-block;
             padding: 9px 14px;
@@ -105,6 +185,7 @@
             color: #0b63ce;
             background: #ffffff;
             font-weight: 700;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -124,23 +205,10 @@
             border-color: #9ca3af;
         }
 
-        .section-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            margin: 0;
-            font-size: 22px;
-            color: #111827;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
+            background: #ffffff;
         }
 
         th,
@@ -154,8 +222,60 @@
             background: #f9fafb;
         }
 
-        .empty {
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            color: #15803d;
+            background: #dcfce7;
+        }
+
+        .status-hide {
+            color: #b45309;
+            background: #fff2d8;
+        }
+
+        .list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .list-item {
+            display: block;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .list-item:last-child {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .list-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .list-item span,
+        .list-item small {
             color: #6b7280;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            color: #0b4f9c;
+            background: #eaf4ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .empty {
             padding: 18px 0;
         }
 
@@ -200,12 +320,6 @@
 
         .d-inline {
             display: inline;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
         }
 
         .table-bordered {
@@ -259,7 +373,7 @@
         }
 
         .page > .d-flex.justify-content-between.align-items-center.mb-3 {
-            max-width: 860px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px 20px 0;
             background: #ffffff;
@@ -297,7 +411,7 @@
         .page > form,
         .page > dl,
         .page > .card {
-            max-width: 860px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -383,7 +497,7 @@
             }
 
             .col-md-8 {
-                max-width: 860px;
+                max-width: 900px;
             }
         }
 
@@ -414,7 +528,7 @@
         }
 
         .detail-card {
-            max-width: 860px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
             background: #ffffff;
@@ -429,7 +543,7 @@
         }
 
         .article-content {
-            max-width: 860px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
             white-space: pre-wrap;
@@ -477,6 +591,23 @@
         }
 
         @@media (max-width: 900px) {
+            .welcome {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .today {
+                text-align: left;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+
             .page {
                 padding: 16px;
             }
@@ -486,20 +617,25 @@
                 padding: 10px 8px;
             }
         }
+
+        @@media (max-width: 600px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <header class="navbar">
         <div class="navbar-inner">
-            <a class="brand" href="/NguoiDung/Index">Quản lý sức khỏe và lịch tiêm chủng</a>
+            <a class="brand" href="/Admin/Index">Quản trị hệ thống tiêm chủng</a>
             <nav class="menu">
-                <a class="@Active("NguoiDung", "Index")" href="/NguoiDung/Index">Trang chủ</a>
-                <a class="@Active("HoSoSucKhoe")" href="/HoSoSucKhoe/Index">Hồ sơ</a>
-                <a class="@Active("LichTiem")" href="/LichTiem/ChonHoSo">Lịch tiêm</a>
-                <a class="@Active("LichSuTiem")" href="/LichSuTiem/ChonHoSo">Lịch sử</a>
-                <a class="@Active("ThongBao")" href="/ThongBao/Index">Thông báo (@thongBaoChuaDoc)</a>
-                <a class="@Active("BaiVietCamNang")" href="/BaiVietCamNang/Index">Cẩm nang</a>
-                <a class="@Active("CauHoiTuVan")" href="/CauHoiTuVan/Index">Tư vấn</a>
+                <a class="@Active("Admin", "Index")" href="/Admin/Index">Trang chủ</a>
+                <a class="@Active("vaccine")" href="/vaccine/index">Vaccine</a>
+                <a class="@Active("muiTiemVaccine")" href="/muiTiemVaccine/index">Mũi tiêm</a>
+                <a class="@activeBaiViet" href="/baiViet/index">Bài viết</a>
+                <a class="@Active("cauHoiTuVan")" href="/cauHoiTuVan/index">Câu hỏi tư vấn</a>
+                <a class="@Active("Admin", "taiKhoan")" href="/Admin/taiKhoan">Tài khoản</a>
                 <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
             </nav>
         </div>
@@ -510,7 +646,7 @@
     </main>
 
     <footer class="footer">
-        Hệ thống quản lý sức khỏe và lịch tiêm chủng
+        Trang quản trị hệ thống tiêm chủng
     </footer>
 </body>
 </html>

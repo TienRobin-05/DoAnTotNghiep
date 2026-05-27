@@ -1,0 +1,4 @@
+@{
+    var vaiTro = Context.Session.GetString("VaiTro");
+    Layout = string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase) ? "_AdminLayout" : "_UserLayout";
+}

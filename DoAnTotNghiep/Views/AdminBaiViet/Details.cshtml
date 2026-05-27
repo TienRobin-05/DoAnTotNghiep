@@ -6,9 +6,11 @@
 }
 
 <h2>@Model.TieuDe</h2>
-<p><strong>Tác giả:</strong> @Model.TenTacGia</p>
-<p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
-<p><strong>Trạng thái:</strong> @(Model.TrangThai ? "Đang hiển thị" : "Đang ẩn")</p>
-<div class="border p-3 mb-3" style="white-space: pre-wrap">@Model.NoiDung</div>
+<section class="detail-card">
+    <p><strong>Tác giả:</strong> @Model.TenTacGia</p>
+    <p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
+    <p><strong>Trạng thái:</strong> @(Model.TrangThai ? "Đang hiển thị" : "Đang ẩn")</p>
+    <div class="article-content border p-3 mb-3">@Model.NoiDung</div>
+</section>
 <a asp-action="Edit" asp-route-maBaiViet="@Model.MaBaiViet" class="btn btn-primary">Sửa</a>
 <a asp-action="Index" class="btn btn-secondary">Quay lại</a>

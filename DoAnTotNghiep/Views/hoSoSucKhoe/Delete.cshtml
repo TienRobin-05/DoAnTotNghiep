@@ -10,6 +10,7 @@
 <div class="alert alert-warning">Bạn có chắc muốn xóa hồ sơ này không?</div>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+<section class="card">
 <table class="table table-bordered col-md-8">
     <tr><th>Họ tên</th><td>@Model.HoTen</td></tr>
     <tr><th>Ngày sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
@@ -17,6 +18,7 @@
     <tr><th>Chiều cao</th><td>@Model.ChieuCao</td></tr>
     <tr><th>Cân nặng</th><td>@Model.CanNang</td></tr>
 </table>
+</section>
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">

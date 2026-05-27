@@ -10,12 +10,14 @@
 <div class="alert alert-warning">Bạn có chắc muốn xóa mũi tiêm này không?</div>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
+<section class="card">
 <table class="table table-bordered col-md-8">
     <tr><th>Vaccine</th><td>@Model.TenVaccine</td></tr>
     <tr><th>Số mũi</th><td>@Model.SoMui</td></tr>
     <tr><th>Tên mũi</th><td>@Model.TenMui</td></tr>
     <tr><th>Ghi chú</th><td>@Model.GhiChu</td></tr>
 </table>
+</section>
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
