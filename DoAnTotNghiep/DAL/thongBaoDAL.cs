@@ -45,6 +45,7 @@ order by ngayGui desc";
                 {
                     maThongBao = Convert.ToInt32(doc["maThongBao"]),
                     maTaiKhoan = Convert.ToInt32(doc["maTaiKhoan"]),
+                    maLichTiem = null,
                     tieuDe = doc["tieuDe"].ToString() ?? string.Empty,
                     noiDung = doc["noiDung"] == DBNull.Value ? null : doc["noiDung"].ToString(),
                     ngayGui = Convert.ToDateTime(doc["ngayGui"]),

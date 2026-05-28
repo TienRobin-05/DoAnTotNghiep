@@ -497,6 +497,7 @@
                 <a class="@Active("HoSoSucKhoe")" href="/HoSoSucKhoe/Index">Hồ sơ</a>
                 <a class="@Active("LichTiem")" href="/LichTiem/ChonHoSo">Lịch tiêm</a>
                 <a class="@Active("LichSuTiem")" href="/LichSuTiem/ChonHoSo">Lịch sử</a>
+                <a class="@Active("vaccine")" href="/vaccine/TraCuu">Vaccine</a>
                 <a class="@Active("ThongBao")" href="/ThongBao/Index">Thông báo (@thongBaoChuaDoc)</a>
                 <a class="@Active("BaiVietCamNang")" href="/BaiVietCamNang/Index">Cẩm nang</a>
                 <a class="@Active("CauHoiTuVan")" href="/CauHoiTuVan/Index">Tư vấn</a>
@@ -506,6 +507,7 @@
     </header>
 
     <main class="page">
+        <partial name="_ThongBao" />
         @RenderBody()
     </main>
 

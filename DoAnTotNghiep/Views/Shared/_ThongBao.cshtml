@@ -1,0 +1,78 @@
+@{
+    var thongBao = TempData["ThongBao"]?.ToString();
+    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
+    var cssClass = string.Equals(loaiThongBao, "error", StringComparison.OrdinalIgnoreCase)
+        ? "alert-danger"
+        : string.Equals(loaiThongBao, "warning", StringComparison.OrdinalIgnoreCase)
+            ? "alert-warning"
+            : "alert-success";
+}
+
+@* Hiển thị thông báo dùng chung cho toàn bộ hệ thống, lấy từ TempData để tránh trùng với cảnh báo ViewBag sẵn có trong từng form. *@
+@if (!string.IsNullOrWhiteSpace(thongBao))
+{
+    <style>
+        .js-auto-alert {
+            max-width: 860px;
+            margin: 0 auto 16px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .js-auto-alert.alert-success {
+            color: #146c43;
+            background: #d1e7dd;
+            border: 1px solid #badbcc;
+        }
+        .js-auto-alert.alert-danger {
+            color: #842029;
+            background: #f8d7da;
+            border: 1px solid #f5c2c7;
+        }
+        .js-auto-alert.alert-warning {
+            color: #8a5a00;
+            background: #fff3cd;
+            border: 1px solid #ffecb5;
+        }
+    </style>
+    <div class="alert @cssClass js-auto-alert" role="alert">
+        @thongBao
+    </div>
+}
+
+<script>
+    // Tự ẩn thông báo sau vài giây để không che giao diện thao tác.
+    window.setTimeout(function () {
+        document.querySelectorAll(".js-auto-alert").forEach(function (alert) {
+            alert.style.display = "none";
+        });
+    }, 4500);
+
+    // Xác nhận các thao tác quan trọng: đăng xuất, xóa/ẩn dữ liệu và đổi trạng thái.
+    document.addEventListener("click", function (event) {
+        var target = event.target.closest("a, button");
+        if (!target) return;
+
+        var message = target.getAttribute("data-confirm");
+        var href = target.getAttribute("href") || "";
+        var form = target.closest("form");
+        var formAction = form ? (form.getAttribute("action") || "") : "";
+        var text = (target.textContent || "").trim().toLowerCase();
+
+        if (!message && href.indexOf("/TaiKhoan/DangXuat") >= 0) {
+            message = "Bạn có chắc chắn muốn đăng xuất không?";
+        }
+
+        if (!message && (href.toLowerCase().indexOf("delete") >= 0 || formAction.toLowerCase().indexOf("delete") >= 0 || text === "xóa")) {
+            message = "Bạn có chắc chắn muốn xóa dữ liệu này không?";
+        }
+
+        if (!message && (formAction.toLowerCase().indexOf("doitrangthai") >= 0 || formAction.toLowerCase().indexOf("anhien") >= 0 || text === "ẩn" || text === "hiện")) {
+            message = "Bạn có chắc chắn muốn đổi trạng thái không?";
+        }
+
+        if (message && !window.confirm(message)) {
+            event.preventDefault();
+        }
+    });
+</script>

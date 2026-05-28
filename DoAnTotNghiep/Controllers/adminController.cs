@@ -45,7 +45,7 @@ namespace DoAnTotNghiep.Controllers
             }
 
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-            if (vaiTro != "Admin")
+            if (!string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
@@ -56,10 +56,10 @@ namespace DoAnTotNghiep.Controllers
             var danhSachBaiViet = baiVietCamNangDAL.layTatCa();
 
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
-            ViewBag.SoTaiKhoan = taiKhoanDAL.layTatCa().Count;
+            ViewBag.SoTaiKhoan = taiKhoanDAL.demTatCa();
             ViewBag.SoVaccine = danhSachVaccine.Count;
             ViewBag.SoMuiTiem = danhSachMuiTiem.Count;
-            ViewBag.SoLichTiem = lichTiemDAL.layTatCa().Count;
+            ViewBag.SoLichTiem = lichTiemDAL.demTatCa();
             ViewBag.SoBaiViet = danhSachBaiViet.Count;
             ViewBag.SoCauHoiChoTraLoi = danhSachCauHoi.Count(x => x.trangThai != "Đã trả lời");
             ViewBag.DanhSachVaccine = danhSachVaccine.Take(5).ToList();
@@ -88,6 +88,7 @@ namespace DoAnTotNghiep.Controllers
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             taiKhoanDAL.doiTrangThai(maTaiKhoan, trangThai);
+            TempData["ThongBao"] = "Đổi trạng thái thành công";
             return RedirectToAction(nameof(taiKhoan));
         }
 

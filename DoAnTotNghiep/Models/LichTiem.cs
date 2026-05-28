@@ -19,6 +19,8 @@
         public string GhiChu { get; set; } = string.Empty;
         // Thuộc tính TenVaccine lưu một phần thông tin của đối tượng model. Dữ liệu này được dùng khi đọc/ghi database, truyền sang Controller hoặc hiển thị ra View.
         public string TenVaccine { get; set; } = string.Empty;
+        // Thuộc tính NhomVaccine lưu nhóm vaccine để màn hình lịch tiêm hiển thị đầy đủ thông tin đã join từ bảng Vaccine.
+        public string NhomVaccine { get; set; } = string.Empty;
         // Thuộc tính TenMui lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string TenMui { get; set; } = string.Empty;
         // Thuộc tính SoMui lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.

@@ -82,6 +82,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(model);
             }
 
+            TempData["ThongBao"] = "Gửi câu hỏi tư vấn thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -123,6 +124,7 @@ namespace DoAnTotNghiep.Controllers
             }
 
             cauHoiTuVanDAL.TraLoi(maCauHoi, maTaiKhoan.Value, cauTraLoi.Trim());
+            TempData["ThongBao"] = "Cập nhật câu hỏi tư vấn thành công";
             return RedirectToAction(nameof(Index));
         }
 

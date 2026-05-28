@@ -20,20 +20,47 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index()
+        public IActionResult Index(string? tuKhoa)
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
-            return View(vaccineDAL.LayDanhSach());
+
+            var danhSach = vaccineDAL.LayDanhSach();
+            // Lọc danh sách vaccine theo tên vaccine hoặc nhóm vaccine, không thay đổi cấu trúc database.
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var tuKhoaTimKiem = tuKhoa.Trim();
+                danhSach = danhSach
+                    .Where(vaccine =>
+                        vaccine.TenVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase)
+                        || vaccine.NhomVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            ViewBag.TuKhoa = tuKhoa;
+            return View(danhSach);
         }
 
         // Mục đích: action TraCuu xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult TraCuu()
+        public IActionResult TraCuu(string? tuKhoa)
         {
+            var danhSach = vaccineDAL.LayDanhSachDangSuDung();
+            // Trang tra cứu chỉ lọc dữ liệu đã lấy từ bảng Vaccine, không thêm bảng/cột mới.
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var tuKhoaTimKiem = tuKhoa.Trim();
+                danhSach = danhSach
+                    .Where(vaccine =>
+                        vaccine.TenVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase)
+                        || vaccine.NhomVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
             ViewBag.LaTraCuu = true;
-            return View("Index", vaccineDAL.LayDanhSachDangSuDung());
+            ViewBag.TuKhoa = tuKhoa;
+            return View("Index", danhSach);
         }
 
         // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -78,6 +105,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(vaccine);
             }
 
+            TempData["ThongBao"] = "Thêm vaccine thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -113,6 +141,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(vaccine);
             }
 
+            TempData["ThongBao"] = "Cập nhật vaccine thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -141,6 +170,7 @@ namespace DoAnTotNghiep.Controllers
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             vaccineDAL.XoaHoacAn(id);
+            TempData["ThongBao"] = "Đổi trạng thái thành công";
             return RedirectToAction(nameof(Index));
         }
 

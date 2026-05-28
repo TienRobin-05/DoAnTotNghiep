@@ -51,12 +51,27 @@ namespace DoAnTotNghiep.Controllers
 
             // Chỉ cho user xem lịch tiêm của hồ sơ thuộc tài khoản đang đăng nhập.
             var hoSo = hoSoSucKhoeDAL.LayTheoId(maHoSo, maTaiKhoan.Value);
-            if (hoSo == null) return NotFound();
+            if (hoSo == null)
+            {
+                TempData["ThongBao"] = "Không tìm thấy hồ sơ sức khỏe";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(ChonHoSo));
+            }
 
             // Nếu hồ sơ chưa có lịch, hệ thống tự tạo lịch dự kiến từ phác đồ mũi tiêm vaccine.
             if (!lichTiemDAL.KiemTraHoSoCoLichTiem(maHoSo))
             {
-                taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
+                var ketQuaTaoLich = taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
+                if (ketQuaTaoLich.SoMuiTiemVaccine == 0)
+                {
+                    TempData["ThongBao"] = "Chưa có dữ liệu mũi tiêm vaccine để tạo lịch tiêm";
+                    TempData["LoaiThongBao"] = "info";
+                }
+                else if (ketQuaTaoLich.SoLichTiemDaTao > 0)
+                {
+                    TempData["ThongBao"] = "Hệ thống đã tự động tạo lịch tiêm cho hồ sơ này";
+                    TempData["LoaiThongBao"] = "success";
+                }
             }
 
             ViewBag.HoTenHoSo = hoSo.HoTen;
@@ -79,6 +94,7 @@ namespace DoAnTotNghiep.Controllers
             if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
             {
                 TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
+                TempData["LoaiThongBao"] = "warning";
                 return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
             }
 
@@ -121,6 +137,7 @@ namespace DoAnTotNghiep.Controllers
             if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
             {
                 TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
+                TempData["LoaiThongBao"] = "warning";
                 return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
             }
 
@@ -133,7 +150,7 @@ namespace DoAnTotNghiep.Controllers
                 NgayCapNhat = DateTime.Now
             });
 
-            TempData["ThongBao"] = "Cập nhật trạng thái đã tiêm thành công.";
+            TempData["ThongBao"] = "Cập nhật lịch tiêm thành công";
             return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
         }
 

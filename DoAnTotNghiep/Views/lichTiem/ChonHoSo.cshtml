@@ -10,6 +10,12 @@
     <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
 </div>
 
+@if (TempData["ThongBao"] != null)
+{
+    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
+    <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
+}
+
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {

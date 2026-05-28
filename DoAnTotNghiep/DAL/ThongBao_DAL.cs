@@ -202,11 +202,27 @@ AND maTaiKhoan = @MaTaiKhoan";
             {
                 MaThongBao = Convert.ToInt32(doc["maThongBao"]),
                 MaTaiKhoan = Convert.ToInt32(doc["maTaiKhoan"]),
+                // Database hiện tại chưa có cột maLichTiem, nên chỉ gán khi câu SELECT thật sự có cột này.
+                MaLichTiem = CoCot(doc, "maLichTiem") && doc["maLichTiem"] != DBNull.Value ? Convert.ToInt32(doc["maLichTiem"]) : null,
                 TieuDe = doc["tieuDe"] == DBNull.Value ? string.Empty : doc["tieuDe"].ToString() ?? string.Empty,
                 NoiDung = doc["noiDung"] == DBNull.Value ? string.Empty : doc["noiDung"].ToString() ?? string.Empty,
                 NgayGui = Convert.ToDateTime(doc["ngayGui"]),
                 DaDoc = Convert.ToBoolean(doc["daDoc"])
             };
+        }
+
+        // Kiểm tra an toàn một cột có tồn tại trong SqlDataReader hay không trước khi đọc dữ liệu.
+        private static bool CoCot(SqlDataReader doc, string tenCot)
+        {
+            for (var i = 0; i < doc.FieldCount; i++)
+            {
+                if (string.Equals(doc.GetName(i), tenCot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

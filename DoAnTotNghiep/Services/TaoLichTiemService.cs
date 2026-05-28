@@ -19,15 +19,19 @@ namespace DoAnTotNghiep.Services
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
-        public void TaoLichTiemChoHoSo(int maHoSo)
+        public KetQuaTaoLichTiem TaoLichTiemChoHoSo(int maHoSo)
         {
             var hoSo = LayHoSoTheoMa(maHoSo);
             if (hoSo == null)
             {
-                return;
+                return new KetQuaTaoLichTiem();
             }
 
-            var danhSachMuiTiem = LayDanhSachMuiTiemCuaVaccineDangSuDung();
+            var danhSachMuiTiem = LayDanhSachMuiTiemVaccine();
+            var ketQua = new KetQuaTaoLichTiem
+            {
+                SoMuiTiemVaccine = danhSachMuiTiem.Count
+            };
 
             foreach (var muiTiem in danhSachMuiTiem)
             {
@@ -38,11 +42,18 @@ namespace DoAnTotNghiep.Services
                 }
 
                 // Ưu tiên độ tuổi khuyến nghị, nếu chưa có thì dùng độ tuổi tối thiểu.
-                var doTuoiTinhLich = muiTiem.DoTuoiKhuyenNghi ?? muiTiem.DoTuoiToiThieu ?? 0;
-                var ngayTiemDuKien = TinhNgayTiemDuKien(hoSo.NgaySinh, doTuoiTinhLich, muiTiem.DonViTuoi);
+                var doTuoiTinhLich = muiTiem.DoTuoiKhuyenNghi ?? muiTiem.DoTuoiToiThieu;
+                var ngayTiemDuKien = doTuoiTinhLich.HasValue
+                    ? TinhNgayTiemDuKien(hoSo.NgaySinh, doTuoiTinhLich.Value, muiTiem.DonViTuoi)
+                    : DateTime.Today;
 
-                ThemLichTiem(maHoSo, muiTiem.MaMuiTiem, ngayTiemDuKien);
+                if (ThemLichTiemNeuChuaTonTai(maHoSo, muiTiem.MaMuiTiem, ngayTiemDuKien))
+                {
+                    ketQua.SoLichTiemDaTao++;
+                }
             }
+
+            return ketQua;
         }
 
         // Mục đích: phương thức LayHoSoTheoMa xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
@@ -74,11 +85,11 @@ WHERE maHoSo = @MaHoSo";
             };
         }
 
-        // Mục đích: phương thức LayDanhSachMuiTiemCuaVaccineDangSuDung xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
+        // Mục đích: phương thức LayDanhSachMuiTiemVaccine lấy toàn bộ mũi tiêm làm nguồn tự động tạo lịch tiêm.
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
-        private List<MuiTiemTaoLich> LayDanhSachMuiTiemCuaVaccineDangSuDung()
+        private List<MuiTiemTaoLich> LayDanhSachMuiTiemVaccine()
         {
             const string sql = @"SELECT
     mt.maMuiTiem,
@@ -86,9 +97,7 @@ WHERE maHoSo = @MaHoSo";
     mt.doTuoiKhuyenNghi,
     mt.donViTuoi
 FROM MuiTiemVaccine mt
-INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
-WHERE v.trangThai = 1
-ORDER BY v.tenVaccine, mt.soMui";
+ORDER BY mt.maVaccine, mt.soMui";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
@@ -131,14 +140,20 @@ AND maMuiTiem = @MaMuiTiem";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        // Mục đích: phương thức ThemLichTiem xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
+        // Mục đích: phương thức ThemLichTiemNeuChuaTonTai chỉ insert khi chưa có cặp maHoSo + maMuiTiem trong LichTiem.
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
-        private void ThemLichTiem(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien)
+        private bool ThemLichTiemNeuChuaTonTai(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien)
         {
             const string sql = @"INSERT INTO LichTiem(maHoSo, maMuiTiem, ngayTiemDuKien, trangThai, ghiChu)
-VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
+SELECT @MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM LichTiem WITH (UPDLOCK, HOLDLOCK)
+    WHERE maHoSo = @MaHoSo
+    AND maMuiTiem = @MaMuiTiem
+)";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
@@ -146,10 +161,10 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
             lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
             lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
             lenh.Parameters.AddWithValue("@TrangThai", "Chưa tiêm");
-            lenh.Parameters.AddWithValue("@GhiChu", string.Empty);
+            lenh.Parameters.AddWithValue("@GhiChu", "Tự động tạo lịch tiêm");
 
             ketNoi.Open();
-            lenh.ExecuteNonQuery();
+            return lenh.ExecuteNonQuery() > 0;
         }
 
         // Mục đích: phương thức TinhNgayTiemDuKien xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
@@ -160,12 +175,21 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
         {
             var donVi = ChuanHoaDonViTuoi(donViTuoi);
 
-            return donVi switch
+            try
             {
-                "năm" => ngaySinh.AddYears(doTuoi),
-                "tháng" => ngaySinh.AddMonths(doTuoi),
-                _ => ngaySinh.AddDays(doTuoi)
-            };
+                return donVi switch
+                {
+                    "năm" => ngaySinh.AddYears(doTuoi),
+                    "tháng" => ngaySinh.AddMonths(doTuoi),
+                    "ngày" => ngaySinh.AddDays(doTuoi),
+                    _ => DateTime.Today
+                };
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Nếu dữ liệu tuổi trong database không hợp lệ, dùng ngày hiện tại để tránh lỗi khi xem lịch.
+                return DateTime.Today;
+            }
         }
 
         // Mục đích: phương thức ChuanHoaDonViTuoi xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
@@ -207,6 +231,15 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
             public int? DoTuoiToiThieu { get; set; }
             public int? DoTuoiKhuyenNghi { get; set; }
             public string DonViTuoi { get; set; } = string.Empty;
+        }
+
+        /// <summary>
+        /// Kết quả trả về sau khi tự động tạo lịch tiêm để Controller hiển thị thông báo phù hợp.
+        /// </summary>
+        public class KetQuaTaoLichTiem
+        {
+            public int SoMuiTiemVaccine { get; set; }
+            public int SoLichTiemDaTao { get; set; }
         }
     }
 }

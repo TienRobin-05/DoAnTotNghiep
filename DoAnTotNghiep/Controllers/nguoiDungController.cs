@@ -1,5 +1,6 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
+using DoAnTotNghiep.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
@@ -12,15 +13,18 @@ namespace DoAnTotNghiep.Controllers
         private readonly ThongBao_DAL thongBaoDAL;
         private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
         private readonly LichTiem_DAL lichTiemDAL;
+        private readonly ThongBaoNhacLichService thongBaoNhacLichService;
 
         public NguoiDungController(
             ThongBao_DAL thongBaoDAL,
             HoSoSucKhoe_DAL hoSoSucKhoeDAL,
-            LichTiem_DAL lichTiemDAL)
+            LichTiem_DAL lichTiemDAL,
+            ThongBaoNhacLichService thongBaoNhacLichService)
         {
             this.thongBaoDAL = thongBaoDAL;
             this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
             this.lichTiemDAL = lichTiemDAL;
+            this.thongBaoNhacLichService = thongBaoNhacLichService;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -36,21 +40,18 @@ namespace DoAnTotNghiep.Controllers
             }
 
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-            if (vaiTro != "User")
+            if (!string.Equals(vaiTro, "User", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
+            thongBaoNhacLichService.KiemTraVaTaoThongBaoNhacLich(maTaiKhoan.Value);
             ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             ViewBag.ThongBaoMoiNhat = thongBaoDAL.LayThongBaoMoiNhat(maTaiKhoan.Value, 4);
 
             var danhSachHoSo = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
-            var tatCaLichTiem = new List<LichTiem>();
-            foreach (var hoSo in danhSachHoSo)
-            {
-                tatCaLichTiem.AddRange(lichTiemDAL.LayDanhSachTheoHoSo(hoSo.MaHoSo, maTaiKhoan.Value));
-            }
+            var tatCaLichTiem = lichTiemDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
 
             ViewBag.DanhSachHoSo = danhSachHoSo;
             ViewBag.LichTiemSapToi = tatCaLichTiem

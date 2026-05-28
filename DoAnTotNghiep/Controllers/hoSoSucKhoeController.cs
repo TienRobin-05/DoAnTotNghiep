@@ -79,6 +79,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(hoSo);
             }
 
+            TempData["ThongBao"] = "Thêm hồ sơ sức khỏe thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -118,6 +119,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(hoSo);
             }
 
+            TempData["ThongBao"] = "Cập nhật hồ sơ sức khỏe thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -148,7 +150,15 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
-            hoSoSucKhoeDAL.Xoa(id, maTaiKhoan.Value);
+            if (hoSoSucKhoeDAL.Xoa(id, maTaiKhoan.Value))
+            {
+                TempData["ThongBao"] = "Xóa hồ sơ sức khỏe thành công";
+            }
+            else
+            {
+                TempData["ThongBao"] = "Xóa hồ sơ sức khỏe thất bại";
+                TempData["LoaiThongBao"] = "error";
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -217,6 +227,7 @@ namespace DoAnTotNghiep.Controllers
             {
                 taiKhoanDAL.CapNhatHoTen(maTaiKhoan.Value, hoTen);
                 HttpContext.Session.SetString("HoTen", hoTen);
+                TempData["ThongBao"] = "Cập nhật hồ sơ sức khỏe thành công";
                 return RedirectToAction("Index", "NguoiDung");
             }
 

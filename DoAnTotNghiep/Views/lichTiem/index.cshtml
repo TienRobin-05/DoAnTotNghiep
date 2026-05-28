@@ -14,7 +14,8 @@
 @if (TempData["ThongBao"] != null)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-success">@TempData["ThongBao"]</div>
+    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
+    <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
 }
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
@@ -31,6 +32,7 @@ else
         <thead>
             <tr>
                 <th>Tên vaccine</th>
+                <th>Nhóm vaccine</th>
                 <th>Tên mũi tiêm</th>
                 <th>Số mũi</th>
                 <th>Ngày tiêm dự kiến</th>
@@ -45,6 +47,7 @@ else
         {
             <tr>
                 <td>@item.TenVaccine</td>
+                <td>@item.NhomVaccine</td>
                 <td>@item.TenMui</td>
                 <td>@item.SoMui</td>
                 <td>@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>

@@ -41,6 +41,7 @@
                         <li class="nav-item"><a class="nav-link" asp-controller="HoSoSucKhoe" asp-action="CapNhatThongTinCaNhan">Hồ sơ sức khỏe</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="index">Lịch tiêm</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="lichSu">Lịch sử tiêm</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="vaccine" asp-action="TraCuu">Vaccine</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">Cẩm nang</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
                     }
@@ -63,6 +64,7 @@
     </nav>
 
     <main class="container pb-4">
+        <partial name="_ThongBao" />
         @RenderBody()
     </main>
 

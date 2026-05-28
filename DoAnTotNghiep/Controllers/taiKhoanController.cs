@@ -68,12 +68,12 @@ namespace DoAnTotNghiep.Controllers
             }
             if (taiKhoanDAL.KiemTraSoDienThoaiTonTai(soDienThoai))
             {
-                ViewBag.ThongBao = "Số điện thoại đã được sử dụng";
+                ViewBag.ThongBao = "Số điện thoại hoặc email đã tồn tại";
                 return View();
             }
             if (taiKhoanDAL.KiemTraEmailTonTai(email))
             {
-                ViewBag.ThongBao = "Email đã được sử dụng";
+                ViewBag.ThongBao = "Số điện thoại hoặc email đã tồn tại";
                 return View();
             }
 
@@ -90,7 +90,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (taiKhoanDAL.DangKy(taiKhoan))
             {
-                TempData["ThongBao"] = "Đăng ký thành công. Vui lòng đăng nhập.";
+                TempData["ThongBao"] = "Đăng ký thành công";
                 return RedirectToAction(nameof(DangNhap));
             }
 
@@ -132,7 +132,7 @@ namespace DoAnTotNghiep.Controllers
 
             if (!taiKhoan.TrangThai)
             {
-                ViewBag.ThongBao = "Tài khoản đã bị khóa";
+                ViewBag.ThongBao = "Tài khoản đang bị khóa hoặc không hoạt động";
                 return View();
             }
 
@@ -145,11 +145,13 @@ namespace DoAnTotNghiep.Controllers
             // Chỉ chấp nhận đúng hai vai trò trong database: Admin và User.
             if (taiKhoan.VaiTro == "Admin")
             {
+                TempData["ThongBao"] = "Đăng nhập thành công";
                 return RedirectToAction("Index", "Admin");
             }
 
             if (taiKhoan.VaiTro == "User")
             {
+                TempData["ThongBao"] = "Đăng nhập thành công";
                 if (!hoSoSucKhoeDAL.KiemTraTaiKhoanDaCoHoSo(taiKhoan.MaTaiKhoan))
                 {
                     return RedirectToAction("CapNhatThongTinCaNhan", "HoSoSucKhoe");
@@ -170,7 +172,9 @@ namespace DoAnTotNghiep.Controllers
         public IActionResult DangXuat()
         {
             HttpContext.Session.Clear();
+            TempData["ThongBao"] = "Đăng xuất thành công";
             return RedirectToAction("Index", "Home");
         }
+
     }
 }

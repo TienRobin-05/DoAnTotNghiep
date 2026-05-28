@@ -11,6 +11,12 @@
 </div>
 
 <section class="card">
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">Chưa có dữ liệu</div>
+}
+else
+{
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -44,4 +50,5 @@
     }
     </tbody>
 </table>
+}
 </section>

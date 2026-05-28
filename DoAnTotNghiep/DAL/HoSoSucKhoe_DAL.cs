@@ -260,7 +260,17 @@ AND maTaiKhoan = @MaTaiKhoan";
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"SELECT TOP 1 *
+            const string sql = @"SELECT TOP 1
+    maHoSo,
+    maTaiKhoan,
+    hoTen,
+    ngaySinh,
+    gioiTinh,
+    chieuCao,
+    canNang,
+    tienSuBenh,
+    diUng,
+    ngayTao
 FROM HoSoSucKhoe
 WHERE maTaiKhoan = @MaTaiKhoan
 ORDER BY ngayTao ASC";

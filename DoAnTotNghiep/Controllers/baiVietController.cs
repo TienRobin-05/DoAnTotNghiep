@@ -58,6 +58,7 @@ namespace DoAnTotNghiep.Controllers
             if (!ModelState.IsValid) return View(model);
             model.maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan")!.Value;
             baiVietCamNangDAL.them(model);
+            TempData["ThongBao"] = "Thêm bài viết thành công";
             return RedirectToAction(nameof(index));
         }
 
@@ -84,6 +85,7 @@ namespace DoAnTotNghiep.Controllers
             if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
             if (!ModelState.IsValid) return View(model);
             baiVietCamNangDAL.capNhat(model);
+            TempData["ThongBao"] = "Cập nhật bài viết thành công";
             return RedirectToAction(nameof(index));
         }
 

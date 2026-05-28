@@ -61,6 +61,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(model);
             }
 
+            TempData["ThongBao"] = "Thêm bài viết thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -98,6 +99,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(model);
             }
 
+            TempData["ThongBao"] = "Cập nhật bài viết thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -137,6 +139,7 @@ namespace DoAnTotNghiep.Controllers
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
 
             baiVietDAL.Xoa(maBaiViet);
+            TempData["ThongBao"] = "Xóa bài viết thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -151,6 +154,7 @@ namespace DoAnTotNghiep.Controllers
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
 
             baiVietDAL.AnHien(maBaiViet, trangThai);
+            TempData["ThongBao"] = "Đổi trạng thái thành công";
             return RedirectToAction(nameof(Index));
         }
 

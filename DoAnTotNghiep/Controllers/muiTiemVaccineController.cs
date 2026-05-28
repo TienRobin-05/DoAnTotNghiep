@@ -92,6 +92,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(mt);
             }
 
+            TempData["ThongBao"] = "Thêm mũi tiêm vaccine thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -134,6 +135,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(mt);
             }
 
+            TempData["ThongBao"] = "Cập nhật mũi tiêm vaccine thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -162,6 +164,7 @@ namespace DoAnTotNghiep.Controllers
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             muiTiemVaccineDAL.Xoa(id);
+            TempData["ThongBao"] = "Xóa mũi tiêm vaccine thành công";
             return RedirectToAction(nameof(Index));
         }
 

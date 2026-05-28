@@ -103,6 +103,17 @@ order by maTaiKhoan desc";
             return danhSach;
         }
 
+        // Đếm tài khoản bằng COUNT(*) để dashboard không phải tải toàn bộ danh sách chỉ để lấy số lượng.
+        public int demTatCa()
+        {
+            const string sql = "select count(*) from TaiKhoan";
+
+            using var ketNoi = coSoDuLieu.taoKetNoi();
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
         // Mục đích: phương thức layTheoMa thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.

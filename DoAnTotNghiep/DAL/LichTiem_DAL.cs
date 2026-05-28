@@ -24,7 +24,7 @@ namespace DoAnTotNghiep.DAL
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
-hs.hoTen AS hoTenHoSo, v.tenVaccine, mt.tenMui, mt.soMui
+hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
 INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
@@ -47,6 +47,34 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             {
                 danhSach.Add(DocLichTiem(doc));
             }
+            return danhSach;
+        }
+
+        // Lấy tất cả lịch tiêm của một tài khoản trong một lần truy vấn, tránh gọi database lặp theo từng hồ sơ.
+        public List<LichTiem> LayDanhSachTheoTaiKhoan(int maTaiKhoan)
+        {
+            const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
+hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
+FROM LichTiem lt
+INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
+INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
+WHERE hs.maTaiKhoan = @MaTaiKhoan
+ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<LichTiem>();
+            while (doc.Read())
+            {
+                danhSach.Add(DocLichTiem(doc));
+            }
+
             return danhSach;
         }
 
@@ -103,7 +131,7 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
-hs.hoTen AS hoTenHoSo, v.tenVaccine, mt.tenMui, mt.soMui
+hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
 INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
@@ -130,7 +158,7 @@ WHERE lt.maLichTiem = @MaLichTiem";
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
-hs.hoTen AS hoTenHoSo, hs.ngaySinh AS ngaySinhHoSo, v.tenVaccine, mt.tenMui, mt.soMui
+hs.hoTen AS hoTenHoSo, hs.ngaySinh AS ngaySinhHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
 INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
@@ -232,6 +260,7 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
                 GhiChu = doc["ghiChu"] == DBNull.Value ? string.Empty : doc["ghiChu"].ToString() ?? string.Empty,
                 HoTenHoSo = doc["hoTenHoSo"] == DBNull.Value ? string.Empty : doc["hoTenHoSo"].ToString() ?? string.Empty,
                 TenVaccine = doc["tenVaccine"] == DBNull.Value ? string.Empty : doc["tenVaccine"].ToString() ?? string.Empty,
+                NhomVaccine = CoCot(doc, "nhomVaccine") && doc["nhomVaccine"] != DBNull.Value ? doc["nhomVaccine"].ToString() ?? string.Empty : string.Empty,
                 TenMui = doc["tenMui"] == DBNull.Value ? string.Empty : doc["tenMui"].ToString() ?? string.Empty,
                 SoMui = Convert.ToInt32(doc["soMui"]),
                 NgaySinhHoSo = CoCot(doc, "ngaySinhHoSo") && doc["ngaySinhHoSo"] != DBNull.Value

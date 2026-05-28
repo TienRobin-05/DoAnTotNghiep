@@ -42,8 +42,16 @@ namespace DoAnTotNghiep.Controllers
 
             if (!thongBao.DaDoc)
             {
-                thongBaoDAL.DanhDauDaDoc(maThongBaoCanXem, maTaiKhoan.Value);
-                thongBao.DaDoc = true;
+                if (thongBaoDAL.DanhDauDaDoc(maThongBaoCanXem, maTaiKhoan.Value))
+                {
+                    TempData["ThongBao"] = "Đã đánh dấu thông báo là đã đọc";
+                    thongBao.DaDoc = true;
+                }
+                else
+                {
+                    TempData["ThongBao"] = "Cập nhật trạng thái thông báo thất bại";
+                    TempData["LoaiThongBao"] = "error";
+                }
             }
 
             return View(thongBao);
