@@ -7,7 +7,7 @@
 
 <h2>Xóa hồ sơ sức khỏe</h2>
 @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-<div class="alert alert-warning">Bạn có chắc muốn xóa hồ sơ này không?</div>
+<div class="alert alert-warning">Bạn có chắc chắn muốn xóa hồ sơ sức khỏe này không? Tất cả lịch tiêm, lịch sử tiêm và thông báo liên quan cũng sẽ bị xóa.</div>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <section class="card">
@@ -23,6 +23,6 @@
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">Xóa</button>
+    <button type="submit" class="btn btn-danger" data-confirm="Bạn có chắc chắn muốn xóa hồ sơ sức khỏe này không? Tất cả lịch tiêm, lịch sử tiêm và thông báo liên quan cũng sẽ bị xóa.">Xóa</button>
     <a asp-action="Index" class="btn btn-link">Hủy</a>
 </form>

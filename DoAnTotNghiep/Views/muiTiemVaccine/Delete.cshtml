@@ -23,5 +23,5 @@
 <form method="post">
     @Html.AntiForgeryToken()
     <button type="submit" class="btn btn-danger">Xóa</button>
-    <a asp-action="Index" class="btn btn-link">Hủy</a>
+    <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@Model.MaVaccine" class="btn btn-link">Hủy</a>
 </form>

@@ -257,7 +257,7 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
                 MaMuiTiem = Convert.ToInt32(doc["maMuiTiem"]),
                 NgayTiemDuKien = Convert.ToDateTime(doc["ngayTiemDuKien"]),
                 TrangThai = doc["trangThai"] == DBNull.Value ? string.Empty : doc["trangThai"].ToString() ?? string.Empty,
-                GhiChu = doc["ghiChu"] == DBNull.Value ? string.Empty : doc["ghiChu"].ToString() ?? string.Empty,
+                GhiChu = ChuanHoaGhiChuHienThi(doc["ghiChu"] == DBNull.Value ? string.Empty : doc["ghiChu"].ToString() ?? string.Empty),
                 HoTenHoSo = doc["hoTenHoSo"] == DBNull.Value ? string.Empty : doc["hoTenHoSo"].ToString() ?? string.Empty,
                 TenVaccine = doc["tenVaccine"] == DBNull.Value ? string.Empty : doc["tenVaccine"].ToString() ?? string.Empty,
                 NhomVaccine = CoCot(doc, "nhomVaccine") && doc["nhomVaccine"] != DBNull.Value ? doc["nhomVaccine"].ToString() ?? string.Empty : string.Empty,
@@ -284,6 +284,24 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
             }
 
             return false;
+        }
+
+        // Chuẩn hóa ghi chú cũ/null để người dùng không thấy nội dung kỹ thuật khi xem lịch tiêm.
+        private static string ChuanHoaGhiChuHienThi(string ghiChu)
+        {
+            if (string.IsNullOrWhiteSpace(ghiChu))
+            {
+                return "Theo lịch tiêm khuyến nghị";
+            }
+
+            var noiDungCu = ghiChu.Trim();
+            if (string.Equals(noiDungCu, "Tự động tạo lịch tiêm", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(noiDungCu, "Tự động tạo lịch tiêm theo độ tuổi", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Mũi tiêm được khuyến nghị theo độ tuổi";
+            }
+
+            return ghiChu;
         }
     }
 }

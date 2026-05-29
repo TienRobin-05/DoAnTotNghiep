@@ -23,7 +23,7 @@ namespace DoAnTotNghiep.DAL
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"select maThongBao, maTaiKhoan, tieuDe, noiDung, ngayGui, daDoc
+            const string sql = @"select maThongBao, maTaiKhoan, maLichTiem, tieuDe, noiDung, ngayGui, daDoc
 from ThongBao
 where maTaiKhoan = @maTaiKhoan
 order by ngayGui desc";
@@ -45,7 +45,7 @@ order by ngayGui desc";
                 {
                     maThongBao = Convert.ToInt32(doc["maThongBao"]),
                     maTaiKhoan = Convert.ToInt32(doc["maTaiKhoan"]),
-                    maLichTiem = null,
+                    maLichTiem = doc["maLichTiem"] == DBNull.Value ? null : Convert.ToInt32(doc["maLichTiem"]),
                     tieuDe = doc["tieuDe"].ToString() ?? string.Empty,
                     noiDung = doc["noiDung"] == DBNull.Value ? null : doc["noiDung"].ToString(),
                     ngayGui = Convert.ToDateTime(doc["ngayGui"]),

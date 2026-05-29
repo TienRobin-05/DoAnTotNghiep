@@ -13,17 +13,20 @@ namespace DoAnTotNghiep.Controllers
         private readonly LichTiem_DAL lichTiemDAL;
         private readonly LichSuTiem_DAL lichSuTiemDAL;
         private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
+        private readonly ThongBao_DAL thongBaoDAL;
         private readonly TaoLichTiemService taoLichTiemService;
 
         public LichTiemController(
             LichTiem_DAL lichTiemDAL,
             LichSuTiem_DAL lichSuTiemDAL,
             HoSoSucKhoe_DAL hoSoSucKhoeDAL,
+            ThongBao_DAL thongBaoDAL,
             TaoLichTiemService taoLichTiemService)
         {
             this.lichTiemDAL = lichTiemDAL;
             this.lichSuTiemDAL = lichSuTiemDAL;
             this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
+            this.thongBaoDAL = thongBaoDAL;
             this.taoLichTiemService = taoLichTiemService;
         }
 
@@ -36,6 +39,8 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+            ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             var danhSachHoSo = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
             return View(danhSachHoSo);
         }
@@ -58,24 +63,41 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction(nameof(ChonHoSo));
             }
 
-            // Nếu hồ sơ chưa có lịch, hệ thống tự tạo lịch dự kiến từ phác đồ mũi tiêm vaccine.
-            if (!lichTiemDAL.KiemTraHoSoCoLichTiem(maHoSo))
+            // Mỗi lần xem lịch, hệ thống tính tuổi và chỉ tạo thêm các mũi phù hợp còn thiếu, không tạo trùng.
+            var ketQuaTaoLich = taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
+            if (ketQuaTaoLich.SoMuiTiemVaccine == 0)
             {
-                var ketQuaTaoLich = taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
-                if (ketQuaTaoLich.SoMuiTiemVaccine == 0)
-                {
-                    TempData["ThongBao"] = "Chưa có dữ liệu mũi tiêm vaccine để tạo lịch tiêm";
-                    TempData["LoaiThongBao"] = "info";
-                }
-                else if (ketQuaTaoLich.SoLichTiemDaTao > 0)
-                {
-                    TempData["ThongBao"] = "Hệ thống đã tự động tạo lịch tiêm cho hồ sơ này";
-                    TempData["LoaiThongBao"] = "success";
-                }
+                TempData["ThongBao"] = "Chưa có dữ liệu mũi tiêm vaccine. Vui lòng thêm mũi tiêm ở trang quản trị.";
+                TempData["LoaiThongBao"] = "info";
+            }
+            else if (ketQuaTaoLich.SoMuiTiemPhuHop == 0)
+            {
+                TempData["ThongBao"] = "Chưa có vaccine phù hợp với độ tuổi của hồ sơ này.";
+                TempData["LoaiThongBao"] = "info";
+            }
+            else if (ketQuaTaoLich.SoLichTiemDaTao > 0)
+            {
+                TempData["ThongBao"] = "Hệ thống đã tự động tạo lịch tiêm cho hồ sơ này";
+                TempData["LoaiThongBao"] = "success";
             }
 
+            // Sau khi tạo/kiểm tra lịch, tạo thông báo cho các lịch đã đến hạn hoặc quá hạn.
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+            ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             ViewBag.HoTenHoSo = hoSo.HoTen;
-            return View(lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value));
+            var danhSachLichTiem = lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value);
+            if (ketQuaTaoLich.MaMuiTiemPhuHop.Count > 0)
+            {
+                danhSachLichTiem = danhSachLichTiem
+                    .Where(lich => ketQuaTaoLich.MaMuiTiemPhuHop.Contains(lich.MaMuiTiem))
+                    .ToList();
+            }
+            else
+            {
+                danhSachLichTiem = new List<LichTiem>();
+            }
+
+            return View(danhSachLichTiem);
         }
 
         [HttpGet]

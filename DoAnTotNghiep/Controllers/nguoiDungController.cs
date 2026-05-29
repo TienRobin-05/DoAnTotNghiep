@@ -13,18 +13,15 @@ namespace DoAnTotNghiep.Controllers
         private readonly ThongBao_DAL thongBaoDAL;
         private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
         private readonly LichTiem_DAL lichTiemDAL;
-        private readonly ThongBaoNhacLichService thongBaoNhacLichService;
 
         public NguoiDungController(
             ThongBao_DAL thongBaoDAL,
             HoSoSucKhoe_DAL hoSoSucKhoeDAL,
-            LichTiem_DAL lichTiemDAL,
-            ThongBaoNhacLichService thongBaoNhacLichService)
+            LichTiem_DAL lichTiemDAL)
         {
             this.thongBaoDAL = thongBaoDAL;
             this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
             this.lichTiemDAL = lichTiemDAL;
-            this.thongBaoNhacLichService = thongBaoNhacLichService;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -46,7 +43,7 @@ namespace DoAnTotNghiep.Controllers
             }
 
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
-            thongBaoNhacLichService.KiemTraVaTaoThongBaoNhacLich(maTaiKhoan.Value);
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
             ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             ViewBag.ThongBaoMoiNhat = thongBaoDAL.LayThongBaoMoiNhat(maTaiKhoan.Value, 4);
 

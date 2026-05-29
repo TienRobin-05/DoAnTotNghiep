@@ -190,6 +190,44 @@ VALUES
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // Thêm hồ sơ và trả về maHoSo mới để controller có thể tạo lịch tiêm/thông báo ngay sau khi lưu.
+        public int ThemVaLayId(HoSoSucKhoe hs)
+        {
+            const string sql = @"INSERT INTO HoSoSucKhoe
+(
+    maTaiKhoan,
+    hoTen,
+    ngaySinh,
+    gioiTinh,
+    chieuCao,
+    canNang,
+    tienSuBenh,
+    diUng,
+    ngayTao
+)
+VALUES
+(
+    @MaTaiKhoan,
+    @HoTen,
+    @NgaySinh,
+    @GioiTinh,
+    @ChieuCao,
+    @CanNang,
+    @TienSuBenh,
+    @DiUng,
+    @NgayTao
+);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            GanThamSoHoSo(lenh, hs);
+
+            ketNoi.Open();
+            var maHoSoMoi = lenh.ExecuteScalar();
+            return maHoSoMoi == null || maHoSoMoi == DBNull.Value ? 0 : Convert.ToInt32(maHoSoMoi);
+        }
+
         // Mục đích: phương thức CapNhat thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -234,22 +272,65 @@ AND maTaiKhoan = @MaTaiKhoan";
         // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public bool Xoa(int maHoSo, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"DELETE FROM HoSoSucKhoe
-WHERE maHoSo = @MaHoSo
-AND maTaiKhoan = @MaTaiKhoan";
-
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            using var giaoDich = ketNoi.BeginTransaction();
+
+            try
+            {
+                // Xóa lịch sử tiêm của các lịch tiêm thuộc đúng hồ sơ và đúng tài khoản đang đăng nhập.
+                ThucThiLenhXoa(ketNoi, giaoDich, @"DELETE lst
+FROM LichSuTiem lst
+INNER JOIN LichTiem lt ON lst.maLichTiem = lt.maLichTiem
+INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
+WHERE hs.maHoSo = @MaHoSo
+AND hs.maTaiKhoan = @MaTaiKhoan", maHoSo, maTaiKhoan);
+
+                // Xóa thông báo theo đúng khóa maLichTiem hiện có trong bảng ThongBao.
+                ThucThiLenhXoa(ketNoi, giaoDich, @"DELETE tb
+FROM ThongBao tb
+INNER JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
+WHERE hs.maHoSo = @MaHoSo
+AND hs.maTaiKhoan = @MaTaiKhoan", maHoSo, maTaiKhoan);
+
+                // Xóa lịch tiêm sau khi đã xóa các bảng con tham chiếu đến LichTiem.
+                ThucThiLenhXoa(ketNoi, giaoDich, @"DELETE lt
+FROM LichTiem lt
+INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
+WHERE hs.maHoSo = @MaHoSo
+AND hs.maTaiKhoan = @MaTaiKhoan", maHoSo, maTaiKhoan);
+
+                // Cuối cùng mới xóa hồ sơ sức khỏe, vẫn kiểm tra đúng chủ sở hữu bằng maTaiKhoan.
+                var soDongHoSoDaXoa = ThucThiLenhXoa(ketNoi, giaoDich, @"DELETE FROM HoSoSucKhoe
+WHERE maHoSo = @MaHoSo
+AND maTaiKhoan = @MaTaiKhoan", maHoSo, maTaiKhoan);
+
+                giaoDich.Commit();
+                return soDongHoSoDaXoa > 0;
+            }
+            catch
+            {
+                try
+                {
+                    giaoDich.Rollback();
+                }
+                catch
+                {
+                    // Nếu rollback cũng lỗi thì trả false để Controller hiển thị thông báo thất bại thay vì crash.
+                }
+
+                return false;
+            }
+        }
+
+        // Thực thi một câu DELETE trong cùng transaction và luôn truyền tham số, không nối chuỗi SQL trực tiếp.
+        private static int ThucThiLenhXoa(SqlConnection ketNoi, SqlTransaction giaoDich, string sql, int maHoSo, int maTaiKhoan)
+        {
+            using var lenh = new SqlCommand(sql, ketNoi, giaoDich);
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
-            return lenh.ExecuteNonQuery() > 0;
+            return lenh.ExecuteNonQuery();
         }
 
         // Mục đích: phương thức LayHoSoDauTienTheoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.

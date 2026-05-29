@@ -42,6 +42,18 @@ ORDER BY v.tenVaccine, mt.soMui";
             return DocDanhSach(sql);
         }
 
+        // Hàm đặt tên theo nghiệp vụ: lấy toàn bộ mũi tiêm kèm tên vaccine để Admin quản lý dữ liệu cố định.
+        public List<MuiTiemVaccine> LayTatCaMuiTiemKemVaccine()
+        {
+            return LayDanhSach();
+        }
+
+        // Hàm đặt tên theo nghiệp vụ: lấy mũi tiêm của một vaccine cụ thể.
+        public List<MuiTiemVaccine> LayMuiTiemTheoVaccine(int maVaccine)
+        {
+            return LayDanhSachTheoVaccine(maVaccine);
+        }
+
         // Mục đích: phương thức LayDanhSachTheoVaccine thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -159,6 +171,12 @@ VALUES
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // Hàm đặt tên theo nghiệp vụ: thêm mũi tiêm cố định cho vaccine.
+        public bool ThemMuiTiemVaccine(MuiTiemVaccine mt)
+        {
+            return Them(mt);
+        }
+
         // Mục đích: phương thức CapNhat thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -191,6 +209,12 @@ WHERE maMuiTiem = @MaMuiTiem";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // Hàm đặt tên theo nghiệp vụ: sửa thông tin mũi tiêm cố định của vaccine.
+        public bool SuaMuiTiemVaccine(MuiTiemVaccine mt)
+        {
+            return CapNhat(mt);
+        }
+
         // Mục đích: phương thức Xoa thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -209,6 +233,12 @@ WHERE maMuiTiem = @MaMuiTiem";
             ketNoi.Open();
             // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
             return lenh.ExecuteNonQuery() > 0;
+        }
+
+        // Hàm đặt tên theo nghiệp vụ: xóa mũi tiêm cố định khỏi bảng MuiTiemVaccine.
+        public bool XoaMuiTiemVaccine(int maMuiTiem)
+        {
+            return Xoa(maMuiTiem);
         }
 
         // Mục đích: phương thức KiemTraTrungSoMui thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.

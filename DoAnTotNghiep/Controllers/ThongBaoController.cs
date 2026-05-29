@@ -24,6 +24,8 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+            ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             return View(thongBaoDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value));
         }
 
@@ -36,6 +38,8 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+            ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             var maThongBaoCanXem = maThongBao > 0 ? maThongBao : id;
             var thongBao = thongBaoDAL.LayTheoId(maThongBaoCanXem, maTaiKhoan.Value);
             if (thongBao == null) return RedirectToAction(nameof(Index));
@@ -46,6 +50,7 @@ namespace DoAnTotNghiep.Controllers
                 {
                     TempData["ThongBao"] = "Đã đánh dấu thông báo là đã đọc";
                     thongBao.DaDoc = true;
+                    ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
                 }
                 else
                 {

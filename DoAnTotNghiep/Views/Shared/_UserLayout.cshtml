@@ -1,7 +1,17 @@
+@inject DoAnTotNghiep.DAL.ThongBao_DAL ThongBaoDal
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var maTaiKhoanDangNhap = Context.Session.GetInt32("MaTaiKhoan");
+    var laUserDangNhap = string.Equals(Context.Session.GetString("VaiTro"), "User", StringComparison.OrdinalIgnoreCase);
     var thongBaoChuaDoc = ViewBag.SoThongBaoChuaDoc is int soThongBao ? soThongBao : 0;
+
+    if (ViewBag.SoThongBaoChuaDoc is not int && maTaiKhoanDangNhap.HasValue && laUserDangNhap)
+    {
+        // Layout cũng cập nhật số thông báo để các trang dùng _UserLayout không bị hiển thị Thông báo (0) sai.
+        ThongBaoDal.TaoThongBaoLichTiemDenHan(maTaiKhoanDangNhap.Value);
+        thongBaoChuaDoc = ThongBaoDal.DemThongBaoChuaDoc(maTaiKhoanDangNhap.Value);
+    }
 
     string Active(string tenController, string? tenAction = null)
     {

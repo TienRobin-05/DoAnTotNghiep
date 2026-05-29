@@ -4,9 +4,20 @@
 
 <div class="mb-3">
     <label asp-for="MaVaccine" class="form-label">Vaccine</label>
-    <select asp-for="MaVaccine" asp-items="ViewBag.DanhSachVaccine" class="form-select">
-        <option value="0">-- Chọn vaccine --</option>
-    </select>
+    @if (Model.MaVaccine > 0)
+    {
+        @* Mũi tiêm được quản lý theo vaccine đang chọn; hidden input giữ đúng maVaccine khi submit. *@
+        <input type="hidden" name="MaVaccine" value="@Model.MaVaccine" />
+        <select asp-for="MaVaccine" asp-items="ViewBag.DanhSachVaccine" class="form-select" disabled>
+            <option value="0">-- Chọn vaccine --</option>
+        </select>
+    }
+    else
+    {
+        <select asp-for="MaVaccine" asp-items="ViewBag.DanhSachVaccine" class="form-select">
+            <option value="0">-- Chọn vaccine --</option>
+        </select>
+    }
 </div>
 <div class="row">
     <div class="col-md-4 mb-3">

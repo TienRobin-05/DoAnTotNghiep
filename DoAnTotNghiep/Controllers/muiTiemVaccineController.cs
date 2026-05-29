@@ -26,7 +26,7 @@ namespace DoAnTotNghiep.Controllers
         public IActionResult Index()
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
-            return View(muiTiemVaccineDAL.LayDanhSach());
+            return View(muiTiemVaccineDAL.LayTatCaMuiTiemKemVaccine());
         }
 
         // Mục đích: action IndexTheoVaccine xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -38,9 +38,11 @@ namespace DoAnTotNghiep.Controllers
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
 
             var vaccine = vaccineDAL.LayTheoId(maVaccine);
+            if (vaccine == null) return NotFound();
+
             ViewBag.TenVaccine = vaccine?.TenVaccine ?? string.Empty;
             ViewBag.MaVaccine = maVaccine;
-            return View(muiTiemVaccineDAL.LayDanhSachTheoVaccine(maVaccine));
+            return View(muiTiemVaccineDAL.LayMuiTiemTheoVaccine(maVaccine));
         }
 
         // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -65,7 +67,13 @@ namespace DoAnTotNghiep.Controllers
         public IActionResult Create(int? maVaccine)
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            if (maVaccine.HasValue && vaccineDAL.LayTheoId(maVaccine.Value) == null)
+            {
+                return NotFound();
+            }
+
             NapDanhSachVaccine(maVaccine);
+            ViewBag.KhoaVaccine = maVaccine.HasValue;
             return View(new MuiTiemVaccine { MaVaccine = maVaccine ?? 0 });
         }
 
@@ -85,7 +93,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(mt);
             }
 
-            if (!muiTiemVaccineDAL.Them(mt))
+            if (!muiTiemVaccineDAL.ThemMuiTiemVaccine(mt))
             {
                 ViewBag.ThongBao = "Thêm mũi tiêm thất bại, vui lòng thử lại";
                 NapDanhSachVaccine(mt.MaVaccine);
@@ -93,7 +101,7 @@ namespace DoAnTotNghiep.Controllers
             }
 
             TempData["ThongBao"] = "Thêm mũi tiêm vaccine thành công";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = mt.MaVaccine });
         }
 
         [HttpGet]
@@ -128,7 +136,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(mt);
             }
 
-            if (!muiTiemVaccineDAL.CapNhat(mt))
+            if (!muiTiemVaccineDAL.SuaMuiTiemVaccine(mt))
             {
                 ViewBag.ThongBao = "Cập nhật mũi tiêm thất bại, vui lòng thử lại";
                 NapDanhSachVaccine(mt.MaVaccine);
@@ -136,7 +144,7 @@ namespace DoAnTotNghiep.Controllers
             }
 
             TempData["ThongBao"] = "Cập nhật mũi tiêm vaccine thành công";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = mt.MaVaccine });
         }
 
         [HttpGet]
@@ -163,9 +171,12 @@ namespace DoAnTotNghiep.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
-            muiTiemVaccineDAL.Xoa(id);
+            var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
+            if (muiTiem == null) return NotFound();
+
+            muiTiemVaccineDAL.XoaMuiTiemVaccine(id);
             TempData["ThongBao"] = "Xóa mũi tiêm vaccine thành công";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = muiTiem.MaVaccine });
         }
 
         // Mục đích: action NapDanhSachVaccine xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

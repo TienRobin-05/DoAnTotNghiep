@@ -28,12 +28,17 @@ namespace DoAnTotNghiep.Services
             }
 
             var danhSachMuiTiem = LayDanhSachMuiTiemVaccine();
+            var danhSachMuiTiemPhuHop = danhSachMuiTiem
+                .Where(muiTiem => KiemTraMuiTiemPhuHopVoiTuoi(hoSo.NgaySinh, muiTiem))
+                .ToList();
             var ketQua = new KetQuaTaoLichTiem
             {
-                SoMuiTiemVaccine = danhSachMuiTiem.Count
+                SoMuiTiemVaccine = danhSachMuiTiem.Count,
+                SoMuiTiemPhuHop = danhSachMuiTiemPhuHop.Count,
+                MaMuiTiemPhuHop = danhSachMuiTiemPhuHop.Select(muiTiem => muiTiem.MaMuiTiem).ToList()
             };
 
-            foreach (var muiTiem in danhSachMuiTiem)
+            foreach (var muiTiem in danhSachMuiTiemPhuHop)
             {
                 // Không tạo trùng lịch tiêm cho cùng một hồ sơ và cùng một mũi tiêm.
                 if (KiemTraLichTiemDaTonTai(maHoSo, muiTiem.MaMuiTiem))
@@ -94,10 +99,13 @@ WHERE maHoSo = @MaHoSo";
             const string sql = @"SELECT
     mt.maMuiTiem,
     mt.doTuoiToiThieu,
+    mt.doTuoiToiDa,
     mt.doTuoiKhuyenNghi,
     mt.donViTuoi
 FROM MuiTiemVaccine mt
-ORDER BY mt.maVaccine, mt.soMui";
+INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
+WHERE v.trangThai = 1
+ORDER BY v.tenVaccine, mt.soMui";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
@@ -112,6 +120,7 @@ ORDER BY mt.maVaccine, mt.soMui";
                 {
                     MaMuiTiem = Convert.ToInt32(doc["maMuiTiem"]),
                     DoTuoiToiThieu = doc["doTuoiToiThieu"] == DBNull.Value ? null : Convert.ToInt32(doc["doTuoiToiThieu"]),
+                    DoTuoiToiDa = doc["doTuoiToiDa"] == DBNull.Value ? null : Convert.ToInt32(doc["doTuoiToiDa"]),
                     DoTuoiKhuyenNghi = doc["doTuoiKhuyenNghi"] == DBNull.Value ? null : Convert.ToInt32(doc["doTuoiKhuyenNghi"]),
                     DonViTuoi = doc["donViTuoi"] == DBNull.Value ? string.Empty : doc["donViTuoi"].ToString() ?? string.Empty
                 });
@@ -161,7 +170,7 @@ WHERE NOT EXISTS (
             lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
             lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
             lenh.Parameters.AddWithValue("@TrangThai", "Chưa tiêm");
-            lenh.Parameters.AddWithValue("@GhiChu", "Tự động tạo lịch tiêm");
+            lenh.Parameters.AddWithValue("@GhiChu", "Mũi tiêm được khuyến nghị theo độ tuổi");
 
             ketNoi.Open();
             return lenh.ExecuteNonQuery() > 0;
@@ -213,6 +222,63 @@ WHERE NOT EXISTS (
             return string.IsNullOrWhiteSpace(donVi) ? "ngày" : donVi;
         }
 
+        // Kiểm tra mũi tiêm có phù hợp với tuổi hiện tại của hồ sơ theo đúng đơn vị ngày/tháng/năm.
+        private static bool KiemTraMuiTiemPhuHopVoiTuoi(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
+        {
+            var donVi = ChuanHoaDonViTuoi(muiTiem.DonViTuoi);
+            var tuoiHienTai = TinhTuoiTheoDonVi(ngaySinh, donVi);
+            var tuoiToiThieu = muiTiem.DoTuoiToiThieu ?? 0;
+            var tuoiToiDa = muiTiem.DoTuoiToiDa ?? 0;
+
+            if (tuoiHienTai < tuoiToiThieu)
+            {
+                return false;
+            }
+
+            // Tuổi tối đa null hoặc 0 được hiểu là không giới hạn.
+            return tuoiToiDa <= 0 || tuoiHienTai <= tuoiToiDa;
+        }
+
+        // Tính tuổi hiện tại của hồ sơ theo đơn vị tương ứng để lọc mũi tiêm phù hợp.
+        private static int TinhTuoiTheoDonVi(DateTime ngaySinh, string donViTuoi)
+        {
+            var ngayHienTai = DateTime.Today;
+            var ngaySinhDate = ngaySinh.Date;
+            if (ngaySinhDate > ngayHienTai)
+            {
+                return 0;
+            }
+
+            return donViTuoi switch
+            {
+                "năm" => TinhSoNamTuoi(ngaySinhDate, ngayHienTai),
+                "tháng" => TinhSoThangTuoi(ngaySinhDate, ngayHienTai),
+                _ => Math.Max(0, (ngayHienTai - ngaySinhDate).Days)
+            };
+        }
+
+        private static int TinhSoThangTuoi(DateTime ngaySinh, DateTime ngayHienTai)
+        {
+            var soThang = ((ngayHienTai.Year - ngaySinh.Year) * 12) + ngayHienTai.Month - ngaySinh.Month;
+            if (ngayHienTai.Day < ngaySinh.Day)
+            {
+                soThang--;
+            }
+
+            return Math.Max(0, soThang);
+        }
+
+        private static int TinhSoNamTuoi(DateTime ngaySinh, DateTime ngayHienTai)
+        {
+            var soNam = ngayHienTai.Year - ngaySinh.Year;
+            if (ngayHienTai.Date < ngaySinh.Date.AddYears(soNam))
+            {
+                soNam--;
+            }
+
+            return Math.Max(0, soNam);
+        }
+
         /// <summary>
         /// Lớp HoSoTaoLich chứa nghiệp vụ dùng chung, giúp Controller/DAL tách riêng phần xử lý phức tạp khỏi luồng request chính.
         /// </summary>
@@ -229,6 +295,7 @@ WHERE NOT EXISTS (
         {
             public int MaMuiTiem { get; set; }
             public int? DoTuoiToiThieu { get; set; }
+            public int? DoTuoiToiDa { get; set; }
             public int? DoTuoiKhuyenNghi { get; set; }
             public string DonViTuoi { get; set; } = string.Empty;
         }
@@ -239,7 +306,9 @@ WHERE NOT EXISTS (
         public class KetQuaTaoLichTiem
         {
             public int SoMuiTiemVaccine { get; set; }
+            public int SoMuiTiemPhuHop { get; set; }
             public int SoLichTiemDaTao { get; set; }
+            public List<int> MaMuiTiemPhuHop { get; set; } = new();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
+using DoAnTotNghiep.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
@@ -11,11 +12,19 @@ namespace DoAnTotNghiep.Controllers
     {
         private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
         private readonly TaiKhoan_DAL taiKhoanDAL;
+        private readonly ThongBao_DAL thongBaoDAL;
+        private readonly TaoLichTiemService taoLichTiemService;
 
-        public HoSoSucKhoeController(HoSoSucKhoe_DAL hoSoSucKhoeDAL, TaiKhoan_DAL taiKhoanDAL)
+        public HoSoSucKhoeController(
+            HoSoSucKhoe_DAL hoSoSucKhoeDAL,
+            TaiKhoan_DAL taiKhoanDAL,
+            ThongBao_DAL thongBaoDAL,
+            TaoLichTiemService taoLichTiemService)
         {
             this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
             this.taiKhoanDAL = taiKhoanDAL;
+            this.thongBaoDAL = thongBaoDAL;
+            this.taoLichTiemService = taoLichTiemService;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -27,6 +36,7 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            CapNhatSoThongBaoLenMenu(maTaiKhoan.Value);
             var danhSach = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
             return View(danhSach);
         }
@@ -40,6 +50,7 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            CapNhatSoThongBaoLenMenu(maTaiKhoan.Value);
             var hoSo = hoSoSucKhoeDAL.LayTheoId(id, maTaiKhoan.Value);
             if (hoSo == null) return NotFound();
 
@@ -53,7 +64,10 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create()
         {
-            if (LayMaTaiKhoanUser() == null) return RedirectToAction("DangNhap", "TaiKhoan");
+            var maTaiKhoan = LayMaTaiKhoanUser();
+            if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            CapNhatSoThongBaoLenMenu(maTaiKhoan.Value);
             return View(new HoSoSucKhoe { NgaySinh = DateTime.Today });
         }
 
@@ -73,12 +87,16 @@ namespace DoAnTotNghiep.Controllers
             hoSo.MaTaiKhoan = maTaiKhoan.Value;
             hoSo.NgayTao = DateTime.Now;
 
-            if (!hoSoSucKhoeDAL.Them(hoSo))
+            var maHoSoMoi = hoSoSucKhoeDAL.ThemVaLayId(hoSo);
+            if (maHoSoMoi <= 0)
             {
                 ViewBag.ThongBao = "Thêm hồ sơ thất bại, vui lòng thử lại";
                 return View(hoSo);
             }
 
+            // Sau khi tạo hồ sơ, tự tạo lịch tiêm phù hợp rồi phát sinh thông báo cho lịch đã đến hạn/quá hạn.
+            taoLichTiemService.TaoLichTiemChoHoSo(maHoSoMoi);
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
             TempData["ThongBao"] = "Thêm hồ sơ sức khỏe thành công";
             return RedirectToAction(nameof(Index));
         }
@@ -93,6 +111,7 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            CapNhatSoThongBaoLenMenu(maTaiKhoan.Value);
             var hoSo = hoSoSucKhoeDAL.LayTheoId(id, maTaiKhoan.Value);
             if (hoSo == null) return NotFound();
 
@@ -133,6 +152,7 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            CapNhatSoThongBaoLenMenu(maTaiKhoan.Value);
             var hoSo = hoSoSucKhoeDAL.LayTheoId(id, maTaiKhoan.Value);
             if (hoSo == null) return NotFound();
 
@@ -152,11 +172,12 @@ namespace DoAnTotNghiep.Controllers
 
             if (hoSoSucKhoeDAL.Xoa(id, maTaiKhoan.Value))
             {
-                TempData["ThongBao"] = "Xóa hồ sơ sức khỏe thành công";
+                TempData["ThongBao"] = "Xóa hồ sơ thành công";
+                TempData["LoaiThongBao"] = "success";
             }
             else
             {
-                TempData["ThongBao"] = "Xóa hồ sơ sức khỏe thất bại";
+                TempData["ThongBao"] = "Xóa hồ sơ thất bại, vui lòng thử lại";
                 TempData["LoaiThongBao"] = "error";
             }
             return RedirectToAction(nameof(Index));
@@ -223,10 +244,14 @@ namespace DoAnTotNghiep.Controllers
                 return View();
             }
 
-            if (hoSoSucKhoeDAL.Them(hoSo))
+            var maHoSoMoi = hoSoSucKhoeDAL.ThemVaLayId(hoSo);
+            if (maHoSoMoi > 0)
             {
                 taiKhoanDAL.CapNhatHoTen(maTaiKhoan.Value, hoTen);
                 HttpContext.Session.SetString("HoTen", hoTen);
+                // Hồ sơ cá nhân đầu tiên cũng cần được tạo lịch và tạo thông báo nếu đã đến hạn.
+                taoLichTiemService.TaoLichTiemChoHoSo(maHoSoMoi);
+                thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
                 TempData["ThongBao"] = "Cập nhật hồ sơ sức khỏe thành công";
                 return RedirectToAction("Index", "NguoiDung");
             }
@@ -309,6 +334,13 @@ namespace DoAnTotNghiep.Controllers
 
             ViewBag.SoDienThoai = soDienThoai;
             ViewBag.Email = email;
+        }
+
+        // Cập nhật số thông báo chưa đọc cho menu dùng _UserLayout.
+        private void CapNhatSoThongBaoLenMenu(int maTaiKhoan)
+        {
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan);
+            ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan);
         }
     }
 }
