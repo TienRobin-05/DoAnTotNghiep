@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DoAnTotNghiep.Controllers
 {
     /// <summary>
-    /// Lớp AdminBaiVietController làa controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
+    /// Lớp AdminBaiVietController làa controller tniếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
     /// </summary>
     public class AdminBaiVietController : Controller
     {
