@@ -32,7 +32,12 @@ namespace DoAnTotNghiep.Controllers
         public IActionResult chiTiet(int id)
         {
             var baiViet = baiVietCamNangDAL.layTheoMa(id);
-            return baiViet == null ? NotFound() : View(baiViet);
+            if (baiViet == null || (!laAdmin() && !baiViet.trangThai))
+            {
+                return NotFound();
+            }
+
+            return View(baiViet);
         }
 
         [HttpGet]
@@ -42,7 +47,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult them()
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             return View(new baiVietCamNangModels());
         }
 
@@ -54,7 +60,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult them(baiVietCamNangModels model)
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             if (!ModelState.IsValid) return View(model);
             model.maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan")!.Value;
             baiVietCamNangDAL.them(model);
@@ -69,7 +76,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult sua(int id)
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             var baiViet = baiVietCamNangDAL.layTheoMa(id);
             return baiViet == null ? NotFound() : View(baiViet);
         }
@@ -82,7 +90,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult sua(baiVietCamNangModels model)
         {
-            if (!laAdmin()) return RedirectToAction("dangNhap", "taiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             if (!ModelState.IsValid) return View(model);
             baiVietCamNangDAL.capNhat(model);
             TempData["ThongBao"] = "Cập nhật bài viết thành công";
@@ -95,7 +104,29 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private bool laAdmin()
         {
-            return string.Equals(HttpContext.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            return maTaiKhoan != null
+                && (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IActionResult? ChanNeuKhongPhaiAdmin()
+        {
+            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
+            {
+                TempData["ThongBao"] = "Vui lòng đăng nhập để tiếp tục";
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            if (!laAdmin())
+            {
+                TempData["ThongBao"] = "Bạn không có quyền truy cập chức năng này";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction("Index", "NguoiDung");
+            }
+
+            return null;
         }
     }
 }

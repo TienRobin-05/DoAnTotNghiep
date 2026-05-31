@@ -22,7 +22,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Index()
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             return View(baiVietDAL.LayTatCaChoAdmin());
         }
 
@@ -33,7 +34,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create()
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             return View(new BaiVietCamNang { TrangThai = true });
         }
 
@@ -45,7 +47,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create(BaiVietCamNang model)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             if (!KiemTraHopLe(model))
             {
@@ -72,7 +75,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Edit(int maBaiViet)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var baiViet = baiVietDAL.LayTheoId(maBaiViet);
             return baiViet == null ? NotFound() : View(baiViet);
@@ -86,7 +90,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Edit(BaiVietCamNang model)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             if (!KiemTraHopLe(model))
             {
@@ -109,7 +114,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Details(int maBaiViet)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var baiViet = baiVietDAL.LayTheoId(maBaiViet);
             return baiViet == null ? NotFound() : View(baiViet);
@@ -122,7 +128,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Delete(int maBaiViet)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var baiViet = baiVietDAL.LayTheoId(maBaiViet);
             return baiViet == null ? NotFound() : View(baiViet);
@@ -136,7 +143,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DeleteConfirmed(int maBaiViet)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             baiVietDAL.Xoa(maBaiViet);
             TempData["ThongBao"] = "Xóa bài viết thành công";
@@ -151,7 +159,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult AnHien(int maBaiViet, bool trangThai)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             baiVietDAL.AnHien(maBaiViet, trangThai);
             TempData["ThongBao"] = "Đổi trạng thái thành công";
@@ -187,7 +196,27 @@ namespace DoAnTotNghiep.Controllers
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-            return maTaiKhoan != null && vaiTro == "Admin";
+            return maTaiKhoan != null
+                && (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IActionResult? ChanNeuKhongPhaiAdmin()
+        {
+            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
+            {
+                TempData["ThongBao"] = "Vui lòng đăng nhập để tiếp tục";
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            if (!LaAdmin())
+            {
+                TempData["ThongBao"] = "Bạn không có quyền truy cập chức năng này";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction("Index", "NguoiDung");
+            }
+
+            return null;
         }
     }
 }

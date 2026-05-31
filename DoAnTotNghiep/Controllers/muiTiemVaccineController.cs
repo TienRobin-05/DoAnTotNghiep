@@ -25,7 +25,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Index()
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             return View(muiTiemVaccineDAL.LayTatCaMuiTiemKemVaccine());
         }
 
@@ -35,7 +36,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult IndexTheoVaccine(int maVaccine)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var vaccine = vaccineDAL.LayTheoId(maVaccine);
             if (vaccine == null) return NotFound();
@@ -51,7 +53,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Details(int id)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
             if (muiTiem == null) return NotFound();
@@ -66,7 +69,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create(int? maVaccine)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             if (maVaccine.HasValue && vaccineDAL.LayTheoId(maVaccine.Value) == null)
             {
                 return NotFound();
@@ -85,7 +89,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create(MuiTiemVaccine mt)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             if (!KiemTraHopLe(mt, null))
             {
@@ -111,7 +116,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Edit(int id)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
             if (muiTiem == null) return NotFound();
@@ -128,7 +134,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Edit(MuiTiemVaccine mt)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             if (!KiemTraHopLe(mt, mt.MaMuiTiem))
             {
@@ -154,7 +161,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Delete(int id)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
             if (muiTiem == null) return NotFound();
@@ -170,7 +178,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DeleteConfirmed(int id)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
             if (muiTiem == null) return NotFound();
 
@@ -242,8 +251,28 @@ namespace DoAnTotNghiep.Controllers
         private bool LaAdmin()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
             return maTaiKhoan != null
-                && string.Equals(HttpContext.Session.GetString("VaiTro"), "Admin", StringComparison.OrdinalIgnoreCase);
+                && (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IActionResult? ChanNeuKhongPhaiAdmin()
+        {
+            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
+            {
+                TempData["ThongBao"] = "Vui lòng đăng nhập để tiếp tục";
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            if (!LaAdmin())
+            {
+                TempData["ThongBao"] = "Bạn không có quyền truy cập chức năng này";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction("Index", "NguoiDung");
+            }
+
+            return null;
         }
     }
 }

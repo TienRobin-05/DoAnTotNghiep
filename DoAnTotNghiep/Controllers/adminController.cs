@@ -38,17 +38,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Index()
         {
-            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
-            if (maTaiKhoan == null)
-            {
-                return RedirectToAction("DangNhap", "TaiKhoan");
-            }
-
-            var vaiTro = HttpContext.Session.GetString("VaiTro");
-            if (!string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                return RedirectToAction("DangNhap", "TaiKhoan");
-            }
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var danhSachVaccine = vaccineDAL.layTatCa();
             var danhSachMuiTiem = muiTiemVaccineDAL.layTatCa();
@@ -74,7 +65,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult taiKhoan()
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             return View(taiKhoanDAL.layTatCa());
         }
 
@@ -86,7 +78,8 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult doiTrangThaiTaiKhoan(int maTaiKhoan, bool trangThai)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
             taiKhoanDAL.doiTrangThai(maTaiKhoan, trangThai);
             TempData["ThongBao"] = "Đổi trạng thái thành công";
             return RedirectToAction(nameof(taiKhoan));
@@ -100,7 +93,27 @@ namespace DoAnTotNghiep.Controllers
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-            return maTaiKhoan != null && vaiTro == "Admin";
+            return maTaiKhoan != null
+                && (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IActionResult? ChanNeuKhongPhaiAdmin()
+        {
+            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
+            {
+                TempData["ThongBao"] = "Vui lòng đăng nhập để tiếp tục";
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            if (!LaAdmin())
+            {
+                TempData["ThongBao"] = "Bạn không có quyền truy cập chức năng này";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction("Index", "NguoiDung");
+            }
+
+            return null;
         }
     }
 }

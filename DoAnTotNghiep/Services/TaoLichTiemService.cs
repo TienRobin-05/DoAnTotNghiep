@@ -1,5 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System.Globalization;
+using System.Text;
 
 namespace DoAnTotNghiep.Services
 {
@@ -28,37 +30,63 @@ namespace DoAnTotNghiep.Services
             }
 
             var danhSachMuiTiem = LayDanhSachMuiTiemVaccine();
-            var danhSachMuiTiemPhuHop = danhSachMuiTiem
-                .Where(muiTiem => KiemTraMuiTiemPhuHopVoiTuoi(hoSo.NgaySinh, muiTiem))
-                .ToList();
             var ketQua = new KetQuaTaoLichTiem
             {
-                SoMuiTiemVaccine = danhSachMuiTiem.Count,
-                SoMuiTiemPhuHop = danhSachMuiTiemPhuHop.Count,
-                MaMuiTiemPhuHop = danhSachMuiTiemPhuHop.Select(muiTiem => muiTiem.MaMuiTiem).ToList()
+                SoMuiTiemVaccine = danhSachMuiTiem.Count
             };
 
-            foreach (var muiTiem in danhSachMuiTiemPhuHop)
+            foreach (var nhomVaccine in danhSachMuiTiem.GroupBy(muiTiem => muiTiem.MaVaccine))
             {
-                // Không tạo trùng lịch tiêm cho cùng một hồ sơ và cùng một mũi tiêm.
-                if (KiemTraLichTiemDaTonTai(maHoSo, muiTiem.MaMuiTiem))
+                TaoLichChoTungVaccine(maHoSo, hoSo.NgaySinh, nhomVaccine.OrderBy(muiTiem => muiTiem.SoMui), ketQua);
+            }
+
+            return ketQua;
+        }
+
+        private void TaoLichChoTungVaccine(
+            int maHoSo,
+            DateTime ngaySinh,
+            IEnumerable<MuiTiemTaoLich> danhSachMuiTiem,
+            KetQuaTaoLichTiem ketQua)
+        {
+            DateTime? ngayTiemMuiTruoc = null;
+
+            foreach (var muiTiem in danhSachMuiTiem)
+            {
+                if (!KiemTraMuiTiemPhuHopVoiTuoi(ngaySinh, muiTiem))
                 {
                     continue;
                 }
 
-                // Ưu tiên độ tuổi khuyến nghị, nếu chưa có thì dùng độ tuổi tối thiểu.
-                var doTuoiTinhLich = muiTiem.DoTuoiKhuyenNghi ?? muiTiem.DoTuoiToiThieu;
-                var ngayTiemDuKien = doTuoiTinhLich.HasValue
-                    ? TinhNgayTiemDuKien(hoSo.NgaySinh, doTuoiTinhLich.Value, muiTiem.DonViTuoi)
-                    : DateTime.Today;
+                ketQua.SoMuiTiemPhuHop++;
+                ketQua.MaMuiTiemPhuHop.Add(muiTiem.MaMuiTiem);
 
-                if (ThemLichTiemNeuChuaTonTai(maHoSo, muiTiem.MaMuiTiem, ngayTiemDuKien))
+                if (LaVaccineNhacHangNam(muiTiem))
+                {
+                    var ketQuaNgay = TinhNgayTiemNhacHangNam(ngaySinh, muiTiem);
+                    if (ThemLichNhacHangNamNeuChuaTonTai(maHoSo, muiTiem.MaMuiTiem, ketQuaNgay.NgayTiemDuKien, ketQuaNgay.GhiChu))
+                    {
+                        ketQua.SoLichTiemDaTao++;
+                    }
+
+                    ngayTiemMuiTruoc = ketQuaNgay.NgayTiemDuKien;
+                    continue;
+                }
+
+                if (KiemTraLichTiemDaTonTai(maHoSo, muiTiem.MaMuiTiem))
+                {
+                    ngayTiemMuiTruoc = LayNgayTiemDuKienDaCo(maHoSo, muiTiem.MaMuiTiem) ?? ngayTiemMuiTruoc;
+                    continue;
+                }
+
+                var ketQuaNgayTiem = TinhNgayTiemTheoThuTuMui(ngaySinh, muiTiem, ngayTiemMuiTruoc);
+                if (ThemLichTiemNeuChuaTonTai(maHoSo, muiTiem.MaMuiTiem, ketQuaNgayTiem.NgayTiemDuKien, ketQuaNgayTiem.GhiChu))
                 {
                     ketQua.SoLichTiemDaTao++;
                 }
-            }
 
-            return ketQua;
+                ngayTiemMuiTruoc = ketQuaNgayTiem.NgayTiemDuKien;
+            }
         }
 
         // Mục đích: phương thức LayHoSoTheoMa xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
@@ -98,14 +126,19 @@ WHERE maHoSo = @MaHoSo";
         {
             const string sql = @"SELECT
     mt.maMuiTiem,
+    mt.maVaccine,
+    mt.soMui,
     mt.doTuoiToiThieu,
     mt.doTuoiToiDa,
     mt.doTuoiKhuyenNghi,
-    mt.donViTuoi
+    mt.donViTuoi,
+    mt.khoangCachNgay,
+    v.tenVaccine,
+    v.nhomVaccine
 FROM MuiTiemVaccine mt
 INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE v.trangThai = 1
-ORDER BY v.tenVaccine, mt.soMui";
+ORDER BY mt.maVaccine, mt.soMui";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
@@ -119,10 +152,15 @@ ORDER BY v.tenVaccine, mt.soMui";
                 danhSach.Add(new MuiTiemTaoLich
                 {
                     MaMuiTiem = Convert.ToInt32(doc["maMuiTiem"]),
+                    MaVaccine = Convert.ToInt32(doc["maVaccine"]),
+                    SoMui = Convert.ToInt32(doc["soMui"]),
                     DoTuoiToiThieu = doc["doTuoiToiThieu"] == DBNull.Value ? null : Convert.ToInt32(doc["doTuoiToiThieu"]),
                     DoTuoiToiDa = doc["doTuoiToiDa"] == DBNull.Value ? null : Convert.ToInt32(doc["doTuoiToiDa"]),
                     DoTuoiKhuyenNghi = doc["doTuoiKhuyenNghi"] == DBNull.Value ? null : Convert.ToInt32(doc["doTuoiKhuyenNghi"]),
-                    DonViTuoi = doc["donViTuoi"] == DBNull.Value ? string.Empty : doc["donViTuoi"].ToString() ?? string.Empty
+                    DonViTuoi = doc["donViTuoi"] == DBNull.Value ? string.Empty : doc["donViTuoi"].ToString() ?? string.Empty,
+                    KhoangCachNgay = doc["khoangCachNgay"] == DBNull.Value ? null : Convert.ToInt32(doc["khoangCachNgay"]),
+                    TenVaccine = doc["tenVaccine"] == DBNull.Value ? string.Empty : doc["tenVaccine"].ToString() ?? string.Empty,
+                    NhomVaccine = doc["nhomVaccine"] == DBNull.Value ? string.Empty : doc["nhomVaccine"].ToString() ?? string.Empty
                 });
             }
 
@@ -149,11 +187,47 @@ AND maMuiTiem = @MaMuiTiem";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        private DateTime? LayNgayTiemDuKienDaCo(int maHoSo, int maMuiTiem)
+        {
+            const string sql = @"SELECT TOP 1 ngayTiemDuKien
+FROM LichTiem
+WHERE maHoSo = @MaHoSo
+AND maMuiTiem = @MaMuiTiem
+ORDER BY ngayTiemDuKien DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
+
+            ketNoi.Open();
+            var giaTri = lenh.ExecuteScalar();
+            return giaTri == null || giaTri == DBNull.Value ? null : Convert.ToDateTime(giaTri);
+        }
+
+        private bool KiemTraLichNhacHangNamDaTonTai(int maHoSo, int maMuiTiem, int nam)
+        {
+            const string sql = @"SELECT COUNT(*)
+FROM LichTiem
+WHERE maHoSo = @MaHoSo
+AND maMuiTiem = @MaMuiTiem
+AND YEAR(ngayTiemDuKien) = @Nam";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
+            lenh.Parameters.AddWithValue("@Nam", nam);
+
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
+        }
+
         // Mục đích: phương thức ThemLichTiemNeuChuaTonTai chỉ insert khi chưa có cặp maHoSo + maMuiTiem trong LichTiem.
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
-        private bool ThemLichTiemNeuChuaTonTai(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien)
+        private bool ThemLichTiemNeuChuaTonTai(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien, string ghiChu)
         {
             const string sql = @"INSERT INTO LichTiem(maHoSo, maMuiTiem, ngayTiemDuKien, trangThai, ghiChu)
 SELECT @MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu
@@ -170,17 +244,102 @@ WHERE NOT EXISTS (
             lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
             lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
             lenh.Parameters.AddWithValue("@TrangThai", "Chưa tiêm");
-            lenh.Parameters.AddWithValue("@GhiChu", "Mũi tiêm được khuyến nghị theo độ tuổi");
+            lenh.Parameters.AddWithValue("@GhiChu", ghiChu);
 
             ketNoi.Open();
             return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức TinhNgayTiemDuKien xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
-        // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
-        // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
-        // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
-        private static DateTime TinhNgayTiemDuKien(DateTime ngaySinh, int doTuoi, string donViTuoi)
+        private bool ThemLichNhacHangNamNeuChuaTonTai(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien, string ghiChu)
+        {
+            if (KiemTraLichNhacHangNamDaTonTai(maHoSo, maMuiTiem, ngayTiemDuKien.Year))
+            {
+                return false;
+            }
+
+            const string sql = @"INSERT INTO LichTiem(maHoSo, maMuiTiem, ngayTiemDuKien, trangThai, ghiChu)
+SELECT @MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM LichTiem WITH (UPDLOCK, HOLDLOCK)
+    WHERE maHoSo = @MaHoSo
+    AND maMuiTiem = @MaMuiTiem
+    AND YEAR(ngayTiemDuKien) = @Nam
+)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
+            lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
+            lenh.Parameters.AddWithValue("@Nam", ngayTiemDuKien.Year);
+            lenh.Parameters.AddWithValue("@TrangThai", "Chưa tiêm");
+            lenh.Parameters.AddWithValue("@GhiChu", ghiChu);
+
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
+        private static KetQuaTinhNgay TinhNgayTiemTheoThuTuMui(DateTime ngaySinh, MuiTiemTaoLich muiTiem, DateTime? ngayTiemMuiTruoc)
+        {
+            if (muiTiem.SoMui > 1 && ngayTiemMuiTruoc.HasValue && muiTiem.KhoangCachNgay.HasValue && muiTiem.KhoangCachNgay.Value > 0)
+            {
+                return new KetQuaTinhNgay
+                {
+                    NgayTiemDuKien = ngayTiemMuiTruoc.Value.Date.AddDays(muiTiem.KhoangCachNgay.Value),
+                    GhiChu = $"Mũi tiêm được tính theo khoảng cách {muiTiem.KhoangCachNgay.Value} ngày từ mũi trước"
+                };
+            }
+
+            var ngayTheoTuoi = TinhNgayTiemTheoDoTuoi(ngaySinh, muiTiem);
+            if (ngayTheoTuoi.HasValue)
+            {
+                return new KetQuaTinhNgay
+                {
+                    NgayTiemDuKien = ngayTheoTuoi.Value,
+                    GhiChu = "Mũi tiêm được khuyến nghị theo độ tuổi"
+                };
+            }
+
+            return new KetQuaTinhNgay
+            {
+                NgayTiemDuKien = DateTime.Today,
+                GhiChu = "Không đủ dữ liệu độ tuổi/khoảng cách để tính lịch, hệ thống tạm dùng ngày hiện tại"
+            };
+        }
+
+        private static KetQuaTinhNgay TinhNgayTiemNhacHangNam(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
+        {
+            var ngayTheoTuoi = TinhNgayTiemTheoDoTuoi(ngaySinh, muiTiem);
+            if (!ngayTheoTuoi.HasValue)
+            {
+                return new KetQuaTinhNgay
+                {
+                    NgayTiemDuKien = DateTime.Today,
+                    GhiChu = "Mũi nhắc hằng năm, không đủ dữ liệu độ tuổi để tính lịch nên tạm dùng ngày hiện tại"
+                };
+            }
+
+            var ngayCoSo = ngayTheoTuoi.Value.Date;
+            return new KetQuaTinhNgay
+            {
+                NgayTiemDuKien = TaoNgayTrongNamAnToan(DateTime.Today.Year, ngayCoSo.Month, ngayCoSo.Day),
+                GhiChu = "Mũi nhắc hằng năm được tạo cho năm hiện tại"
+            };
+        }
+
+        private static DateTime? TinhNgayTiemTheoDoTuoi(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
+        {
+            var doTuoiTinhLich = muiTiem.DoTuoiKhuyenNghi ?? muiTiem.DoTuoiToiThieu;
+            if (!doTuoiTinhLich.HasValue)
+            {
+                return null;
+            }
+
+            return TinhNgayTiemDuKien(ngaySinh, doTuoiTinhLich.Value, muiTiem.DonViTuoi);
+        }
+
+        private static DateTime? TinhNgayTiemDuKien(DateTime ngaySinh, int doTuoi, string donViTuoi)
         {
             var donVi = ChuanHoaDonViTuoi(donViTuoi);
 
@@ -191,14 +350,43 @@ WHERE NOT EXISTS (
                     "năm" => ngaySinh.AddYears(doTuoi),
                     "tháng" => ngaySinh.AddMonths(doTuoi),
                     "ngày" => ngaySinh.AddDays(doTuoi),
-                    _ => DateTime.Today
+                    _ => null
                 };
             }
             catch (ArgumentOutOfRangeException)
             {
-                // Nếu dữ liệu tuổi trong database không hợp lệ, dùng ngày hiện tại để tránh lỗi khi xem lịch.
-                return DateTime.Today;
+                return null;
             }
+        }
+
+        private static DateTime TaoNgayTrongNamAnToan(int nam, int thang, int ngay)
+        {
+            var ngayToiDaTrongThang = DateTime.DaysInMonth(nam, thang);
+            return new DateTime(nam, thang, Math.Min(ngay, ngayToiDaTrongThang));
+        }
+
+        private static bool LaVaccineNhacHangNam(MuiTiemTaoLich muiTiem)
+        {
+            var noiDung = BoDauTiengViet($"{muiTiem.TenVaccine} {muiTiem.NhomVaccine}").ToLowerInvariant();
+            return noiDung.Contains("cum")
+                || noiDung.Contains("cum mua")
+                || noiDung.Contains("nhac")
+                || noiDung.Contains("hang nam");
+        }
+
+        private static string BoDauTiengViet(string giaTri)
+        {
+            var normalized = giaTri.Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder();
+            foreach (var kyTu in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(kyTu) != UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(kyTu);
+                }
+            }
+
+            return builder.ToString().Normalize(NormalizationForm.FormC);
         }
 
         // Mục đích: phương thức ChuanHoaDonViTuoi xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
@@ -294,10 +482,21 @@ WHERE NOT EXISTS (
         private class MuiTiemTaoLich
         {
             public int MaMuiTiem { get; set; }
+            public int MaVaccine { get; set; }
+            public int SoMui { get; set; }
             public int? DoTuoiToiThieu { get; set; }
             public int? DoTuoiToiDa { get; set; }
             public int? DoTuoiKhuyenNghi { get; set; }
             public string DonViTuoi { get; set; } = string.Empty;
+            public int? KhoangCachNgay { get; set; }
+            public string TenVaccine { get; set; } = string.Empty;
+            public string NhomVaccine { get; set; } = string.Empty;
+        }
+
+        private class KetQuaTinhNgay
+        {
+            public DateTime NgayTiemDuKien { get; set; }
+            public string GhiChu { get; set; } = string.Empty;
         }
 
         /// <summary>

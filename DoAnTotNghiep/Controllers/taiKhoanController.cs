@@ -114,9 +114,12 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult DangNhap(string soDienThoai, string matKhau)
+        public IActionResult DangNhap(string soDienThoaiDangNhap, string matKhauDangNhap)
         {
             // Đăng nhập chỉ dùng số điện thoại và mật khẩu, không dùng email.
+            var soDienThoai = soDienThoaiDangNhap;
+            var matKhau = matKhauDangNhap;
+
             if (string.IsNullOrWhiteSpace(soDienThoai) || string.IsNullOrWhiteSpace(matKhau))
             {
                 ViewBag.ThongBao = "Số điện thoại hoặc mật khẩu không được bỏ trống";

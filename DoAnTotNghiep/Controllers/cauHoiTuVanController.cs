@@ -102,7 +102,8 @@ namespace DoAnTotNghiep.Controllers
         [HttpGet]
         public IActionResult traLoi(int id, int maCauHoi = 0)
         {
-            if (!LaAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
 
             var maCauHoiCanTraLoi = maCauHoi > 0 ? maCauHoi : id;
             var cauHoi = cauHoiTuVanDAL.LayTheoId(maCauHoiCanTraLoi);
@@ -114,7 +115,9 @@ namespace DoAnTotNghiep.Controllers
         public IActionResult traLoi(int maCauHoi, string cauTraLoi)
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
-            if (!LaAdmin() || maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
+            if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
             if (string.IsNullOrWhiteSpace(cauTraLoi))
             {
@@ -166,8 +169,28 @@ namespace DoAnTotNghiep.Controllers
 
         private bool LaAdmin()
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
             return HttpContext.Session.GetInt32("MaTaiKhoan") != null
-                && HttpContext.Session.GetString("VaiTro") == "Admin";
+                && (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IActionResult? ChanNeuKhongPhaiAdmin()
+        {
+            if (HttpContext.Session.GetInt32("MaTaiKhoan") == null)
+            {
+                TempData["ThongBao"] = "Vui lòng đăng nhập để tiếp tục";
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            if (!LaAdmin())
+            {
+                TempData["ThongBao"] = "Bạn không có quyền truy cập chức năng này";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction("Index", "NguoiDung");
+            }
+
+            return null;
         }
     }
 }
