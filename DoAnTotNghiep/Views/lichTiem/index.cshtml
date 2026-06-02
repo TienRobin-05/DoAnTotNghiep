@@ -12,23 +12,11 @@
     var hienCotThaoTac = Model.Any(item => item.TrangThai != "Đã tiêm");
 }
 
-<style>
-    .filter-bar {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-
-    .filter-bar .btn.active {
-        background: #0d6efd;
-        color: #fff;
-        border-color: #0d6efd;
-    }
-</style>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
+<div class="list-page-head">
+    <div>
+        <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
+        <p>@tongTatCa lịch tiêm trong hồ sơ</p>
+    </div>
     <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
 </div>
 
@@ -40,7 +28,7 @@
     <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
 }
 
-<div class="filter-bar">
+<div class="filter-bar compact-filter">
     <a asp-action="Index" asp-route-maHoSo="@maHoSo" asp-route-trangThai="tat-ca" class="btn btn-outline-primary @(boLocTrangThai == "tat-ca" ? "active" : "")">
         Tất cả (@tongTatCa)
     </a>
@@ -61,70 +49,67 @@
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     @if (TempData["ThongBao"] == null)
     {
-        <div class="alert alert-info">Không có lịch tiêm phù hợp với bộ lọc đang chọn.</div>
+        <div class="empty-state">Không có lịch tiêm phù hợp với bộ lọc đang chọn.</div>
     }
 }
 else
 {
-    <section class="card">
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Tên vaccine</th>
-                <th>Nhóm vaccine</th>
-                <th>Tên mũi tiêm</th>
-                <th>Số mũi</th>
-                <th>Ngày tiêm dự kiến</th>
-                <th>Trạng thái</th>
-                <th>Ghi chú</th>
-                @if (hienCotThaoTac)
-                {
-                    <th>Thao tác</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-        @foreach (var item in Model)
+    <section class="schedule-list">
+        @foreach (var nhomVaccine in Model.GroupBy(item => new { item.TenVaccine, item.NhomVaccine }))
         {
-            var trangThaiHienThi = item.TrangThai;
-            if (item.TrangThai == "Chưa tiêm")
-            {
-                if (item.NgayTiemDuKien.Date > DateTime.Today)
+            <article class="schedule-group">
+                <div class="schedule-group-head">
+                    <div>
+                        <h3>@nhomVaccine.Key.TenVaccine</h3>
+                        <span>@nhomVaccine.Key.NhomVaccine</span>
+                    </div>
+                    <strong>@nhomVaccine.Count() mũi</strong>
+                </div>
+
+                <div class="schedule-rows">
+                @foreach (var item in nhomVaccine.OrderBy(lich => lich.SoMui))
                 {
-                    trangThaiHienThi = "Chưa tiêm - Sắp đến lịch";
-                }
-                else if (item.NgayTiemDuKien.Date == DateTime.Today)
-                {
-                    trangThaiHienThi = "Chưa tiêm - Đến lịch hôm nay";
-                }
-                else
-                {
-                    trangThaiHienThi = "Chưa tiêm - Quá hạn";
-                }
-            }
-            <tr>
-                <td>@item.TenVaccine</td>
-                <td>@item.NhomVaccine</td>
-                <td>@item.TenMui</td>
-                <td>@item.SoMui</td>
-                <td>@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
-                <td>@trangThaiHienThi</td>
-                <td>@item.GhiChu</td>
-                @if (hienCotThaoTac)
-                {
-                    <td>
-                        @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+                    var trangThaiHienThi = item.TrangThai;
+                    var statusClass = "status-muted";
+                    if (item.TrangThai == "Đã tiêm")
+                    {
+                        trangThaiHienThi = "Đã tiêm";
+                        statusClass = "status-ok";
+                    }
+                    else if (item.NgayTiemDuKien.Date > DateTime.Today)
+                    {
+                        trangThaiHienThi = "Sắp tới";
+                        statusClass = "status-info";
+                    }
+                    else if (item.NgayTiemDuKien.Date == DateTime.Today)
+                    {
+                        trangThaiHienThi = "Hôm nay";
+                        statusClass = "status-warning";
+                    }
+                    else
+                    {
+                        trangThaiHienThi = "Quá hạn";
+                        statusClass = "status-danger";
+                    }
+
+                    <div class="schedule-item">
+                        <div class="schedule-main">
+                            <div class="schedule-title">
+                                <strong>Mũi @item.SoMui</strong>
+                                <span>@item.TenMui</span>
+                            </div>
+                            <div class="item-meta">@item.GhiChu</div>
+                        </div>
+                        <div class="schedule-date">@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</div>
+                        <span class="status-badge @statusClass">@trangThaiHienThi</span>
                         @if (item.TrangThai != "Đã tiêm")
                         {
                             <a asp-action="CapNhatDaTiem" asp-route-maLichTiem="@item.MaLichTiem" class="btn btn-sm btn-primary">Cập nhật đã tiêm</a>
                         }
-                    </td>
+                    </div>
                 }
-            </tr>
+                </div>
+            </article>
         }
-        </tbody>
-    </table>
     </section>
 }

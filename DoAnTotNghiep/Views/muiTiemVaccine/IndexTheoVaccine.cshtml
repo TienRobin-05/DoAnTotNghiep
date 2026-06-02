@@ -5,8 +5,11 @@
     ViewData["Title"] = "Mũi tiêm theo vaccine";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Mũi tiêm của vaccine: @ViewBag.TenVaccine</h2>
+<div class="list-page-head">
+    <div>
+        <h2>@ViewBag.TenVaccine</h2>
+        <p>@Model.Count mũi tiêm trong phác đồ</p>
+    </div>
     <a asp-action="Create" asp-route-maVaccine="@ViewBag.MaVaccine" class="btn btn-primary">Thêm mũi tiêm</a>
 </div>
 
@@ -15,43 +18,49 @@
     <div class="alert alert-success">@TempData["ThongBao"]</div>
 }
 
-@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-<section class="card">
+<section class="list-card">
 @if (Model.Count == 0)
 {
-    <div class="alert alert-info">Chưa có dữ liệu</div>
+    <div class="empty-state">Chưa có dữ liệu mũi tiêm cho vaccine này.</div>
 }
 else
 {
-<table class="table table-bordered table-striped">
+<table class="table list-table">
     <thead>
         <tr>
-            <th>Số mũi</th>
-            <th>Tên mũi</th>
-            <th>Độ tuổi tối thiểu</th>
-            <th>Độ tuổi tối đa</th>
-            <th>Độ tuổi khuyến nghị</th>
-            <th>Đơn vị tuổi</th>
-            <th>Khoảng cách ngày</th>
+            <th>Mũi tiêm</th>
+            <th>Độ tuổi</th>
+            <th>Khoảng cách</th>
             <th>Ghi chú</th>
             <th>Thao tác</th>
         </tr>
     </thead>
     <tbody>
-    @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
+        var doTuoi = item.DoTuoiToiThieu.HasValue || item.DoTuoiToiDa.HasValue
+            ? $"{item.DoTuoiToiThieu?.ToString() ?? "0"} - {item.DoTuoiToiDa?.ToString() ?? "không giới hạn"} {item.DonViTuoi}"
+            : "Chưa cấu hình";
+        var tuoiKhuyenNghi = item.DoTuoiKhuyenNghi.HasValue
+            ? $"Khuyến nghị: {item.DoTuoiKhuyenNghi} {item.DonViTuoi}"
+            : "Chưa có tuổi khuyến nghị";
+        var khoangCach = item.KhoangCachNgay.HasValue && item.KhoangCachNgay.Value > 0
+            ? $"{item.KhoangCachNgay} ngày"
+            : "Theo độ tuổi";
+        var ghiChu = string.IsNullOrWhiteSpace(item.GhiChu) ? "Không có" : item.GhiChu;
         <tr>
-            <td>@item.SoMui</td>
-            <td>@item.TenMui</td>
-            <td>@item.DoTuoiToiThieu</td>
-            <td>@item.DoTuoiToiDa</td>
-            <td>@item.DoTuoiKhuyenNghi</td>
-            <td>@item.DonViTuoi</td>
-            <td>@item.KhoangCachNgay</td>
-            <td>@item.GhiChu</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                <span class="dose-pill">Mũi @item.SoMui</span>
+                <div class="item-title">@item.TenMui</div>
+            </td>
+            <td>
+                <div>@doTuoi</div>
+                <div class="item-meta">@tuoiKhuyenNghi</div>
+            </td>
+            <td><span class="soft-badge">@khoangCach</span></td>
+            <td class="text-truncate-cell">@ghiChu</td>
+            <td class="table-actions">
+                <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-light">Chi tiết</a>
                 <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sửa</a>
                 <a asp-action="Delete" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-danger">Xóa</a>
             </td>
@@ -62,4 +71,4 @@ else
 }
 </section>
 
-<a asp-controller="Vaccine" asp-action="Index" class="btn btn-link">Quay lại danh sách vaccine</a>
+<a asp-controller="Vaccine" asp-action="Index" class="btn btn-link mt-2">Quay lại danh sách vaccine</a>

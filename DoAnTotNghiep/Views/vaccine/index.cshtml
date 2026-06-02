@@ -13,46 +13,36 @@
     }
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>@ViewData["Title"]</h2>
-    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+<div class="list-page-head">
+    <div>
+        <h2>@ViewData["Title"]</h2>
+        <p>@Model.Count vaccine trong danh sách</p>
+    </div>
     @if (!laTraCuu)
     {
         <a asp-action="Create" class="btn btn-primary">Thêm vaccine</a>
     }
 </div>
 
-@* Form tìm kiếm vaccine theo đúng dữ liệu có sẵn trong bảng Vaccine: tenVaccine và nhomVaccine. *@
-<form method="get" class="card mb-3">
-    <div class="row align-items-end">
-        <div class="col-md-8">
-            <label for="tuKhoa" class="form-label">Tìm kiếm vaccine</label>
-            <input id="tuKhoa" name="tuKhoa" value="@tuKhoa" class="form-control" placeholder="Nhập tên vaccine hoặc nhóm vaccine" />
-        </div>
-        <div class="col-md-4">
-            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-            <a asp-action="@actionLamMoi" class="btn btn-secondary">Làm mới</a>
-        </div>
-    </div>
+<form method="get" class="list-toolbar">
+    <input id="tuKhoa" name="tuKhoa" value="@tuKhoa" class="form-control" placeholder="Tìm tên hoặc nhóm vaccine" />
+    <button type="submit" class="btn btn-primary">Tìm</button>
+    <a asp-action="@actionLamMoi" class="btn btn-outline-secondary">Làm mới</a>
 </form>
 
-<section class="card">
+<section class="list-card">
     @if (Model.Count == 0)
     {
-        <div class="alert alert-info">Chưa có vaccine</div>
+        <div class="empty-state">Chưa có vaccine phù hợp.</div>
     }
     else
     {
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table table-bordered table-striped">
+    <table class="table list-table">
         <thead>
             <tr>
-                <th>Mã</th>
-                <th>Tên vaccine</th>
+                <th>Vaccine</th>
                 <th>Nhóm</th>
-                <th>Độ tuổi tối thiểu</th>
-                <th>Độ tuổi tối đa</th>
-                <th>Đơn vị tuổi</th>
+                <th>Độ tuổi</th>
                 <th>Trạng thái</th>
                 @if (!laTraCuu)
                 {
@@ -61,31 +51,37 @@
             </tr>
         </thead>
         <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
         @foreach (var item in Model)
         {
+            var doTuoi = item.DoTuoiToiThieu.HasValue || item.DoTuoiToiDa.HasValue
+                ? $"{item.DoTuoiToiThieu?.ToString() ?? "0"} - {item.DoTuoiToiDa?.ToString() ?? "không giới hạn"} {item.DonViTuoi}"
+                : "Chưa cấu hình";
             <tr>
-                <td>@item.MaVaccine</td>
                 <td>
-                    @if (laTraCuu)
-                    {
-                        <a asp-action="Details" asp-route-id="@item.MaVaccine">@item.TenVaccine</a>
-                    }
-                    else
-                    {
-                        @item.TenVaccine
-                    }
+                    <div class="item-title">
+                        @if (laTraCuu)
+                        {
+                            <a asp-action="Details" asp-route-id="@item.MaVaccine">@item.TenVaccine</a>
+                        }
+                        else
+                        {
+                            @item.TenVaccine
+                        }
+                    </div>
+                    <div class="item-meta">Mã #@item.MaVaccine</div>
                 </td>
-                <td>@item.NhomVaccine</td>
-                <td>@item.DoTuoiToiThieu</td>
-                <td>@item.DoTuoiToiDa</td>
-                <td>@item.DonViTuoi</td>
-                <td>@(item.TrangThai ? "Đang dùng" : "Đã ẩn")</td>
+                <td><span class="soft-badge">@item.NhomVaccine</span></td>
+                <td>@doTuoi</td>
+                <td>
+                    <span class="status-badge @(item.TrangThai ? "status-ok" : "status-muted")">
+                        @(item.TrangThai ? "Đang dùng" : "Đã ẩn")
+                    </span>
+                </td>
                 @if (!laTraCuu)
                 {
-                    <td>
-                        <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                        <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Mũi tiêm</a>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-light">Chi tiết</a>
+                        <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Mũi</a>
                         <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
                         <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Ẩn</a>
                     </td>

@@ -176,7 +176,7 @@ namespace DoAnTotNghiep.Controllers
         {
             HttpContext.Session.Clear();
             TempData["ThongBao"] = "Đăng xuất thành công";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(DangNhap));
         }
 
     }

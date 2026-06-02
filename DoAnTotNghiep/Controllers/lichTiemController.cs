@@ -177,7 +177,14 @@ namespace DoAnTotNghiep.Controllers
                 NgayCapNhat = DateTime.Now
             });
 
-            TempData["ThongBao"] = "Cập nhật lịch tiêm thành công";
+            var soLichDaDieuChinh = taoLichTiemService.DieuChinhLichMuiTiepTheoSauKhiTiem(
+                lichTiem.MaHoSo,
+                lichTiem.MaMuiTiem,
+                ngayTiemThucTe);
+
+            TempData["ThongBao"] = soLichDaDieuChinh > 0
+                ? $"Cập nhật lịch tiêm thành công. Hệ thống đã điều chỉnh {soLichDaDieuChinh} mũi tiếp theo theo ngày tiêm thực tế."
+                : "Cập nhật lịch tiêm thành công";
             return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
         }
 

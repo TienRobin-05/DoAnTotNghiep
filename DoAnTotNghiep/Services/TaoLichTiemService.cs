@@ -43,6 +43,43 @@ namespace DoAnTotNghiep.Services
             return ketQua;
         }
 
+        public int DieuChinhLichMuiTiepTheoSauKhiTiem(int maHoSo, int maMuiTiemDaTiem, DateTime ngayTiemThucTe)
+        {
+            var danhSachMuiCungVaccine = LayDanhSachLichTheoVaccineCuaMui(maHoSo, maMuiTiemDaTiem);
+            var viTriMuiDaTiem = danhSachMuiCungVaccine.FindIndex(mui => mui.MaMuiTiem == maMuiTiemDaTiem);
+            if (viTriMuiDaTiem < 0)
+            {
+                return 0;
+            }
+
+            var ngayCoSo = ngayTiemThucTe.Date;
+            var ngayCoSoLaNgayTiemThucTe = true;
+            var soLichDaDieuChinh = 0;
+
+            for (var i = viTriMuiDaTiem + 1; i < danhSachMuiCungVaccine.Count; i++)
+            {
+                var muiTiepTheo = danhSachMuiCungVaccine[i];
+                if (muiTiepTheo.NgayTiemThucTe.HasValue || string.Equals(muiTiepTheo.TrangThai, "Đã tiêm", StringComparison.OrdinalIgnoreCase))
+                {
+                    ngayCoSo = muiTiepTheo.NgayTiemThucTe?.Date ?? muiTiepTheo.NgayTiemDuKien.Date;
+                    ngayCoSoLaNgayTiemThucTe = muiTiepTheo.NgayTiemThucTe.HasValue;
+                    continue;
+                }
+
+                var khoangCachNgay = LayKhoangCachNgay(muiTiepTheo);
+                var ngayDuKienMoi = TinhNgaySauKhoangCach(ngayCoSo, khoangCachNgay, ngayCoSoLaNgayTiemThucTe);
+                if (CapNhatNgayTiemDuKien(muiTiepTheo.MaLichTiem, ngayDuKienMoi, $"Lịch được điều chỉnh theo ngày tiêm thực tế của mũi trước, cách {khoangCachNgay} ngày"))
+                {
+                    soLichDaDieuChinh++;
+                }
+
+                ngayCoSo = ngayDuKienMoi;
+                ngayCoSoLaNgayTiemThucTe = false;
+            }
+
+            return soLichDaDieuChinh;
+        }
+
         private void TaoLichChoTungVaccine(
             int maHoSo,
             DateTime ngaySinh,
@@ -50,6 +87,7 @@ namespace DoAnTotNghiep.Services
             KetQuaTaoLichTiem ketQua)
         {
             DateTime? ngayTiemMuiTruoc = null;
+            var ngayTiemMuiTruocLaNgayThucTe = false;
 
             foreach (var muiTiem in danhSachMuiTiem)
             {
@@ -70,19 +108,22 @@ namespace DoAnTotNghiep.Services
 
                 if (KiemTraLichTiemDaTonTai(maHoSo, muiTiem.MaMuiTiem))
                 {
-                    var ketQuaNgayTiemDaCo = TinhNgayTiemTheoThuTuMui(ngaySinh, muiTiem, ngayTiemMuiTruoc);
+                    var ketQuaNgayTiemDaCo = TinhNgayTiemTheoThuTuMui(ngaySinh, muiTiem, ngayTiemMuiTruoc, ngayTiemMuiTruocLaNgayThucTe);
                     CapNhatLichTiemTuDongNeuCan(maHoSo, muiTiem.MaMuiTiem, ketQuaNgayTiemDaCo.NgayTiemDuKien, ketQuaNgayTiemDaCo.GhiChu);
-                    ngayTiemMuiTruoc = LayNgayTiemDuKienDaCo(maHoSo, muiTiem.MaMuiTiem) ?? ketQuaNgayTiemDaCo.NgayTiemDuKien;
+                    var ngayTiemCoSoDaCo = LayNgayTiemCoSoDaCo(maHoSo, muiTiem.MaMuiTiem);
+                    ngayTiemMuiTruoc = ngayTiemCoSoDaCo?.NgayTiem ?? ketQuaNgayTiemDaCo.NgayTiemDuKien;
+                    ngayTiemMuiTruocLaNgayThucTe = ngayTiemCoSoDaCo?.LaNgayTiemThucTe ?? false;
                     continue;
                 }
 
-                var ketQuaNgayTiem = TinhNgayTiemTheoThuTuMui(ngaySinh, muiTiem, ngayTiemMuiTruoc);
+                var ketQuaNgayTiem = TinhNgayTiemTheoThuTuMui(ngaySinh, muiTiem, ngayTiemMuiTruoc, ngayTiemMuiTruocLaNgayThucTe);
                 if (ThemLichTiemNeuChuaTonTai(maHoSo, muiTiem.MaMuiTiem, ketQuaNgayTiem.NgayTiemDuKien, ketQuaNgayTiem.GhiChu))
                 {
                     ketQua.SoLichTiemDaTao++;
                 }
 
                 ngayTiemMuiTruoc = ketQuaNgayTiem.NgayTiemDuKien;
+                ngayTiemMuiTruocLaNgayThucTe = false;
             }
         }
 
@@ -164,6 +205,89 @@ ORDER BY mt.maVaccine, mt.soMui";
             return danhSach;
         }
 
+        private List<MuiTiemDieuChinhLich> LayDanhSachLichTheoVaccineCuaMui(int maHoSo, int maMuiTiem)
+        {
+            const string sql = @"SELECT
+    lt.maLichTiem,
+    lt.maMuiTiem,
+    lt.ngayTiemDuKien,
+    lt.trangThai,
+    mt.maVaccine,
+    mt.soMui,
+    mt.khoangCachNgay,
+    v.tenVaccine,
+    v.nhomVaccine,
+    lst.ngayTiemThucTe
+FROM LichTiem lt
+INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
+OUTER APPLY (
+    SELECT TOP 1 ngayTiemThucTe
+    FROM LichSuTiem
+    WHERE maLichTiem = lt.maLichTiem
+    ORDER BY ngayCapNhat DESC, maLichSu DESC
+) lst
+WHERE lt.maHoSo = @MaHoSo
+AND mt.maVaccine = (
+    SELECT maVaccine
+    FROM MuiTiemVaccine
+    WHERE maMuiTiem = @MaMuiTiem
+)
+ORDER BY mt.soMui";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
+
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<MuiTiemDieuChinhLich>();
+            while (doc.Read())
+            {
+                danhSach.Add(new MuiTiemDieuChinhLich
+                {
+                    MaLichTiem = Convert.ToInt32(doc["maLichTiem"]),
+                    MaMuiTiem = Convert.ToInt32(doc["maMuiTiem"]),
+                    MaVaccine = Convert.ToInt32(doc["maVaccine"]),
+                    SoMui = Convert.ToInt32(doc["soMui"]),
+                    NgayTiemDuKien = Convert.ToDateTime(doc["ngayTiemDuKien"]),
+                    TrangThai = doc["trangThai"] == DBNull.Value ? string.Empty : doc["trangThai"].ToString() ?? string.Empty,
+                    KhoangCachNgay = doc["khoangCachNgay"] == DBNull.Value ? null : Convert.ToInt32(doc["khoangCachNgay"]),
+                    TenVaccine = doc["tenVaccine"] == DBNull.Value ? string.Empty : doc["tenVaccine"].ToString() ?? string.Empty,
+                    NhomVaccine = doc["nhomVaccine"] == DBNull.Value ? string.Empty : doc["nhomVaccine"].ToString() ?? string.Empty,
+                    NgayTiemThucTe = doc["ngayTiemThucTe"] == DBNull.Value ? null : Convert.ToDateTime(doc["ngayTiemThucTe"])
+                });
+            }
+
+            return danhSach;
+        }
+
+        private bool CapNhatNgayTiemDuKien(int maLichTiem, DateTime ngayTiemDuKien, string ghiChu)
+        {
+            const string sql = @"UPDATE LichTiem
+SET ngayTiemDuKien = @NgayTiemDuKien,
+    ghiChu = @GhiChu
+WHERE maLichTiem = @MaLichTiem
+AND trangThai <> N'Đã tiêm'
+AND NOT EXISTS (
+    SELECT 1
+    FROM LichSuTiem
+    WHERE maLichTiem = @MaLichTiem
+)
+AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
+            lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
+            lenh.Parameters.AddWithValue("@GhiChu", ghiChu);
+
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
         // Mục đích: phương thức KiemTraLichTiemDaTonTai xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
@@ -184,13 +308,21 @@ AND maMuiTiem = @MaMuiTiem";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        private DateTime? LayNgayTiemDuKienDaCo(int maHoSo, int maMuiTiem)
+        private NgayTiemCoSo? LayNgayTiemCoSoDaCo(int maHoSo, int maMuiTiem)
         {
-            const string sql = @"SELECT TOP 1 ngayTiemDuKien
-FROM LichTiem
-WHERE maHoSo = @MaHoSo
-AND maMuiTiem = @MaMuiTiem
-ORDER BY ngayTiemDuKien DESC";
+            const string sql = @"SELECT TOP 1
+    COALESCE(lst.ngayTiemThucTe, lt.ngayTiemDuKien) AS ngayTiemCoSo,
+    CASE WHEN lst.ngayTiemThucTe IS NULL THEN 0 ELSE 1 END AS laNgayTiemThucTe
+FROM LichTiem lt
+OUTER APPLY (
+    SELECT TOP 1 ngayTiemThucTe
+    FROM LichSuTiem
+    WHERE maLichTiem = lt.maLichTiem
+    ORDER BY ngayCapNhat DESC, maLichSu DESC
+) lst
+WHERE lt.maHoSo = @MaHoSo
+AND lt.maMuiTiem = @MaMuiTiem
+ORDER BY COALESCE(lst.ngayTiemThucTe, lt.ngayTiemDuKien) DESC";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
@@ -198,8 +330,17 @@ ORDER BY ngayTiemDuKien DESC";
             lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
 
             ketNoi.Open();
-            var giaTri = lenh.ExecuteScalar();
-            return giaTri == null || giaTri == DBNull.Value ? null : Convert.ToDateTime(giaTri);
+            using var doc = lenh.ExecuteReader();
+            if (!doc.Read())
+            {
+                return null;
+            }
+
+            return new NgayTiemCoSo
+            {
+                NgayTiem = Convert.ToDateTime(doc["ngayTiemCoSo"]),
+                LaNgayTiemThucTe = Convert.ToInt32(doc["laNgayTiemThucTe"]) == 1
+            };
         }
 
         private bool KiemTraLichNhacHangNamDaTonTai(int maHoSo, int maMuiTiem, int nam)
@@ -303,14 +444,18 @@ WHERE NOT EXISTS (
             return lenh.ExecuteNonQuery() > 0;
         }
 
-        private static KetQuaTinhNgay TinhNgayTiemTheoThuTuMui(DateTime ngaySinh, MuiTiemTaoLich muiTiem, DateTime? ngayTiemMuiTruoc)
+        private static KetQuaTinhNgay TinhNgayTiemTheoThuTuMui(
+            DateTime ngaySinh,
+            MuiTiemTaoLich muiTiem,
+            DateTime? ngayTiemMuiTruoc,
+            bool ngayTiemMuiTruocLaNgayThucTe = false)
         {
             if (muiTiem.SoMui > 1 && ngayTiemMuiTruoc.HasValue)
             {
                 var khoangCachNgay = LayKhoangCachNgay(muiTiem);
                 return new KetQuaTinhNgay
                 {
-                    NgayTiemDuKien = ngayTiemMuiTruoc.Value.Date.AddDays(khoangCachNgay),
+                    NgayTiemDuKien = TinhNgaySauKhoangCach(ngayTiemMuiTruoc.Value.Date, khoangCachNgay, ngayTiemMuiTruocLaNgayThucTe),
                     GhiChu = $"Mũi tiêm được tính theo khoảng cách {khoangCachNgay} ngày từ mũi trước"
                 };
             }
@@ -330,6 +475,11 @@ WHERE NOT EXISTS (
                 NgayTiemDuKien = DateTime.Today,
                 GhiChu = "Không đủ dữ liệu độ tuổi/khoảng cách để tính lịch, hệ thống tạm dùng ngày hiện tại"
             };
+        }
+
+        private static DateTime TinhNgaySauKhoangCach(DateTime ngayCoSo, int khoangCachNgay, bool ngayCoSoLaNgayTiemThucTe)
+        {
+            return ngayCoSo.Date.AddDays(khoangCachNgay + (ngayCoSoLaNgayTiemThucTe ? 1 : 0));
         }
 
         private static int LayKhoangCachNgay(MuiTiemTaoLich muiTiem)
@@ -531,6 +681,20 @@ WHERE NOT EXISTS (
             public int? KhoangCachNgay { get; set; }
             public string TenVaccine { get; set; } = string.Empty;
             public string NhomVaccine { get; set; } = string.Empty;
+        }
+
+        private class MuiTiemDieuChinhLich : MuiTiemTaoLich
+        {
+            public int MaLichTiem { get; set; }
+            public DateTime NgayTiemDuKien { get; set; }
+            public string TrangThai { get; set; } = string.Empty;
+            public DateTime? NgayTiemThucTe { get; set; }
+        }
+
+        private class NgayTiemCoSo
+        {
+            public DateTime NgayTiem { get; set; }
+            public bool LaNgayTiemThucTe { get; set; }
         }
 
         private class KetQuaTinhNgay
