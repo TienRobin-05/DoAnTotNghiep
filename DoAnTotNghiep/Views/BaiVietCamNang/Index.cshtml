@@ -23,7 +23,6 @@ else
                 <th>Tiêu đề</th>
                 <th>Tác giả</th>
                 <th>Ngày tạo</th>
-                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -31,12 +30,11 @@ else
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.TieuDe</td>
+                <td>
+                    <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet">@item.TieuDe</a>
+                </td>
                 <td>@item.TenTacGia</td>
                 <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-primary">Xem chi tiết</a>
-                </td>
             </tr>
         }
         </tbody>

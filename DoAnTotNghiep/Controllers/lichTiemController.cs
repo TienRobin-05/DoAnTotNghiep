@@ -49,7 +49,7 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index(int maHoSo)
+        public IActionResult Index(int maHoSo, string? trangThai)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -70,11 +70,6 @@ namespace DoAnTotNghiep.Controllers
                 TempData["ThongBao"] = "Chưa có dữ liệu mũi tiêm vaccine. Vui lòng thêm mũi tiêm ở trang quản trị.";
                 TempData["LoaiThongBao"] = "info";
             }
-            else if (ketQuaTaoLich.SoMuiTiemPhuHop == 0)
-            {
-                TempData["ThongBao"] = "Chưa có vaccine phù hợp với độ tuổi của hồ sơ này.";
-                TempData["LoaiThongBao"] = "info";
-            }
             else if (ketQuaTaoLich.SoLichTiemDaTao > 0)
             {
                 TempData["ThongBao"] = "Hệ thống đã tự động tạo lịch tiêm cho hồ sơ này";
@@ -90,12 +85,22 @@ namespace DoAnTotNghiep.Controllers
             {
                 danhSachLichTiem = danhSachLichTiem
                     .Where(lich => ketQuaTaoLich.MaMuiTiemPhuHop.Contains(lich.MaMuiTiem))
+                    .Where(LaLichTiemNenHienThi)
                     .ToList();
             }
             else
             {
                 danhSachLichTiem = new List<LichTiem>();
             }
+
+            var boLoc = ChuanHoaBoLoc(trangThai);
+            ViewBag.MaHoSo = maHoSo;
+            ViewBag.BoLocTrangThai = boLoc;
+            ViewBag.TongTatCa = danhSachLichTiem.Count;
+            ViewBag.TongDaTiem = danhSachLichTiem.Count(LaDaTiem);
+            ViewBag.TongQuaHan = danhSachLichTiem.Count(LaQuaHan);
+            ViewBag.TongSapToi = danhSachLichTiem.Count(LaSapToi);
+            danhSachLichTiem = LocLichTiemTheoTrangThai(danhSachLichTiem, boLoc);
 
             return View(danhSachLichTiem);
         }
@@ -189,6 +194,76 @@ namespace DoAnTotNghiep.Controllers
             if (vaiTro != "User") return null;
 
             return maTaiKhoan.Value;
+        }
+
+        private static bool LaLichTiemNenHienThi(LichTiem lich)
+        {
+            if (!LaVaccineNhacHangNam(lich))
+            {
+                return true;
+            }
+
+            return lich.TrangThai == "Đã tiêm" || lich.NgayTiemDuKien.Year == DateTime.Today.Year;
+        }
+
+        private static List<LichTiem> LocLichTiemTheoTrangThai(List<LichTiem> danhSach, string boLoc)
+        {
+            return boLoc switch
+            {
+                "da-tiem" => danhSach.Where(LaDaTiem).ToList(),
+                "qua-han" => danhSach.Where(LaQuaHan).ToList(),
+                "sap-toi" => danhSach.Where(LaSapToi).ToList(),
+                _ => danhSach
+            };
+        }
+
+        private static string ChuanHoaBoLoc(string? boLoc)
+        {
+            return boLoc switch
+            {
+                "da-tiem" => "da-tiem",
+                "qua-han" => "qua-han",
+                "sap-toi" => "sap-toi",
+                _ => "tat-ca"
+            };
+        }
+
+        private static bool LaDaTiem(LichTiem lich)
+        {
+            return string.Equals(lich.TrangThai, "Đã tiêm", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool LaQuaHan(LichTiem lich)
+        {
+            return !LaDaTiem(lich) && lich.NgayTiemDuKien.Date < DateTime.Today;
+        }
+
+        private static bool LaSapToi(LichTiem lich)
+        {
+            return !LaDaTiem(lich) && lich.NgayTiemDuKien.Date >= DateTime.Today;
+        }
+
+        private static bool LaVaccineNhacHangNam(LichTiem lich)
+        {
+            var noiDung = BoDauTiengViet($"{lich.TenVaccine} {lich.NhomVaccine} {lich.TenMui}").ToLowerInvariant();
+            return noiDung.Contains("cum")
+                || noiDung.Contains("nhac")
+                || noiDung.Contains("hang nam");
+        }
+
+        private static string BoDauTiengViet(string giaTri)
+        {
+            var normalized = giaTri.Normalize(System.Text.NormalizationForm.FormD);
+            var builder = new System.Text.StringBuilder();
+            foreach (var kyTu in normalized)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(kyTu) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(kyTu);
+                }
+            }
+
+            return builder.ToString().Normalize(System.Text.NormalizationForm.FormC);
         }
     }
 }

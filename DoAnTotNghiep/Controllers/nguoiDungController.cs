@@ -49,14 +49,15 @@ namespace DoAnTotNghiep.Controllers
 
             var danhSachHoSo = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
             var tatCaLichTiem = lichTiemDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
+            var lichTiemChuaTiemSapToi = tatCaLichTiem
+                .Where(lich => lich.TrangThai != "Đã tiêm"
+                    && lich.NgayTiemDuKien.Date >= DateTime.Today)
+                .OrderBy(lich => lich.NgayTiemDuKien)
+                .ToList();
 
             ViewBag.DanhSachHoSo = danhSachHoSo;
-            ViewBag.LichTiemSapToi = tatCaLichTiem
-                .Where(lich => lich.TrangThai != "Đã tiêm")
-                .OrderBy(lich => lich.NgayTiemDuKien)
-                .Take(5)
-                .ToList();
-            ViewBag.SoMuiSapDenHan = tatCaLichTiem.Count(lich => lich.TrangThai == "Sắp đến hạn");
+            ViewBag.LichTiemSapToi = lichTiemChuaTiemSapToi.Take(5).ToList();
+            ViewBag.SoMuiSapDenHan = lichTiemChuaTiemSapToi.Count;
             ViewBag.SoMuiHoanThanh = tatCaLichTiem.Count(lich => lich.TrangThai == "Đã tiêm");
             return View();
         }

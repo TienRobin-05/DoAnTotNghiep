@@ -10,6 +10,9 @@
 *.userosscache
 *.sln.docstates
 
+# Local ASP.NET Core data-protection keys
+**/App_Data/DataProtectionKeys/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

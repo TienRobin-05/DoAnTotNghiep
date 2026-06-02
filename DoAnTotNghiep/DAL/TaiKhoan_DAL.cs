@@ -1,4 +1,5 @@
 ﻿using DoAnTotNghiep.Models;
+using DoAnTotNghiep.Services;
 using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.DAL
@@ -111,20 +112,35 @@ VALUES
     trangThai,
     ngayTao
 FROM TaiKhoan
-WHERE soDienThoai = @SoDienThoai
-AND matKhau = @MatKhau";
+WHERE soDienThoai = @SoDienThoai";
 
             // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@SoDienThoai", soDienThoai);
-            lenh.Parameters.AddWithValue("@MatKhau", matKhau);
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
             // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
             using var doc = lenh.ExecuteReader();
-            return doc.Read() ? DocTaiKhoan(doc) : null;
+            if (!doc.Read())
+            {
+                return null;
+            }
+
+            var taiKhoan = DocTaiKhoan(doc);
+            if (!MatKhauService.KiemTra(matKhau, taiKhoan.MatKhau))
+            {
+                return null;
+            }
+
+            if (!MatKhauService.LaHash(taiKhoan.MatKhau))
+            {
+                doc.Close();
+                CapNhatMatKhau(taiKhoan.MaTaiKhoan, MatKhauService.TaoHash(matKhau));
+            }
+
+            return taiKhoan;
         }
 
         // Mục đích: phương thức LayTaiKhoanTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -183,6 +199,20 @@ WHERE maTaiKhoan = @MaTaiKhoan";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        private void CapNhatMatKhau(int maTaiKhoan, string matKhauDaHash)
+        {
+            const string sql = @"UPDATE TaiKhoan
+SET matKhau = @MatKhau
+WHERE maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@MatKhau", matKhauDaHash);
+            ketNoi.Open();
+            lenh.ExecuteNonQuery();
+        }
+
         // Mục đích: phương thức GanThamSoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -191,7 +221,7 @@ WHERE maTaiKhoan = @MaTaiKhoan";
         {
             lenh.Parameters.AddWithValue("@HoTen", tk.HoTen);
             lenh.Parameters.AddWithValue("@Email", tk.Email);
-            lenh.Parameters.AddWithValue("@MatKhau", tk.MatKhau);
+            lenh.Parameters.AddWithValue("@MatKhau", MatKhauService.ChuanBiLuu(tk.MatKhau));
             lenh.Parameters.AddWithValue("@SoDienThoai", tk.SoDienThoai);
             lenh.Parameters.AddWithValue("@VaiTro", tk.VaiTro);
             lenh.Parameters.AddWithValue("@TrangThai", tk.TrangThai);

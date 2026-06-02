@@ -53,11 +53,6 @@ namespace DoAnTotNghiep.Services
 
             foreach (var muiTiem in danhSachMuiTiem)
             {
-                if (!KiemTraMuiTiemPhuHopVoiTuoi(ngaySinh, muiTiem))
-                {
-                    continue;
-                }
-
                 ketQua.SoMuiTiemPhuHop++;
                 ketQua.MaMuiTiemPhuHop.Add(muiTiem.MaMuiTiem);
 
@@ -75,7 +70,9 @@ namespace DoAnTotNghiep.Services
 
                 if (KiemTraLichTiemDaTonTai(maHoSo, muiTiem.MaMuiTiem))
                 {
-                    ngayTiemMuiTruoc = LayNgayTiemDuKienDaCo(maHoSo, muiTiem.MaMuiTiem) ?? ngayTiemMuiTruoc;
+                    var ketQuaNgayTiemDaCo = TinhNgayTiemTheoThuTuMui(ngaySinh, muiTiem, ngayTiemMuiTruoc);
+                    CapNhatLichTiemTuDongNeuCan(maHoSo, muiTiem.MaMuiTiem, ketQuaNgayTiemDaCo.NgayTiemDuKien, ketQuaNgayTiemDaCo.GhiChu);
+                    ngayTiemMuiTruoc = LayNgayTiemDuKienDaCo(maHoSo, muiTiem.MaMuiTiem) ?? ketQuaNgayTiemDaCo.NgayTiemDuKien;
                     continue;
                 }
 
@@ -223,6 +220,32 @@ AND YEAR(ngayTiemDuKien) = @Nam";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        private void CapNhatLichTiemTuDongNeuCan(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien, string ghiChu)
+        {
+            const string sql = @"UPDATE LichTiem
+SET ngayTiemDuKien = @NgayTiemDuKien,
+    ghiChu = @GhiChu
+WHERE maHoSo = @MaHoSo
+AND maMuiTiem = @MaMuiTiem
+AND trangThai <> N'Đã tiêm'
+AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien
+AND NOT EXISTS (
+    SELECT 1
+    FROM LichSuTiem lst
+    WHERE lst.maLichTiem = LichTiem.maLichTiem
+)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
+            lenh.Parameters.AddWithValue("@NgayTiemDuKien", ngayTiemDuKien.Date);
+            lenh.Parameters.AddWithValue("@GhiChu", ghiChu);
+
+            ketNoi.Open();
+            lenh.ExecuteNonQuery();
+        }
+
         // Mục đích: phương thức ThemLichTiemNeuChuaTonTai chỉ insert khi chưa có cặp maHoSo + maMuiTiem trong LichTiem.
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
@@ -282,12 +305,13 @@ WHERE NOT EXISTS (
 
         private static KetQuaTinhNgay TinhNgayTiemTheoThuTuMui(DateTime ngaySinh, MuiTiemTaoLich muiTiem, DateTime? ngayTiemMuiTruoc)
         {
-            if (muiTiem.SoMui > 1 && ngayTiemMuiTruoc.HasValue && muiTiem.KhoangCachNgay.HasValue && muiTiem.KhoangCachNgay.Value > 0)
+            if (muiTiem.SoMui > 1 && ngayTiemMuiTruoc.HasValue)
             {
+                var khoangCachNgay = LayKhoangCachNgay(muiTiem);
                 return new KetQuaTinhNgay
                 {
-                    NgayTiemDuKien = ngayTiemMuiTruoc.Value.Date.AddDays(muiTiem.KhoangCachNgay.Value),
-                    GhiChu = $"Mũi tiêm được tính theo khoảng cách {muiTiem.KhoangCachNgay.Value} ngày từ mũi trước"
+                    NgayTiemDuKien = ngayTiemMuiTruoc.Value.Date.AddDays(khoangCachNgay),
+                    GhiChu = $"Mũi tiêm được tính theo khoảng cách {khoangCachNgay} ngày từ mũi trước"
                 };
             }
 
@@ -306,6 +330,22 @@ WHERE NOT EXISTS (
                 NgayTiemDuKien = DateTime.Today,
                 GhiChu = "Không đủ dữ liệu độ tuổi/khoảng cách để tính lịch, hệ thống tạm dùng ngày hiện tại"
             };
+        }
+
+        private static int LayKhoangCachNgay(MuiTiemTaoLich muiTiem)
+        {
+            if (muiTiem.KhoangCachNgay.HasValue && muiTiem.KhoangCachNgay.Value > 0)
+            {
+                return muiTiem.KhoangCachNgay.Value;
+            }
+
+            var noiDung = BoDauTiengViet($"{muiTiem.TenVaccine} {muiTiem.NhomVaccine}").ToLowerInvariant();
+            if (noiDung.Contains("hpv"))
+            {
+                return muiTiem.SoMui == 2 ? 60 : 120;
+            }
+
+            return 30;
         }
 
         private static KetQuaTinhNgay TinhNgayTiemNhacHangNam(DateTime ngaySinh, MuiTiemTaoLich muiTiem)

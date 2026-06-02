@@ -1,11 +1,18 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 // Khởi tạo builder để đăng ký service, đọc cấu hình và chuẩn bị tạo ứng dụng ASP.NET Core MVC.
 var builder = WebApplication.CreateBuilder(args);
 
 // Đăng ký MVC để ứng dụng sử dụng Controller xử lý request và View Razor hiển thị giao diện.
 builder.Services.AddControllersWithViews();
+
+var thuMucKhoaBaoVeDuLieu = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
+Directory.CreateDirectory(thuMucKhoaBaoVeDuLieu);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(thuMucKhoaBaoVeDuLieu))
+    .SetApplicationName("DoAnTotNghiep");
 
 // Cấu hình Session để lưu thông tin đăng nhập như mã tài khoản, họ tên và vai trò trong suốt phiên làm việc.
 builder.Services.AddSession(options =>

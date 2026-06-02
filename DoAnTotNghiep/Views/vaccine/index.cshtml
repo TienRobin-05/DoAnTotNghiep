@@ -54,7 +54,10 @@
                 <th>Độ tuổi tối đa</th>
                 <th>Đơn vị tuổi</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
+                @if (!laTraCuu)
+                {
+                    <th>Thao tác</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -63,26 +66,30 @@
         {
             <tr>
                 <td>@item.MaVaccine</td>
-                <td>@item.TenVaccine</td>
+                <td>
+                    @if (laTraCuu)
+                    {
+                        <a asp-action="Details" asp-route-id="@item.MaVaccine">@item.TenVaccine</a>
+                    }
+                    else
+                    {
+                        @item.TenVaccine
+                    }
+                </td>
                 <td>@item.NhomVaccine</td>
                 <td>@item.DoTuoiToiThieu</td>
                 <td>@item.DoTuoiToiDa</td>
                 <td>@item.DonViTuoi</td>
                 <td>@(item.TrangThai ? "Đang dùng" : "Đã ẩn")</td>
-                <td>
-                    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-                    @if (!laTraCuu)
-                    {
+                @if (!laTraCuu)
+                {
+                    <td>
                         <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
                         <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Mũi tiêm</a>
                         <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
                         <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Ẩn</a>
-                    }
-                    else
-                    {
-                        <span class="text-muted">Đang hiển thị</span>
-                    }
-                </td>
+                    </td>
+                }
             </tr>
         }
         </tbody>

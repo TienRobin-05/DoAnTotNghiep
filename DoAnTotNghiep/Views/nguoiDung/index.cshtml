@@ -179,20 +179,19 @@
                         <th>Mũi tiêm</th>
                         <th>Ngày dự kiến</th>
                         <th>Trạng thái</th>
-                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var lich in lichTiemSapToi)
                     {
-                        var cssTrangThai = lich.TrangThai == "Sắp đến hạn" ? "status-due" : lich.TrangThai == "Quá hạn" ? "status-late" : lich.TrangThai == "Đã tiêm" ? "status-done" : "";
+                        var trangThaiHienThi = lich.NgayTiemDuKien.Date == DateTime.Today ? "Đến lịch hôm nay" : "Sắp đến lịch";
+                        var cssTrangThai = "status-due";
                         <tr>
                             <td>@lich.HoTenHoSo</td>
                             <td>@lich.TenVaccine</td>
                             <td>@lich.TenMui</td>
                             <td>@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
-                            <td><span class="status @cssTrangThai">@lich.TrangThai</span></td>
-                            <td><a class="btn" href="/LichTiem/CapNhatDaTiem?maLichTiem=@lich.MaLichTiem">Cập nhật</a></td>
+                            <td><span class="status @cssTrangThai">@trangThaiHienThi</span></td>
                         </tr>
                     }
                 </tbody>

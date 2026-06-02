@@ -39,7 +39,10 @@ else
                 <th>Ngày gửi</th>
                 <th>Trạng thái</th>
                 <th>Ngày trả lời</th>
-                <th>Thao tác</th>
+                @if (laAdmin)
+                {
+                    <th>Thao tác</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -47,7 +50,16 @@ else
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.CauHoi</td>
+                <td>
+                    @if (laAdmin)
+                    {
+                        @item.CauHoi
+                    }
+                    else
+                    {
+                        <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi">@item.CauHoi</a>
+                    }
+                </td>
                 @if (laAdmin)
                 {
                     <td>@item.TenNguoiGui</td>
@@ -55,16 +67,12 @@ else
                 <td>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@item.TrangThai</td>
                 <td>@(item.NgayTraLoi.HasValue ? item.NgayTraLoi.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
-                <td>
-                    @if (laAdmin)
-                    {
+                @if (laAdmin)
+                {
+                    <td>
                         <a asp-action="traLoi" asp-route-id="@item.MaCauHoi" class="btn btn-sm btn-primary">Trả lời</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="btn btn-sm btn-primary">Xem chi tiết</a>
-                    }
-                </td>
+                    </td>
+                }
             </tr>
         }
         </tbody>

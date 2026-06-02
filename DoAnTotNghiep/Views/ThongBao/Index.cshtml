@@ -27,7 +27,6 @@ else
                 <th>Nội dung</th>
                 <th>Ngày gửi</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -35,13 +34,12 @@ else
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.TieuDe</td>
+                <td>
+                    <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao">@item.TieuDe</a>
+                </td>
                 <td>@item.NoiDung</td>
                 <td>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@item.TrangThaiDoc</td>
-                <td>
-                    <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="btn btn-sm btn-primary">Xem chi tiết</a>
-                </td>
             </tr>
         }
         </tbody>
