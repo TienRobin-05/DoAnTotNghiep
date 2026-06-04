@@ -18,6 +18,11 @@
             padding: 12px 14px;
             border-radius: 6px;
             font-weight: 600;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .js-auto-alert.is-hiding {
+            opacity: 0;
+            transform: translateY(-4px);
         }
         .js-auto-alert.alert-success {
             color: #146c43;
@@ -44,9 +49,12 @@
     // Tự ẩn thông báo sau vài giây để không che giao diện thao tác.
     window.setTimeout(function () {
         document.querySelectorAll(".js-auto-alert").forEach(function (alert) {
-            alert.style.display = "none";
+            alert.classList.add("is-hiding");
+            window.setTimeout(function () {
+                alert.style.display = "none";
+            }, 250);
         });
-    }, 4500);
+    }, 1600);
 
     // Xác nhận các thao tác quan trọng: đăng xuất, xóa/ẩn dữ liệu và đổi trạng thái.
     document.addEventListener("click", function (event) {

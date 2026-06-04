@@ -9,6 +9,16 @@ namespace DoAnTotNghiep.DAL
     public class ThongBao_DAL
     {
         private readonly string chuoiKetNoi;
+        private static readonly string[] TieuDeThongBaoNhacLich =
+        {
+            "Sắp đến lịch tiêm",
+            "Hôm nay là lịch tiêm",
+            "Đã đến lịch tiêm",
+            "Quá hạn lịch tiêm"
+        };
+        private const int GioGuiThongBaoNhacLich = 0;
+        private const int SoNgayNhacTruoc = 2;
+        private const int SoNgayGiuThongBaoNhacLich = 3;
 
         public ThongBao_DAL(IConfiguration configuration)
         {
@@ -77,6 +87,38 @@ AND daDoc = 0";
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
             return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
+        public List<ThongBao> LayThongBaoChuaDocMoiNhat(int maTaiKhoan, int soLuong)
+        {
+            const string sql = @"SELECT TOP (@SoLuong)
+    maThongBao,
+    maTaiKhoan,
+    maLichTiem,
+    tieuDe,
+    noiDung,
+    ngayGui,
+    daDoc
+FROM ThongBao
+WHERE maTaiKhoan = @MaTaiKhoan
+AND daDoc = 0
+ORDER BY ngayGui DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@SoLuong", soLuong);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<ThongBao>();
+            while (doc.Read())
+            {
+                danhSach.Add(DocThongBao(doc));
+            }
+
+            return danhSach;
         }
 
         // Mục đích: phương thức LayThongBaoMoiNhat thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -185,6 +227,13 @@ VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDe, @NoiDung, @NgayGui, @DaDoc)";
         // Tạo thông báo cho các lịch tiêm đã đến hạn hoặc quá hạn, không tạo trùng khi người dùng mở trang nhiều lần.
         public int TaoThongBaoLichTiemDenHan(int maTaiKhoan)
         {
+            XoaThongBaoNhacLichKhongConHieuLuc(maTaiKhoan);
+
+            if (DateTime.Now.TimeOfDay < TimeSpan.FromHours(GioGuiThongBaoNhacLich))
+            {
+                return 0;
+            }
+
             var danhSachLich = LayLichTiemDenHan(maTaiKhoan);
             var soLichDenHanTheoHoSo = danhSachLich
                 .GroupBy(lich => lich.MaHoSo)
@@ -193,13 +242,13 @@ VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDe, @NoiDung, @NgayGui, @DaDoc)";
 
             foreach (var lich in danhSachLich)
             {
-                // Chống tạo trùng bằng đúng cặp maTaiKhoan + maLichTiem theo bảng ThongBao hiện tại.
-                if (DaCoThongBaoChoLich(maTaiKhoan, lich.MaLichTiem))
+                var tieuDe = TaoTieuDeThongBao(lich);
+
+                if (DaCoThongBaoChoLich(maTaiKhoan, lich.MaLichTiem, tieuDe))
                 {
                     continue;
                 }
 
-                var tieuDe = TaoTieuDeThongBao(lich);
                 var noiDung = TaoNoiDungThongBao(lich, soLichDenHanTheoHoSo.GetValueOrDefault(lich.MaHoSo) > 1);
 
                 if (ThemThongBaoLichTiem(maTaiKhoan, lich.MaLichTiem, tieuDe, noiDung))
@@ -211,7 +260,7 @@ VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDe, @NoiDung, @NgayGui, @DaDoc)";
             return soThongBaoDaTao;
         }
 
-        // Lấy các lịch chưa tiêm đã đến hạn hoặc quá hạn của tài khoản hiện tại.
+        // Lấy các lịch chưa tiêm sắp đến hạn, đúng ngày hoặc quá hạn của tài khoản hiện tại.
         private List<LichTiemCanThongBao> LayLichTiemDenHan(int maTaiKhoan)
         {
             const string sql = @"SELECT
@@ -234,13 +283,14 @@ INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
 INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE hs.maTaiKhoan = @MaTaiKhoan
-AND CAST(lt.ngayTiemDuKien AS DATE) <= CAST(GETDATE() AS DATE)
+AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, @SoNgayNhacTruoc, CAST(GETDATE() AS DATE))
 AND lt.trangThai = @TrangThaiChuaTiem
 ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@SoNgayNhacTruoc", SoNgayNhacTruoc);
             lenh.Parameters.AddWithValue("@TrangThaiChuaTiem", "Chưa tiêm");
 
             ketNoi.Open();
@@ -270,17 +320,19 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             return danhSach;
         }
 
-        private bool DaCoThongBaoChoLich(int maTaiKhoan, int maLichTiem)
+        private bool DaCoThongBaoChoLich(int maTaiKhoan, int maLichTiem, string tieuDe)
         {
             const string sql = @"SELECT COUNT(*)
 FROM ThongBao
 WHERE maTaiKhoan = @maTaiKhoan
-AND maLichTiem = @maLichTiem";
+AND maLichTiem = @maLichTiem
+AND tieuDe = @tieuDe";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@maTaiKhoan", maTaiKhoan);
             lenh.Parameters.AddWithValue("@maLichTiem", maLichTiem);
+            lenh.Parameters.AddWithValue("@tieuDe", tieuDe);
 
             ketNoi.Open();
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
@@ -289,7 +341,7 @@ AND maLichTiem = @maLichTiem";
         private bool ThemThongBaoLichTiem(int maTaiKhoan, int maLichTiem, string tieuDe, string noiDung)
         {
             const string sql = @"INSERT INTO ThongBao(maTaiKhoan, maLichTiem, tieuDe, noiDung, ngayGui, daDoc)
-VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, GETDATE(), 0)";
+VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
@@ -297,6 +349,7 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, GETDATE(), 0)";
             lenh.Parameters.AddWithValue("@maLichTiem", maLichTiem);
             lenh.Parameters.AddWithValue("@tieuDe", tieuDe);
             lenh.Parameters.AddWithValue("@noiDung", noiDung);
+            lenh.Parameters.AddWithValue("@ngayGui", DateTime.Today.AddHours(GioGuiThongBaoNhacLich));
 
             ketNoi.Open();
             return lenh.ExecuteNonQuery() > 0;
@@ -304,34 +357,73 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, GETDATE(), 0)";
 
         private static string TaoTieuDeThongBao(LichTiemCanThongBao lich)
         {
+            if (lich.NgayTiemDuKien.Date < DateTime.Today)
+            {
+                return "Quá hạn lịch tiêm";
+            }
+
             return lich.NgayTiemDuKien.Date == DateTime.Today
-                ? "Đã đến lịch tiêm"
-                : "Quá hạn lịch tiêm";
+                ? "Hôm nay là lịch tiêm"
+                : "Sắp đến lịch tiêm";
         }
 
         private static string TaoNoiDungThongBao(LichTiemCanThongBao lich, bool coMuiKhacDenHan)
         {
             var ngayTiem = lich.NgayTiemDuKien.ToString("dd-MM-yyyy");
+            var soNgayConLai = (lich.NgayTiemDuKien.Date - DateTime.Today).Days;
             var thongTinMui = $"mũi {lich.SoMui}";
             if (!string.IsNullOrWhiteSpace(lich.TenMui))
             {
                 thongTinMui += $" - {lich.TenMui}";
             }
 
-            var thongTinKhoangCach = lich.KhoangCachNgay.HasValue && lich.KhoangCachNgay.Value > 0
-                ? $" Khoảng cách khuyến nghị giữa các mũi: {lich.KhoangCachNgay.Value} ngày."
-                : " Khoảng cách giữa các mũi: chưa thiết lập.";
-
-            var noiDung = lich.NgayTiemDuKien.Date == DateTime.Today
-                ? $"Hồ sơ {lich.HoTenHoSo} đã đủ điều kiện tiêm vaccine {lich.TenVaccine}, nhóm {lich.NhomVaccine}. Mũi cần tiêm: {thongTinMui}. Có thể đi tiêm từ ngày {ngayTiem}.{thongTinKhoangCach} Vui lòng kiểm tra và cập nhật trạng thái sau khi tiêm."
-                : $"Hồ sơ {lich.HoTenHoSo} đã quá hạn tiêm vaccine {lich.TenVaccine}, nhóm {lich.NhomVaccine}. Mũi cần tiêm: {thongTinMui}. Lịch tiêm dự kiến từ ngày {ngayTiem}.{thongTinKhoangCach} Vui lòng đi tiêm sớm và cập nhật trạng thái sau khi tiêm.";
+            string noiDung;
+            if (lich.NgayTiemDuKien.Date < DateTime.Today)
+            {
+                noiDung = $"{lich.HoTenHoSo} đã quá hạn {thongTinMui} {lich.TenVaccine}. Hãy cập nhật khi đã tiêm.";
+            }
+            else if (lich.NgayTiemDuKien.Date == DateTime.Today)
+            {
+                noiDung = $"Hôm nay {lich.HoTenHoSo} đến lịch tiêm {thongTinMui} {lich.TenVaccine}. Đã tiêm chưa?";
+            }
+            else
+            {
+                noiDung = $"Còn {soNgayConLai} ngày đến lịch tiêm của {lich.HoTenHoSo}: {thongTinMui} {lich.TenVaccine}.";
+            }
 
             if (coMuiKhacDenHan)
             {
-                noiDung += " Ngoài ra, hồ sơ này còn có các mũi tiêm khác đang đến hạn. Vui lòng kiểm tra trong mục Lịch tiêm.";
+                noiDung += " Có thêm mũi khác cần xem.";
             }
 
             return noiDung;
+        }
+
+        private void XoaThongBaoNhacLichKhongConHieuLuc(int maTaiKhoan)
+        {
+            const string sql = @"DELETE tb
+FROM ThongBao tb
+LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+WHERE tb.maTaiKhoan = @MaTaiKhoan
+AND tb.tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)
+AND (
+    tb.ngayGui < DATEADD(DAY, -@SoNgayGiu, GETDATE())
+    OR lt.maLichTiem IS NULL
+    OR lt.trangThai <> @TrangThaiChuaTiem
+)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@TieuDeSapDen", TieuDeThongBaoNhacLich[0]);
+            lenh.Parameters.AddWithValue("@TieuDeHomNay", TieuDeThongBaoNhacLich[1]);
+            lenh.Parameters.AddWithValue("@TieuDeDenHanCu", TieuDeThongBaoNhacLich[2]);
+            lenh.Parameters.AddWithValue("@TieuDeQuaHan", TieuDeThongBaoNhacLich[3]);
+            lenh.Parameters.AddWithValue("@SoNgayGiu", SoNgayGiuThongBaoNhacLich);
+            lenh.Parameters.AddWithValue("@TrangThaiChuaTiem", "Chưa tiêm");
+
+            ketNoi.Open();
+            lenh.ExecuteNonQuery();
         }
 
         // Mục đích: phương thức DanhDauDaDoc thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.

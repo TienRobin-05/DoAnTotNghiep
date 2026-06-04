@@ -1,4 +1,4 @@
-@{
+﻿@{
     var action = ViewContext.RouteData.Values["action"]?.ToString();
     var laTrangDangNhap = string.Equals(action, "DangNhap", StringComparison.OrdinalIgnoreCase);
     var laTrangDangKy = string.Equals(action, "DangKy", StringComparison.OrdinalIgnoreCase);
@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Hệ thống quản lý sức khỏe và lịch tiêm chủng</title>
+    <title>@ViewData["Title"] - Há»‡ thá»‘ng quáº£n lÃ½ sá»©c khá»e vÃ  lá»‹ch tiÃªm chá»§ng</title>
     <style>
         * {
             box-sizing: border-box;
@@ -30,58 +30,70 @@
         }
 
         .auth-header {
-            min-height: 88px;
+            background: #ffffff;
+            border-bottom: 1px solid #dbe7f5;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+        }
+
+        .auth-header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 24px;
-            padding: 18px 64px;
-            background: #ffffff;
-            border-bottom: 1px solid #d9e2ef;
-            box-shadow: 0 3px 12px rgba(15, 42, 77, 0.06);
+            gap: 20px;
         }
 
         .auth-brand {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 12px;
             text-decoration: none;
-            color: #0f2d5c;
-            font-size: 27px;
-            font-weight: 700;
+            color: #0b63ce;
+            font-size: 24px;
+            font-weight: bold;
         }
 
         .auth-logo {
-            width: 52px;
-            height: 52px;
+            width: 46px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
             font-size: 34px;
-            font-weight: 700;
-            background: linear-gradient(180deg, #2f7df4, #0d55c8);
-            border-radius: 16px 16px 22px 22px;
-            box-shadow: 0 8px 16px rgba(19, 96, 212, 0.18);
+            font-weight: bold;
+            line-height: 1;
+            background: linear-gradient(180deg, #2f80ff 0%, #0b63ce 100%);
+            border-radius: 12px 12px 22px 22px;
+            box-shadow: 0 8px 18px rgba(11, 99, 206, 0.22);
         }
 
         .auth-nav {
             display: flex;
             align-items: center;
-            gap: 34px;
-            white-space: nowrap;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .auth-nav a {
-            color: #27364d;
+            display: inline-block;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: 1px solid #0b63ce;
+            border-radius: 8px;
+            color: #0b63ce;
+            background: #ffffff;
             text-decoration: none;
-            font-size: 17px;
-            font-weight: 500;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
         }
 
-        .auth-nav a.active {
-            color: #0d6efd;
-            font-weight: 700;
+        .auth-nav a.auth-nav-primary {
+            color: #ffffff;
+            background: #0b63ce;
         }
 
         .auth-main {
@@ -121,6 +133,12 @@
             padding: 12px 14px;
             border-radius: 6px;
             font-size: 15px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .auth-alert.is-hiding {
+            opacity: 0;
+            transform: translateY(-4px);
         }
 
         .auth-alert.success {
@@ -251,19 +269,17 @@
         }
 
         @@media (max-width: 900px) {
-            .auth-header {
+            .auth-header-inner {
                 flex-direction: column;
                 align-items: flex-start;
-                padding: 20px;
             }
 
             .auth-brand {
-                font-size: 22px;
+                font-size: 20px;
             }
 
             .auth-nav {
                 width: 100%;
-                justify-content: space-between;
                 gap: 12px;
             }
         }
@@ -286,17 +302,25 @@
 </head>
 <body>
     <div class="auth-page">
-        <header class="auth-header">
-            <a class="auth-brand" asp-controller="Home" asp-action="Index">
-                <span class="auth-logo">+</span>
-                <span>Hệ thống quản lý sức khỏe và lịch tiêm chủng</span>
-            </a>
+                <header class="auth-header">
+            <div class="auth-header-inner">
+                <a class="auth-brand" asp-controller="Home" asp-action="Index">
+                    <span class="auth-logo">+</span>
+                    <span>H&#7879; th&#7889;ng qu&#7843;n l&#253; s&#7913;c kh&#7887;e v&#224; l&#7883;ch ti&#234;m ch&#7911;ng</span>
+                </a>
 
-            <nav class="auth-nav">
-                <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-                <a class="@(laTrangDangNhap ? "active" : "")" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
-                <a class="@(laTrangDangKy ? "active" : "")" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
-            </nav>
+                <nav class="auth-nav">
+                    <a asp-controller="Home" asp-action="Index">Gi&#7899;i thi&#7879;u</a>
+                    @if (laTrangDangNhap)
+                    {
+                        <a class="auth-nav-primary" asp-controller="TaiKhoan" asp-action="DangKy">&#272;&#259;ng k&#253;</a>
+                    }
+                    else
+                    {
+                        <a class="auth-nav-primary" asp-controller="TaiKhoan" asp-action="DangNhap">&#272;&#259;ng nh&#7853;p</a>
+                    }
+                </nav>
+            </div>
         </header>
 
         <main class="auth-main">
@@ -304,8 +328,19 @@
         </main>
 
         <footer class="auth-footer">
-            © 2024 Hệ thống quản lý sức khỏe và lịch tiêm chủng. All rights reserved.
+            Â© 2024 Há»‡ thá»‘ng quáº£n lÃ½ sá»©c khá»e vÃ  lá»‹ch tiÃªm chá»§ng. All rights reserved.
         </footer>
     </div>
+    <script>
+        window.setTimeout(function () {
+            document.querySelectorAll(".auth-alert").forEach(function (alert) {
+                alert.classList.add("is-hiding");
+                window.setTimeout(function () {
+                    alert.style.display = "none";
+                }, 250);
+            });
+        }, 1600);
+    </script>
 </body>
 </html>
+

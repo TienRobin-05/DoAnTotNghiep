@@ -3,46 +3,165 @@
 @model List<ThongBao>
 @{
     ViewData["Title"] = "Thông báo của tôi";
-}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Thông báo của tôi</h2>
-    <a href="/NguoiDung/Index" class="btn btn-link">Quay lại trang người dùng</a>
-</div>
-
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (Model.Count == 0)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Bạn chưa có thông báo nào.</div>
-}
-else
-{
-    <section class="card">
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Tiêu đề</th>
-                <th>Nội dung</th>
-                <th>Ngày gửi</th>
-                <th>Trạng thái</th>
-            </tr>
-        </thead>
-        <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-        @foreach (var item in Model)
+    string RutGon(string noiDung, int doDai = 90)
+    {
+        if (string.IsNullOrWhiteSpace(noiDung))
         {
-            <tr>
-                <td>
-                    <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao">@item.TieuDe</a>
-                </td>
-                <td>@item.NoiDung</td>
-                <td>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@item.TrangThaiDoc</td>
-            </tr>
+            return string.Empty;
         }
-        </tbody>
-    </table>
-    </section>
+
+        var giaTri = noiDung.Trim()
+            .Replace("Hồ sơ ", "")
+            .Replace("vaccine ", "")
+            .Replace("Vui lòng ", "")
+            .Replace("Ngoài ra, hồ sơ này còn có các mũi tiêm khác đang đến hạn. Vui lòng kiểm tra trong mục Lịch tiêm.", "");
+
+        var viTriChiTiet = giaTri.IndexOf("Khoảng cách", StringComparison.OrdinalIgnoreCase);
+        if (viTriChiTiet >= 0)
+        {
+            giaTri = giaTri[..viTriChiTiet].Trim();
+        }
+
+        viTriChiTiet = giaTri.IndexOf("nhóm Vaccine", StringComparison.OrdinalIgnoreCase);
+        if (viTriChiTiet >= 0)
+        {
+            var dauChamSauNhom = giaTri.IndexOf(". ", viTriChiTiet, StringComparison.OrdinalIgnoreCase);
+            if (dauChamSauNhom > viTriChiTiet)
+            {
+                giaTri = giaTri.Remove(viTriChiTiet, dauChamSauNhom - viTriChiTiet + 2).Trim();
+            }
+        }
+
+        return giaTri.Length <= doDai ? giaTri : giaTri[..doDai].TrimEnd() + "...";
+    }
 }
+
+<style>
+    .notification-page {
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+    .notification-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .notification-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 16px;
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid #0b63ce;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(15, 42, 77, 0.05);
+    }
+
+    .notification-card.unread {
+        border-left-color: #f59e0b;
+        background: #fffdf7;
+    }
+
+    .notification-main {
+        min-width: 0;
+    }
+
+    .notification-title-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .notification-title-row a {
+        color: #111827;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .notification-summary {
+        margin: 0;
+        color: #475569;
+        line-height: 1.45;
+    }
+
+    .notification-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 170px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .notification-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 9px;
+        border-radius: 999px;
+        color: #475569;
+        background: #e2e8f0;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .notification-badge.unread {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    @@media (max-width: 760px) {
+        .notification-card {
+            grid-template-columns: 1fr;
+        }
+
+        .notification-meta {
+            justify-content: flex-start;
+            min-width: 0;
+        }
+    }
+</style>
+
+<section class="notification-page">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Thông báo của tôi</h2>
+        <a href="/NguoiDung/Index" class="btn btn-link">Quay lại trang người dùng</a>
+    </div>
+
+    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
+    @if (Model.Count == 0)
+    {
+        @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
+        <div class="alert alert-info">Bạn chưa có thông báo nào.</div>
+    }
+    else
+    {
+        <div class="notification-list">
+            @foreach (var item in Model)
+            {
+                var lopChuaDoc = item.DaDoc ? string.Empty : "unread";
+                <article class="notification-card @lopChuaDoc">
+                    <div class="notification-main">
+                        <div class="notification-title-row">
+                            <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao">@item.TieuDe</a>
+                            <span class="notification-badge @lopChuaDoc">@item.TrangThaiDoc</span>
+                        </div>
+                        <p class="notification-summary">@RutGon(item.NoiDung)</p>
+                    </div>
+                    <div class="notification-meta">
+                        <span>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</span>
+                        <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="btn btn-sm btn-primary">Xem</a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>

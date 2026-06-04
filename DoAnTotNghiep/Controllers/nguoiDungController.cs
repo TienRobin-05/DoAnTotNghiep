@@ -49,15 +49,32 @@ namespace DoAnTotNghiep.Controllers
 
             var danhSachHoSo = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
             var tatCaLichTiem = lichTiemDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
-            var lichTiemChuaTiemSapToi = tatCaLichTiem
-                .Where(lich => lich.TrangThai != "Đã tiêm"
-                    && lich.NgayTiemDuKien.Date >= DateTime.Today)
+            var lichTiemChuaTiem = tatCaLichTiem
+                .Where(lich => lich.TrangThai != "Đã tiêm")
+                .ToList();
+
+            var lichTiemQuaHan = lichTiemChuaTiem
+                .Where(lich => lich.NgayTiemDuKien.Date < DateTime.Today)
+                .OrderBy(lich => lich.NgayTiemDuKien)
+                .ToList();
+
+            var lichTiemHomNay = lichTiemChuaTiem
+                .Where(lich => lich.NgayTiemDuKien.Date == DateTime.Today)
+                .OrderBy(lich => lich.TenVaccine)
+                .ToList();
+
+            var lichTiemSapToi = lichTiemChuaTiem
+                .Where(lich => lich.NgayTiemDuKien.Date > DateTime.Today)
                 .OrderBy(lich => lich.NgayTiemDuKien)
                 .ToList();
 
             ViewBag.DanhSachHoSo = danhSachHoSo;
-            ViewBag.LichTiemSapToi = lichTiemChuaTiemSapToi.Take(5).ToList();
-            ViewBag.SoMuiSapDenHan = lichTiemChuaTiemSapToi.Count;
+            ViewBag.LichTiemQuaHan = lichTiemQuaHan.Take(4).ToList();
+            ViewBag.LichTiemHomNay = lichTiemHomNay.Take(4).ToList();
+            ViewBag.LichTiemSapToi = lichTiemSapToi.Take(5).ToList();
+            ViewBag.SoMuiQuaHan = lichTiemQuaHan.Count;
+            ViewBag.SoMuiHomNay = lichTiemHomNay.Count;
+            ViewBag.SoMuiSapDenHan = lichTiemSapToi.Count;
             ViewBag.SoMuiHoanThanh = tatCaLichTiem.Count(lich => lich.TrangThai == "Đã tiêm");
             return View();
         }

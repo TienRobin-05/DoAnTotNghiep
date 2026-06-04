@@ -5,12 +5,59 @@
     var maTaiKhoanDangNhap = Context.Session.GetInt32("MaTaiKhoan");
     var laUserDangNhap = string.Equals(Context.Session.GetString("VaiTro"), "User", StringComparison.OrdinalIgnoreCase);
     var thongBaoChuaDoc = ViewBag.SoThongBaoChuaDoc is int soThongBao ? soThongBao : 0;
+    var danhSachThongBaoNoi = new List<DoAnTotNghiep.Models.ThongBao>();
+    var duLieuThongBaoNoi = "[]";
 
     if (ViewBag.SoThongBaoChuaDoc is not int && maTaiKhoanDangNhap.HasValue && laUserDangNhap)
     {
         // Layout cũng cập nhật số thông báo để các trang dùng _UserLayout không bị hiển thị Thông báo (0) sai.
         ThongBaoDal.TaoThongBaoLichTiemDenHan(maTaiKhoanDangNhap.Value);
         thongBaoChuaDoc = ThongBaoDal.DemThongBaoChuaDoc(maTaiKhoanDangNhap.Value);
+    }
+
+    if (maTaiKhoanDangNhap.HasValue && laUserDangNhap && thongBaoChuaDoc > 0)
+    {
+        danhSachThongBaoNoi = ThongBaoDal.LayThongBaoChuaDocMoiNhat(maTaiKhoanDangNhap.Value, 3);
+        duLieuThongBaoNoi = System.Text.Json.JsonSerializer.Serialize(danhSachThongBaoNoi.Select(thongBao => new
+        {
+            id = thongBao.MaThongBao,
+            title = thongBao.TieuDe,
+            body = RutGonThongBao(thongBao.NoiDung),
+            url = Url.Action("Details", "ThongBao", new { maThongBao = thongBao.MaThongBao }) ?? "/ThongBao/Index",
+            sentAt = thongBao.NgayGui.ToString("yyyy-MM-dd HH:mm")
+        }));
+    }
+
+    string RutGonThongBao(string noiDung, int doDai = 90)
+    {
+        if (string.IsNullOrWhiteSpace(noiDung))
+        {
+            return string.Empty;
+        }
+
+        var giaTri = noiDung.Trim()
+            .Replace("Hồ sơ ", "")
+            .Replace("vaccine ", "")
+            .Replace("Vui lòng ", "")
+            .Replace("Ngoài ra, hồ sơ này còn có các mũi tiêm khác đang đến hạn. Vui lòng kiểm tra trong mục Lịch tiêm.", "");
+
+        var viTriChiTiet = giaTri.IndexOf("Khoảng cách", StringComparison.OrdinalIgnoreCase);
+        if (viTriChiTiet >= 0)
+        {
+            giaTri = giaTri[..viTriChiTiet].Trim();
+        }
+
+        viTriChiTiet = giaTri.IndexOf("nhóm Vaccine", StringComparison.OrdinalIgnoreCase);
+        if (viTriChiTiet >= 0)
+        {
+            var dauChamSauNhom = giaTri.IndexOf(". ", viTriChiTiet, StringComparison.OrdinalIgnoreCase);
+            if (dauChamSauNhom > viTriChiTiet)
+            {
+                giaTri = giaTri.Remove(viTriChiTiet, dauChamSauNhom - viTriChiTiet + 2).Trim();
+            }
+        }
+
+        return giaTri.Length <= doDai ? giaTri : giaTri[..doDai].TrimEnd() + "...";
     }
 
     string Active(string tenController, string? tenAction = null)
@@ -91,6 +138,16 @@
         .menu a.active {
             color: #0b63ce;
             background: #ffffff;
+        }
+
+        .menu a.logout-link {
+            color: #ffffff;
+            background: #dc2626;
+            border-radius: 6px;
+        }
+
+        .menu a.logout-link:hover {
+            background: #b91c1c;
         }
 
         .page {
@@ -419,6 +476,119 @@
             border: 1px solid #ffecb5;
         }
 
+        .floating-notification {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 30;
+            width: min(380px, calc(100vw - 32px));
+            border: 1px solid #c7d7ef;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 16px 34px rgba(15, 42, 77, 0.22);
+            overflow: hidden;
+        }
+
+        .floating-notification-toggle {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .floating-notification-toggle:checked + .floating-notification {
+            display: none;
+        }
+
+        .floating-notification-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            color: #ffffff;
+            background: #0b63ce;
+        }
+
+        .floating-notification-head strong {
+            font-size: 15px;
+        }
+
+        .floating-notification-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .floating-notification-close:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .floating-notification-body {
+            display: grid;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .floating-notification-item {
+            padding: 13px 14px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .floating-notification-item:last-child {
+            border-bottom: 0;
+        }
+
+        .floating-notification-item h3 {
+            margin: 0 0 6px;
+            color: #111827;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .floating-notification-item p {
+            display: -webkit-box;
+            margin: 0 0 10px;
+            color: #475569;
+            line-height: 1.45;
+            overflow: hidden;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .floating-notification-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .floating-notification-actions .btn {
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+
+        .desktop-notification-button {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+            padding: 6px 8px;
+            color: #ffffff;
+            background: transparent;
+            cursor: pointer;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .desktop-notification-button:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
         .text-danger {
             color: #dc2626;
         }
@@ -613,8 +783,8 @@
         }
 
         .status-info {
-            color: #1d4ed8;
-            background: #dbeafe;
+            color: #15803d;
+            background: #dcfce7;
         }
 
         .status-warning {
@@ -630,6 +800,11 @@
         .status-muted {
             color: #475569;
             background: #e2e8f0;
+        }
+
+        .status-advice {
+            color: #a16207;
+            background: #fef3c7;
         }
 
         .empty-state {
@@ -711,6 +886,11 @@
             .item-meta {
                 white-space: normal;
             }
+
+            .floating-notification {
+                right: 16px;
+                bottom: 16px;
+            }
         }
     </style>
 </head>
@@ -727,10 +907,40 @@
                 <a class="@Active("ThongBao")" href="/ThongBao/Index">Thông báo (@thongBaoChuaDoc)</a>
                 <a class="@Active("BaiVietCamNang")" href="/BaiVietCamNang/Index">Cẩm nang</a>
                 <a class="@Active("CauHoiTuVan")" href="/CauHoiTuVan/Index">Tư vấn</a>
-                <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
+                <a class="logout-link" href="/TaiKhoan/DangXuat">Đăng xuất</a>
             </nav>
         </div>
     </header>
+
+    @if (danhSachThongBaoNoi.Count > 0)
+    {
+        <input type="checkbox" id="anThongBaoNoi" class="floating-notification-toggle" />
+        <aside class="floating-notification" aria-live="polite">
+            <div class="floating-notification-head">
+                <strong>Thông báo nhắc lịch</strong>
+                <div>
+                    <button type="button" class="desktop-notification-button" id="batThongBaoDesktop">Bật đẩy</button>
+                    <label for="anThongBaoNoi" class="floating-notification-close" title="Ẩn thông báo">×</label>
+                </div>
+            </div>
+            <div class="floating-notification-body">
+                @foreach (var thongBaoNoi in danhSachThongBaoNoi)
+                {
+                    <article class="floating-notification-item">
+                        <h3>@thongBaoNoi.TieuDe</h3>
+                        <p>@RutGonThongBao(thongBaoNoi.NoiDung)</p>
+                        <div class="floating-notification-actions">
+                            <a asp-controller="ThongBao" asp-action="Details" asp-route-maThongBao="@thongBaoNoi.MaThongBao" class="btn btn-primary btn-sm">Xem chi tiết</a>
+                            @if (thongBaoNoi.MaLichTiem.HasValue)
+                            {
+                                <a asp-controller="LichTiem" asp-action="CapNhatDaTiem" asp-route-maLichTiem="@thongBaoNoi.MaLichTiem.Value" class="btn btn-secondary btn-sm">Đã tiêm chưa?</a>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        </aside>
+    }
 
     <main class="page">
         <partial name="_ThongBao" />
@@ -740,5 +950,58 @@
     <footer class="footer">
         Hệ thống quản lý sức khỏe và lịch tiêm chủng
     </footer>
+    <script>
+        (() => {
+            const thongBaoNoi = @Html.Raw(duLieuThongBaoNoi);
+            const nutBatThongBao = document.getElementById("batThongBaoDesktop");
+
+            if (!("Notification" in window) || thongBaoNoi.length === 0) {
+                if (nutBatThongBao) nutBatThongBao.style.display = "none";
+                return;
+            }
+
+            const khoaDaDay = (thongBao) => `thong-bao-desktop-${thongBao.id}-${thongBao.sentAt}`;
+
+            const dayThongBaoDesktop = () => {
+                if (Notification.permission !== "granted") return;
+
+                thongBaoNoi.forEach((thongBao) => {
+                    const khoa = khoaDaDay(thongBao);
+                    if (localStorage.getItem(khoa)) return;
+
+                    const notification = new Notification(thongBao.title, {
+                        body: thongBao.body,
+                        tag: `thong-bao-${thongBao.id}`,
+                        renotify: false
+                    });
+
+                    notification.onclick = () => {
+                        window.focus();
+                        window.location.href = thongBao.url;
+                        notification.close();
+                    };
+
+                    localStorage.setItem(khoa, "1");
+                });
+            };
+
+            if (Notification.permission === "granted") {
+                if (nutBatThongBao) nutBatThongBao.style.display = "none";
+                dayThongBaoDesktop();
+            } else if (Notification.permission === "denied") {
+                if (nutBatThongBao) nutBatThongBao.textContent = "Đã chặn";
+            }
+
+            nutBatThongBao?.addEventListener("click", async () => {
+                const quyen = await Notification.requestPermission();
+                if (quyen === "granted") {
+                    nutBatThongBao.style.display = "none";
+                    dayThongBaoDesktop();
+                } else if (quyen === "denied") {
+                    nutBatThongBao.textContent = "Đã chặn";
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
