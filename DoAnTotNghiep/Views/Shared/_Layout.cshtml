@@ -12,9 +12,16 @@
 <body>
     @{
         var hoTen = Context.Session.GetString("HoTen");
+        var soDienThoai = Context.Session.GetString("SoDienThoai");
+        var email = Context.Session.GetString("Email");
         var vaiTro = Context.Session.GetString("VaiTro");
-        var daDangNhap = !string.IsNullOrWhiteSpace(hoTen);
+        var maTaiKhoan = Context.Session.GetInt32("MaTaiKhoan");
+        var daDangNhap = maTaiKhoan.HasValue;
         var laAdmin = string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase);
+        var tenHienThi = !string.IsNullOrWhiteSpace(hoTen)
+            ? hoTen
+            : (!string.IsNullOrWhiteSpace(soDienThoai) ? soDienThoai : email);
+        tenHienThi = string.IsNullOrWhiteSpace(tenHienThi) ? "Tài khoản" : tenHienThi;
     }
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
@@ -50,8 +57,15 @@
                     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                     @if (daDangNhap)
                     {
-                        <span class="text-muted">@hoTen (@vaiTro)</span>
-                        <a class="btn btn-outline-danger btn-sm" asp-controller="TaiKhoan" asp-action="DangXuat">Đăng xuất</a>
+                        <div class="dropdown account-dropdown">
+                            <button class="btn btn-outline-primary btn-sm dropdown-toggle account-name-button" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @tenHienThi
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end account-dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="TaiKhoan" asp-action="ThongTinCaNhan">Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" asp-controller="TaiKhoan" asp-action="DangXuat">Đăng xuất</a></li>
+                            </ul>
+                        </div>
                     }
                     else
                     {

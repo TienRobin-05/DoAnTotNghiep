@@ -176,7 +176,36 @@ namespace DoAnTotNghiep.Controllers
         {
             HttpContext.Session.Clear();
             TempData["ThongBao"] = "Đăng xuất thành công";
-            return RedirectToAction(nameof(DangNhap));
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult ThongTinCaNhan()
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (maTaiKhoan == null)
+            {
+                return RedirectToAction(nameof(DangNhap));
+            }
+
+            var taiKhoan = taiKhoanDAL.LayTaiKhoanTheoId(maTaiKhoan.Value);
+            if (taiKhoan == null)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction(nameof(DangNhap));
+            }
+
+            var hoSoCaNhan = hoSoSucKhoeDAL.LayHoSoDauTienTheoTaiKhoan(maTaiKhoan.Value);
+            var model = new ThongTinCaNhanViewModel
+            {
+                HoTen = !string.IsNullOrWhiteSpace(hoSoCaNhan?.HoTen) ? hoSoCaNhan.HoTen : taiKhoan.HoTen,
+                SoDienThoai = taiKhoan.SoDienThoai,
+                Email = taiKhoan.Email,
+                GioiTinh = hoSoCaNhan?.GioiTinh ?? string.Empty,
+                NgaySinh = hoSoCaNhan == null || hoSoCaNhan.NgaySinh == default ? null : hoSoCaNhan.NgaySinh
+            };
+
+            return View(model);
         }
 
     }
