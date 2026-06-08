@@ -131,9 +131,11 @@
 </style>
 
 <section class="notification-page">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Thông báo của tôi</h2>
-        <a href="/NguoiDung/Index" class="btn btn-link">Quay lại trang người dùng</a>
+    <div class="list-page-head">
+        <div>
+            <h2>Thông báo của tôi</h2>
+            <p>@Model.Count thông báo trong tài khoản của bạn</p>
+        </div>
     </div>
 
     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@

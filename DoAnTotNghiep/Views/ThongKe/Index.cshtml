@@ -5,13 +5,39 @@
     ViewData["Title"] = "Thống kê";
 }
 
-<h2>Thống kê tổng quan</h2>
+<div class="list-page-head">
+    <div>
+        <h2>Thống kê tổng quan</h2>
+        <p>Các số liệu chính của hệ thống tiêm chủng</p>
+    </div>
+</div>
 
 <style>
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-    .stat-box { border: 1px solid #ddd; border-radius: 6px; padding: 16px; background: #fff; }
-    .stat-box strong { display: block; font-size: 28px; }
-    .stat-box span { color: #555; }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+    .stat-box {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-box strong {
+        display: block;
+        color: #0b63ce;
+        font-size: 28px;
+    }
+
+    .stat-box span {
+        color: #555;
+    }
 </style>
 
 <div class="stat-grid">

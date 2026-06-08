@@ -82,17 +82,28 @@
             overflow-x: auto;
         }
 
-        .menu a {
+        .menu a,
+        .menu button {
             color: #eef6ff;
             padding: 9px 12px;
+            border: 0;
             border-radius: 6px;
             font-size: 15px;
             font-weight: 600;
+            font-family: inherit;
+            background: transparent;
             white-space: nowrap;
+            cursor: pointer;
         }
 
-        .menu a:hover {
+        .menu a:hover,
+        .menu button:hover {
             background: rgba(255, 255, 255, 0.14);
+        }
+
+        .menu button:disabled {
+            cursor: default;
+            opacity: 0.8;
         }
 
         .menu a.active {
@@ -289,6 +300,68 @@
 
         .table-striped tbody tr:nth-child(even) {
             background: #f9fafb;
+        }
+
+        .list-card {
+            max-width: 980px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-table {
+            margin: 0;
+            background: #ffffff;
+        }
+
+        .list-table th {
+            color: #475569;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .list-table td {
+            vertical-align: middle;
+        }
+
+        .item-title {
+            color: #111827;
+            font-weight: 800;
+        }
+
+        .item-title a {
+            color: #0b63ce;
+        }
+
+        .item-meta {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .soft-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            color: #0b63ce;
+            background: #eaf4ff;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .table-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
         .btn-sm {
@@ -522,27 +595,46 @@
 
         .list-page-head {
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: space-between;
             gap: 16px;
-            margin-bottom: 12px;
-            padding: 14px 16px;
+            margin-bottom: 16px;
+            padding: 20px;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             background: #ffffff;
         }
 
         .list-page-head h2 {
-            margin: 0;
+            margin: 0 0 8px;
             color: #111827;
-            font-size: 24px;
+            font-size: 30px;
             font-weight: 800;
+            line-height: 1.2;
         }
 
         .list-page-head p {
-            margin: 6px 0 0;
+            margin: 0;
             color: #6b7280;
+            font-size: 20px;
             line-height: 1.4;
+        }
+
+        .list-page-head .btn {
+            flex: 0 0 auto;
+        }
+
+        .list-toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto auto;
+            gap: 10px;
+            align-items: center;
+            max-width: 980px;
+            margin: 0 auto 16px;
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
         }
 
         .compact-filter {
@@ -711,6 +803,13 @@
             font-weight: 700;
         }
 
+        .text-truncate-cell {
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         hr {
             border: 0;
             border-top: 1px solid #e5e7eb;
@@ -767,9 +866,29 @@
                 flex-direction: column;
             }
 
+            .list-page-head h2 {
+                font-size: 26px;
+            }
+
+            .list-page-head p {
+                font-size: 17px;
+            }
+
+            .list-toolbar {
+                grid-template-columns: 1fr;
+            }
+
             .schedule-item {
                 grid-template-columns: 1fr;
                 align-items: start;
+            }
+
+            .list-card {
+                overflow-x: auto;
+            }
+
+            .list-table {
+                min-width: 720px;
             }
 
             .schedule-date,
@@ -788,7 +907,7 @@
 <body>
     <header class="navbar">
         <div class="navbar-inner">
-            <a class="brand" href="/NguoiDung/Index">Quản lý sức khỏe và lịch tiêm chủng</a>
+            <span class="brand">Quản lý sức khỏe và lịch tiêm chủng</span>
             <nav class="menu">
                 <a class="@Active("NguoiDung", "Index")" href="/NguoiDung/Index">Trang chủ</a>
                 <a class="@Active("HoSoSucKhoe")" href="/HoSoSucKhoe/Index">Hồ sơ</a>
@@ -853,5 +972,6 @@
             }, true);
         })();
     </script>
+    <script src="/js/push-notification.js?v=6"></script>
 </body>
 </html>

@@ -395,6 +395,156 @@
             background: #f9fafb;
         }
 
+        .list-page-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            max-width: 980px;
+            margin: 0 auto 16px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-page-head h2 {
+            margin: 0 0 8px;
+            color: #111827;
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .list-page-head p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 20px;
+            line-height: 1.4;
+        }
+
+        .list-page-head .btn {
+            flex: 0 0 auto;
+        }
+
+        .list-toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto auto;
+            gap: 10px;
+            align-items: center;
+            max-width: 980px;
+            margin: 0 auto 16px;
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-card {
+            max-width: 980px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-table {
+            margin: 0;
+            background: #ffffff;
+        }
+
+        .list-table th {
+            color: #475569;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .list-table td {
+            vertical-align: middle;
+        }
+
+        .item-title {
+            color: #111827;
+            font-weight: 800;
+        }
+
+        .item-title a {
+            color: #0b63ce;
+        }
+
+        .item-meta {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .soft-badge,
+        .dose-pill,
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .soft-badge {
+            color: #0b63ce;
+            background: #eaf4ff;
+        }
+
+        .dose-pill {
+            color: #ffffff;
+            background: #111827;
+        }
+
+        .status-badge.status-ok {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .status-badge.status-muted {
+            color: #475569;
+            background: #e2e8f0;
+        }
+
+        .status-badge.status-warning {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .table-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .empty-state {
+            padding: 22px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            color: #64748b;
+            background: #ffffff;
+            font-weight: 700;
+        }
+
+        .text-truncate-cell {
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .btn-sm {
             padding: 6px 10px;
             font-size: 14px;
@@ -677,6 +827,31 @@
                 padding: 16px;
             }
 
+            .list-card {
+                overflow-x: auto;
+            }
+
+            .list-table {
+                min-width: 720px;
+            }
+
+            .list-page-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .list-page-head h2 {
+                font-size: 26px;
+            }
+
+            .list-page-head p {
+                font-size: 17px;
+            }
+
+            .list-toolbar {
+                grid-template-columns: 1fr;
+            }
+
             th,
             td {
                 padding: 10px 8px;
@@ -693,7 +868,7 @@
 <body>
     <header class="navbar">
         <div class="navbar-inner">
-            <a class="brand" href="/Admin/Index">Quản trị hệ thống tiêm chủng</a>
+            <span class="brand">Quản trị hệ thống tiêm chủng</span>
             <nav class="menu">
                 <a class="@Active("Admin", "Index")" href="/Admin/Index">Trang chủ</a>
                 <a class="@Active("vaccine")" href="/vaccine/index">Vaccine</a>

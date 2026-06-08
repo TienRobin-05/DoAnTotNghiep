@@ -91,6 +91,30 @@
         color: #64748b;
     }
 
+    .home-actions {
+        display: grid;
+        gap: 10px;
+        justify-items: end;
+    }
+
+    .reminder-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .reminder-toggle input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: #0b63ce;
+    }
+
     .home-name {
         color: #0b63ce;
     }
@@ -511,6 +535,10 @@
             flex-direction: column;
         }
 
+        .home-actions {
+            justify-items: start;
+        }
+
         .schedule-table {
             overflow-x: auto;
         }
@@ -526,7 +554,13 @@
         <h1>Xin chào, <span class="home-name">@hoTen</span></h1>
         <p>Cùng theo dõi sức khỏe và lịch tiêm của bạn và gia đình.</p>
     </div>
-    <div class="home-date">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
+    <div class="home-actions">
+        <label class="reminder-toggle">
+            <input type="checkbox" id="btnBatThongBao" />
+            <span>Tự động nhắc lịch</span>
+        </label>
+        <div class="home-date">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
+    </div>
 </section>
 
 <section class="home-grid">
@@ -710,7 +744,7 @@
 
         <article class="panel">
             <div class="panel-head">
-                <h2>Hồ sơ</h2>
+                <h2>Hồ sơ sức khỏe</h2>
                 <a class="head-link" href="/HoSoSucKhoe/Index">Xem tất cả</a>
             </div>
 

@@ -1,4 +1,5 @@
 ﻿using DoAnTotNghiep.Models;
+using DoAnTotNghiep.Services;
 using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.DAL
@@ -19,10 +20,12 @@ namespace DoAnTotNghiep.DAL
         private const int GioGuiThongBaoNhacLich = 0;
         private const int SoNgayNhacTruoc = 2;
         private const int SoNgayGiuThongBaoNhacLich = 3;
+        private readonly PushNotificationService pushNotificationService;
 
-        public ThongBao_DAL(IConfiguration configuration)
+        public ThongBao_DAL(IConfiguration configuration, PushNotificationService pushNotificationService)
         {
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+            this.pushNotificationService = pushNotificationService;
         }
 
         // Mục đích: phương thức LayDanhSachTheoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -251,8 +254,10 @@ VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDe, @NoiDung, @NgayGui, @DaDoc)";
 
                 var noiDung = TaoNoiDungThongBao(lich, soLichDenHanTheoHoSo.GetValueOrDefault(lich.MaHoSo) > 1);
 
-                if (ThemThongBaoLichTiem(maTaiKhoan, lich.MaLichTiem, tieuDe, noiDung))
+                var maThongBao = ThemThongBaoLichTiem(maTaiKhoan, lich.MaLichTiem, tieuDe, noiDung);
+                if (maThongBao > 0)
                 {
+                    pushNotificationService.GuiThongBao(maTaiKhoan, maThongBao, tieuDe, noiDung);
                     soThongBaoDaTao++;
                 }
             }
@@ -338,9 +343,10 @@ AND tieuDe = @tieuDe";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        private bool ThemThongBaoLichTiem(int maTaiKhoan, int maLichTiem, string tieuDe, string noiDung)
+        private int ThemThongBaoLichTiem(int maTaiKhoan, int maLichTiem, string tieuDe, string noiDung)
         {
             const string sql = @"INSERT INTO ThongBao(maTaiKhoan, maLichTiem, tieuDe, noiDung, ngayGui, daDoc)
+OUTPUT INSERTED.maThongBao
 VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -352,7 +358,8 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
             lenh.Parameters.AddWithValue("@ngayGui", DateTime.Today.AddHours(GioGuiThongBaoNhacLich));
 
             ketNoi.Open();
-            return lenh.ExecuteNonQuery() > 0;
+            var ketQua = lenh.ExecuteScalar();
+            return ketQua == null || ketQua == DBNull.Value ? 0 : Convert.ToInt32(ketQua);
         }
 
         private static string TaoTieuDeThongBao(LichTiemCanThongBao lich)
@@ -502,3 +509,5 @@ AND maTaiKhoan = @MaTaiKhoan";
         }
     }
 }
+
+

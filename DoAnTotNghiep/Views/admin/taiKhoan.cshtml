@@ -5,25 +5,38 @@
     ViewData["Title"] = "Quản lý tài khoản";
 }
 
-<h2>Quản lý tài khoản</h2>
+<div class="list-page-head">
+    <div>
+        <h2>Quản lý tài khoản</h2>
+        <p>@Model.Count tài khoản trong hệ thống</p>
+    </div>
+</div>
 
-<section class="card">
-<table class="table table-bordered table-striped">
+<section class="list-card">
+<table class="table list-table">
     <thead>
-        <tr><th>Mã</th><th>Họ tên</th><th>Email</th><th>Số điện thoại</th><th>Vai trò</th><th>Trạng thái</th><th></th></tr>
+        <tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr>
     </thead>
     <tbody>
     @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
         <tr>
-            <td>@item.maTaiKhoan</td>
-            <td>@item.hoTen</td>
-            <td>@item.email</td>
-            <td>@item.soDienThoai</td>
-            <td>@item.vaiTro</td>
-            <td>@(item.trangThai ? "Hoạt động" : "Khóa")</td>
             <td>
+                <div class="item-title">@item.hoTen</div>
+                <div class="item-meta">Mã tài khoản #@item.maTaiKhoan</div>
+            </td>
+            <td>
+                <div>@item.email</div>
+                <div class="item-meta">@(string.IsNullOrWhiteSpace(item.soDienThoai) ? "Chưa có số điện thoại" : item.soDienThoai)</div>
+            </td>
+            <td><span class="soft-badge">@item.vaiTro</span></td>
+            <td>
+                <span class="status-badge @(item.trangThai ? "status-ok" : "status-muted")">
+                    @(item.trangThai ? "Hoạt động" : "Khóa")
+                </span>
+            </td>
+            <td class="table-actions">
                 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
                 <form asp-action="doiTrangThaiTaiKhoan" method="post">
                     @Html.AntiForgeryToken()

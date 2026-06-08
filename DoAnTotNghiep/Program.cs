@@ -32,12 +32,14 @@ builder.Services.AddScoped<LichTiem_DAL>();
 // Đăng ký dependency injection dạng Scoped để mỗi request dùng một instance phù hợp của DAL/service.
 builder.Services.AddScoped<LichSuTiem_DAL>();
 builder.Services.AddScoped<ThongBao_DAL>();
+builder.Services.AddScoped<PushSubscription_DAL>();
 builder.Services.AddScoped<CauHoiTuVan_DAL>();
 builder.Services.AddScoped<BaiVietCamNang_DAL>();
 builder.Services.AddScoped<ThongKe_DAL>();
 builder.Services.AddScoped<TaoLichTiemService>();
 // Đăng ký dependency injection dạng Scoped để mỗi request dùng một instance phù hợp của DAL/service.
 builder.Services.AddScoped<ThongBaoNhacLichService>();
+builder.Services.AddScoped<PushNotificationService>();
 builder.Services.AddScoped<taiKhoanDAL>();
 builder.Services.AddScoped<hoSoSucKhoeDAL>();
 builder.Services.AddScoped<vaccineDAL>();
@@ -58,7 +60,19 @@ if (!app.Environment.IsDevelopment())
 }
 
 // Bật middleware phục vụ file tĩnh như CSS, JavaScript, hình ảnh trong thư mục wwwroot.
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        if (context.File.Name == "push-service-worker.js")
+        {
+            context.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+            context.Context.Response.Headers.Pragma = "no-cache";
+            context.Context.Response.Headers.Expires = "0";
+            context.Context.Response.Headers["Service-Worker-Allowed"] = "/";
+        }
+    }
+});
 // Bật middleware định tuyến để ASP.NET Core xác định Controller/Action cần chạy cho mỗi URL.
 app.UseRouting();
 // Bật middleware Session trước khi Controller chạy để có thể đọc/ghi dữ liệu phiên đăng nhập.

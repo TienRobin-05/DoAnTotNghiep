@@ -5,48 +5,57 @@
     ViewData["Title"] = "Hồ sơ sức khỏe";
 }
 
-<section class="card">
-    <div class="section-head">
-        <h2 class="section-title">Hồ sơ sức khỏe</h2>
-        <a asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
+<div class="list-page-head">
+    <div>
+        <h2>Hồ sơ sức khỏe</h2>
+        <p>@Model.Count hồ sơ trong tài khoản của bạn</p>
     </div>
+    <a asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
+</div>
 
-    @if (Model.Count == 0)
-    {
-        <div class="empty">Bạn chưa có hồ sơ sức khỏe nào.</div>
-    }
-    else
-    {
-        <table>
+@if (Model.Count == 0)
+{
+    <div class="empty-state">Bạn chưa có hồ sơ sức khỏe nào.</div>
+}
+else
+{
+    <section class="list-card">
+        <table class="table list-table">
             <thead>
                 <tr>
-                    <th>Họ tên</th>
+                    <th>Hồ sơ</th>
                     <th>Ngày sinh</th>
                     <th>Giới tính</th>
-                    <th>Chiều cao</th>
-                    <th>Cân nặng</th>
+                    <th>Thể trạng</th>
                     <th>Ngày tạo</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.HoTen</td>
-                        <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
-                        <td>@item.GioiTinh</td>
-                        <td>@(item.ChieuCao.HasValue ? item.ChieuCao.Value.ToString() : "")</td>
-                        <td>@(item.CanNang.HasValue ? item.CanNang.Value.ToString() : "")</td>
-                        <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@item.MaHoSo" class="btn">Chi tiết</a>
-                            <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="btn">Sửa</a>
-                            <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="btn btn-danger">Xóa</a>
-                        </td>
-                    </tr>
-                }
+            @foreach (var item in Model)
+            {
+                var chieuCao = item.ChieuCao.HasValue ? $"{item.ChieuCao.Value} cm" : "Chưa nhập";
+                var canNang = item.CanNang.HasValue ? $"{item.CanNang.Value} kg" : "Chưa nhập";
+                <tr>
+                    <td>
+                        <div class="item-title">@item.HoTen</div>
+                        <div class="item-meta">Mã hồ sơ #@item.MaHoSo</div>
+                    </td>
+                    <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
+                    <td><span class="soft-badge">@item.GioiTinh</span></td>
+                    <td>
+                        <div>@chieuCao</div>
+                        <div class="item-meta">@canNang</div>
+                    </td>
+                    <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                        <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-danger">Xóa</a>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
-    }
-</section>
+    </section>
+}
