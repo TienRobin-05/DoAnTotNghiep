@@ -67,7 +67,7 @@
 
 <style>
     .page {
-        max-width: 1540px;
+        max-width: 1320px;
     }
 
     .home-header {
@@ -117,6 +117,36 @@
 
     .home-name {
         color: #0b63ce;
+    }
+
+    .start-profile-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 0 0 16px;
+        padding: 16px 18px;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        background: #eff6ff;
+    }
+
+    .start-profile-cta strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .start-profile-cta span {
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    .start-profile-cta .btn {
+        white-space: nowrap;
     }
 
     .home-grid {
@@ -571,6 +601,11 @@
             justify-items: start;
         }
 
+        .start-profile-cta {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
         .schedule-table {
             overflow-x: auto;
         }
@@ -594,6 +629,17 @@
         <div class="home-date">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
     </div>
 </section>
+
+@if (danhSachHoSo.Count == 0)
+{
+    <section class="start-profile-cta">
+        <div>
+            <strong>Thêm hồ sơ sức khỏe để bắt đầu</strong>
+            <span>Tạo hồ sơ đầu tiên để hệ thống tự lập lịch tiêm và theo dõi nhắc lịch cho bạn.</span>
+        </div>
+        <a class="btn btn-primary" href="/HoSoSucKhoe/Create">Thêm hồ sơ mới -&gt;</a>
+    </section>
+}
 
 <section class="home-grid">
     <article class="panel">

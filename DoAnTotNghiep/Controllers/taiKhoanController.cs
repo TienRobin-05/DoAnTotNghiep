@@ -164,11 +164,6 @@ namespace DoAnTotNghiep.Controllers
             if (vaiTro == "User")
             {
                 TempData["ThongBao"] = "Đăng nhập thành công";
-                if (!hoSoSucKhoeDAL.KiemTraTaiKhoanDaCoHoSo(taiKhoan.MaTaiKhoan))
-                {
-                    return RedirectToAction("CapNhatThongTinCaNhan", "HoSoSucKhoe");
-                }
-
                 return RedirectToAction("Index", "NguoiDung");
             }
 
@@ -260,7 +255,7 @@ namespace DoAnTotNghiep.Controllers
         {
             HttpContext.Session.Clear();
             TempData["ThongBao"] = "Đăng xuất thành công";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(DangNhap));
         }
 
         [HttpGet]
