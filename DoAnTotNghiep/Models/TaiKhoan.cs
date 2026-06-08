@@ -21,5 +21,9 @@
         public bool TrangThai { get; set; }
         // Thuộc tính NgayTao lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public DateTime NgayTao { get; set; }
+        public DateTime? LanDangNhapCuoi { get; set; }
+        public bool DaXoa { get; set; }
+        public DateTime? NgayXoaMem { get; set; }
+        public string? LyDoXoa { get; set; }
     }
 }

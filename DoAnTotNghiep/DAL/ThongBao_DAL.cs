@@ -165,6 +165,38 @@ ORDER BY ngayGui DESC";
             return danhSach;
         }
 
+        public List<ThongBao> LayThongBaoGanDay(int maTaiKhoan, int soNgay)
+        {
+            const string sql = @"SELECT
+    maThongBao,
+    maTaiKhoan,
+    maLichTiem,
+    tieuDe,
+    noiDung,
+    ngayGui,
+    daDoc
+FROM ThongBao
+WHERE maTaiKhoan = @MaTaiKhoan
+AND ngayGui >= DATEADD(DAY, -@SoNgay, GETDATE())
+ORDER BY ngayGui DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@SoNgay", soNgay);
+
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<ThongBao>();
+            while (doc.Read())
+            {
+                danhSach.Add(DocThongBao(doc));
+            }
+
+            return danhSach;
+        }
+
         // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.

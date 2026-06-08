@@ -24,7 +24,7 @@ namespace DoAnTotNghiep.DAL
             return new ThongKeViewModel
             {
                 TongSoTaiKhoan = Dem("SELECT COUNT(*) FROM TaiKhoan"),
-                TongSoNguoiDung = Dem("SELECT COUNT(*) FROM TaiKhoan WHERE vaiTro = N'User'"),
+                TongSoNguoiDung = Dem("SELECT COUNT(*) FROM TaiKhoan WHERE vaiTro IN (N'User', N'NguoiDung')"),
                 TongSoAdmin = Dem("SELECT COUNT(*) FROM TaiKhoan WHERE vaiTro = N'Admin'"),
                 TongSoHoSoSucKhoe = Dem("SELECT COUNT(*) FROM HoSoSucKhoe"),
                 TongSoVaccineDangSuDung = Dem("SELECT COUNT(*) FROM Vaccine WHERE trangThai = 1"),

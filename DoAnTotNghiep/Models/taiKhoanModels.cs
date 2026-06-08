@@ -31,5 +31,16 @@ namespace DoAnTotNghiep.Models
         public bool trangThai { get; set; } = true;
         // Thuộc tính ngayTao lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public DateTime ngayTao { get; set; }
+        public DateTime? lanDangNhapCuoi { get; set; }
+        public bool daXoa { get; set; }
+        public DateTime? ngayXoaMem { get; set; }
+        public string? lyDoXoa { get; set; }
+    }
+
+    public class KetQuaDonDepTaiKhoan
+    {
+        public int SoTaiKhoanXoaMem { get; set; }
+        public int SoTaiKhoanXoaCung { get; set; }
+        public string ThongBao { get; set; } = string.Empty;
     }
 }

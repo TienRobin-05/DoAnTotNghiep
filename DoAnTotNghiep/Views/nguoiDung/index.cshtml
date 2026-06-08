@@ -150,6 +150,13 @@
         font-weight: 800;
     }
 
+    .panel-head p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
     .head-link {
         color: #0b63ce;
         font-weight: 700;
@@ -479,6 +486,31 @@
         white-space: nowrap;
     }
 
+    .notification-hidden {
+        display: none;
+    }
+
+    .recent-notification-more {
+        display: flex;
+        justify-content: flex-end;
+        padding: 12px 14px 14px;
+    }
+
+    .recent-notification-more button {
+        border: 1px solid #0d6efd;
+        border-radius: 7px;
+        padding: 7px 13px;
+        color: #0d6efd;
+        background: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .recent-notification-more button:hover {
+        background: #eff6ff;
+    }
+
     .profile-item .btn {
         white-space: nowrap;
     }
@@ -716,29 +748,41 @@
     <div class="side-column">
         <article class="panel">
             <div class="panel-head">
-                <h2>Thông báo gần đây</h2>
-                <a class="head-link" href="/ThongBao/Index">Xem tất cả</a>
+                <div>
+                    <h2>Thông báo gần đây</h2>
+                    <p>Hiển thị thông báo trong 10 ngày gần nhất</p>
+                </div>
             </div>
 
             @if (thongBaoMoiNhat.Count == 0)
             {
-                <div class="empty-row" style="margin: 14px;">Chưa có thông báo.</div>
+                <div class="empty-row" style="margin: 14px;">Chưa có thông báo gần đây.</div>
             }
             else
             {
                 <div class="side-list">
-                    @foreach (var tb in thongBaoMoiNhat)
+                    @for (var i = 0; i < thongBaoMoiNhat.Count; i++)
                     {
-                        <a class="notice-item" href="/ThongBao/Details/@tb.MaThongBao">
+                        var tb = thongBaoMoiNhat[i];
+                        var hiddenClass = i >= 3 ? "notification-hidden" : string.Empty;
+
+                        <a class="notice-item recent-notification-item @hiddenClass" href="/ThongBao/Details/@tb.MaThongBao">
                             <span class="notice-dot"></span>
                             <span class="notice-content">
                                 <strong>@tb.TieuDe</strong>
                                 <span>@RutGon(tb.NoiDung)</span>
                             </span>
-                            <small class="notice-time">@tb.NgayGui.ToString("HH:mm")</small>
+                            <small class="notice-time">@tb.NgayGui.ToString("dd/MM HH:mm")</small>
                         </a>
                     }
                 </div>
+
+                @if (thongBaoMoiNhat.Count > 3)
+                {
+                    <div class="recent-notification-more">
+                        <button type="button" id="btnXemThemThongBao">Xem thêm</button>
+                    </div>
+                }
             }
         </article>
 
@@ -773,3 +817,18 @@
         </article>
     </div>
 </section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById("btnXemThemThongBao");
+        if (!btn) return;
+
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".recent-notification-item.notification-hidden").forEach(function (item) {
+                item.classList.remove("notification-hidden");
+            });
+
+            btn.style.display = "none";
+        });
+    });
+</script>

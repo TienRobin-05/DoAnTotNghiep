@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Quên mật khẩu";
+    Layout = "_AuthLayout";
+}
+
+<style>
+    .forgot-password-back-link {
+        margin-top: 22px;
+        text-align: center;
+    }
+</style>
+
+<section class="auth-card">
+    <h1 class="auth-title">Quên mật khẩu</h1>
+    <p class="auth-subtitle">Nhập số điện thoại và email để đặt lại mật khẩu.</p>
+
+    @if (ViewBag.ThongBao != null)
+    {
+        <div class="auth-alert error">@ViewBag.ThongBao</div>
+    }
+
+    <form method="post" autocomplete="off">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label>Số điện thoại</label>
+            <div class="input-box">
+                <input
+                    type="text"
+                    name="soDienThoai"
+                    value="@ViewBag.SoDienThoai"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="Nhập số điện thoại" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <div class="input-box">
+                <input
+                    type="email"
+                    name="email"
+                    value="@ViewBag.Email"
+                    autocomplete="off"
+                    placeholder="Nhập email" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Mật khẩu mới</label>
+            <div class="input-box">
+                <input
+                    type="password"
+                    name="matKhauMoi"
+                    autocomplete="new-password"
+                    placeholder="Nhập mật khẩu mới" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Xác nhận mật khẩu</label>
+            <div class="input-box">
+                <input
+                    type="password"
+                    name="xacNhanMatKhau"
+                    autocomplete="new-password"
+                    placeholder="Nhập lại mật khẩu mới" />
+            </div>
+        </div>
+
+        <button type="submit" class="auth-button">Đặt lại mật khẩu</button>
+
+        <div class="auth-switch forgot-password-back-link">
+            <a class="auth-link" asp-action="DangNhap">Quay lại đăng nhập</a>
+        </div>
+    </form>
+</section>

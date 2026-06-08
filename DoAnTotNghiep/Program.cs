@@ -54,6 +54,18 @@ builder.Services.AddScoped<cauHoiTuVanDAL>();
 // Tạo đối tượng app sau khi đã hoàn tất đăng ký service và cấu hình ban đầu.
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        scope.ServiceProvider.GetRequiredService<PushSubscription_DAL>().KhoiTaoBangNeuChuaCo();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Khong khoi tao duoc bang PushSubscription. Chuc nang push se thu lai khi nguoi dung dang ky.");
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

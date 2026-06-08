@@ -80,8 +80,49 @@ namespace DoAnTotNghiep.Controllers
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
+
+            var taiKhoan = taiKhoanDAL.layTheoMa(maTaiKhoan);
+            if (taiKhoan == null)
+            {
+                TempData["ThongBao"] = "Không tìm thấy tài khoản cần cập nhật";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(taiKhoan));
+            }
+
+            var maTaiKhoanDangNhap = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (maTaiKhoanDangNhap == maTaiKhoan && !trangThai)
+            {
+                TempData["ThongBao"] = "Không thể khóa tài khoản đang đăng nhập.";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(taiKhoan));
+            }
+
             taiKhoanDAL.doiTrangThai(maTaiKhoan, trangThai);
             TempData["ThongBao"] = "Đổi trạng thái thành công";
+            return RedirectToAction(nameof(taiKhoan));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult donDepTaiKhoanKhongHoatDong()
+        {
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
+
+            try
+            {
+                var maTaiKhoanDangNhap = HttpContext.Session.GetInt32("MaTaiKhoan");
+                var ketQua = taiKhoanDAL.DonDepTaiKhoanKhongHoatDong(maTaiKhoanDangNhap);
+                var coLoi = ketQua.ThongBao.StartsWith("Dọn tài khoản thất bại", StringComparison.OrdinalIgnoreCase);
+                TempData["ThongBao"] = coLoi ? "Xóa thất bại." : "Xóa thành công.";
+                TempData["LoaiThongBao"] = coLoi ? "danger" : "success";
+            }
+            catch
+            {
+                TempData["ThongBao"] = "Xóa thất bại.";
+                TempData["LoaiThongBao"] = "danger";
+            }
+
             return RedirectToAction(nameof(taiKhoan));
         }
 

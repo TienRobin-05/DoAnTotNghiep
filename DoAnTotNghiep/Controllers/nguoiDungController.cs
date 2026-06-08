@@ -45,7 +45,7 @@ namespace DoAnTotNghiep.Controllers
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
             thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
             ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
-            ViewBag.ThongBaoMoiNhat = thongBaoDAL.LayThongBaoMoiNhat(maTaiKhoan.Value, 4);
+            ViewBag.ThongBaoMoiNhat = thongBaoDAL.LayThongBaoGanDay(maTaiKhoan.Value, 10);
 
             var danhSachHoSo = hoSoSucKhoeDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);
             var tatCaLichTiem = lichTiemDAL.LayDanhSachTheoTaiKhoan(maTaiKhoan.Value);

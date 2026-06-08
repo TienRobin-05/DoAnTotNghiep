@@ -23,7 +23,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpPost]
-        public IActionResult DangKy([FromBody] PushSubscriptionRequest request)
+        public IActionResult DangKy([FromBody] PushSubscriptionRequest? request)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null)
@@ -31,7 +31,8 @@ namespace DoAnTotNghiep.Controllers
                 return Unauthorized();
             }
 
-            if (string.IsNullOrWhiteSpace(request.Endpoint)
+            if (request?.Keys == null
+                || string.IsNullOrWhiteSpace(request.Endpoint)
                 || string.IsNullOrWhiteSpace(request.Keys.P256dh)
                 || string.IsNullOrWhiteSpace(request.Keys.Auth))
             {
@@ -43,7 +44,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpPost]
-        public IActionResult HuyDangKy([FromBody] PushSubscriptionRequest request)
+        public IActionResult HuyDangKy([FromBody] PushSubscriptionRequest? request)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null)
@@ -51,7 +52,7 @@ namespace DoAnTotNghiep.Controllers
                 return Unauthorized();
             }
 
-            if (string.IsNullOrWhiteSpace(request.Endpoint))
+            if (string.IsNullOrWhiteSpace(request?.Endpoint))
             {
                 return BadRequest();
             }

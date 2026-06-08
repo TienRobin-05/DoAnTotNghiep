@@ -5,22 +5,108 @@
     ViewData["Title"] = "Quản lý tài khoản";
 }
 
+<style>
+    .account-status-overlay {
+        align-items: center;
+        background: rgba(15, 23, 42, 0.45);
+        display: none;
+        inset: 0;
+        justify-content: center;
+        padding: 18px;
+        position: fixed;
+        z-index: 1000;
+    }
+
+    .account-status-overlay.is-open {
+        display: flex;
+    }
+
+    .account-status-modal {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+        max-width: 460px;
+        padding: 22px;
+        width: 100%;
+    }
+
+    .account-status-modal h3 {
+        font-size: 20px;
+        margin: 0 0 16px;
+    }
+
+    .account-status-details {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        display: grid;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding: 14px;
+    }
+
+    .account-status-details span {
+        color: #64748b;
+        display: block;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .status-options {
+        display: grid;
+        gap: 10px;
+        margin: 12px 0 20px;
+    }
+
+    .status-option {
+        align-items: center;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .status-option input {
+        margin: 0;
+    }
+
+    .account-status-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .status-badge.status-locked {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+</style>
+
 <div class="list-page-head">
     <div>
         <h2>Quản lý tài khoản</h2>
         <p>@Model.Count tài khoản trong hệ thống</p>
     </div>
+    <form asp-action="donDepTaiKhoanKhongHoatDong" method="post">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-sm btn-outline-danger" type="submit">Dọn tài khoản không hoạt động</button>
+    </form>
 </div>
 
 <section class="list-card">
 <table class="table list-table">
     <thead>
-        <tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr>
+        <tr><th>Tài khoản</th><th>Liên hệ</th><th>Vai trò</th><th>Lần đăng nhập cuối</th><th>Xóa mềm</th><th>Trạng thái</th><th>Thao tác</th></tr>
     </thead>
     <tbody>
     @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
+        var trangThaiHienThi = item.trangThai ? "Hoạt động" : "Khóa";
+        var lienHeHienThi = !string.IsNullOrWhiteSpace(item.email)
+            ? item.email
+            : (!string.IsNullOrWhiteSpace(item.soDienThoai) ? item.soDienThoai : "Chưa có thông tin liên hệ");
         <tr>
             <td>
                 <div class="item-title">@item.hoTen</div>
@@ -32,21 +118,135 @@
             </td>
             <td><span class="soft-badge">@item.vaiTro</span></td>
             <td>
-                <span class="status-badge @(item.trangThai ? "status-ok" : "status-muted")">
-                    @(item.trangThai ? "Hoạt động" : "Khóa")
+                @(item.lanDangNhapCuoi.HasValue ? item.lanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa ghi nhận")
+            </td>
+            <td>
+                @if (item.daXoa)
+                {
+                    <span class="status-badge status-locked">Đã xóa mềm</span>
+                    <div class="item-meta">
+                        @(item.ngayXoaMem.HasValue ? item.ngayXoaMem.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(item.lyDoXoa))
+                    {
+                        <div class="item-meta">@item.lyDoXoa</div>
+                    }
+                }
+                else
+                {
+                    <span class="status-badge status-ok">Chưa xóa</span>
+                }
+            </td>
+            <td>
+                <span class="status-badge @(item.trangThai ? "status-ok" : "status-locked")">
+                    @trangThaiHienThi
                 </span>
             </td>
             <td class="table-actions">
-                @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-                <form asp-action="doiTrangThaiTaiKhoan" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="maTaiKhoan" value="@item.maTaiKhoan" />
-                    <input type="hidden" name="trangThai" value="@(!item.trangThai)" />
-                    <button class="btn btn-sm btn-outline-secondary" type="submit">Đổi trạng thái</button>
-                </form>
+                <button class="btn btn-sm btn-outline-secondary js-open-status-modal"
+                        type="button"
+                        data-ma-tai-khoan="@item.maTaiKhoan"
+                        data-ho-ten="@item.hoTen"
+                        data-lien-he="@lienHeHienThi"
+                        data-trang-thai="@item.trangThai"
+                        data-trang-thai-hien-thi="@trangThaiHienThi">
+                    Đổi trạng thái
+                </button>
             </td>
         </tr>
     }
     </tbody>
 </table>
 </section>
+
+<div class="account-status-overlay" id="accountStatusOverlay" aria-hidden="true">
+    <div class="account-status-modal" role="dialog" aria-modal="true" aria-labelledby="accountStatusTitle">
+        <h3 id="accountStatusTitle">Đổi trạng thái tài khoản</h3>
+        <form asp-action="doiTrangThaiTaiKhoan" method="post" id="accountStatusForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="maTaiKhoan" id="modalMaTaiKhoan" />
+
+            <div class="account-status-details">
+                <div>
+                    <span>Họ tên</span>
+                    <strong id="modalHoTen"></strong>
+                </div>
+                <div>
+                    <span>Email hoặc số điện thoại</span>
+                    <strong id="modalLienHe"></strong>
+                </div>
+                <div>
+                    <span>Trạng thái hiện tại</span>
+                    <strong id="modalTrangThaiHienTai"></strong>
+                </div>
+            </div>
+
+            <div>
+                <span class="item-meta">Trạng thái mới</span>
+                <div class="status-options">
+                    <label class="status-option">
+                        <input type="radio" name="trangThai" value="true" id="modalTrangThaiHoatDong" />
+                        <span>Hoạt động</span>
+                    </label>
+                    <label class="status-option">
+                        <input type="radio" name="trangThai" value="false" id="modalTrangThaiKhoa" />
+                        <span>Khóa</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="account-status-actions">
+                <button class="btn btn-sm btn-outline-secondary" type="button" id="closeStatusModal">Hủy</button>
+                <button class="btn btn-sm btn-primary" type="submit">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const overlay = document.getElementById("accountStatusOverlay");
+        const openButtons = document.querySelectorAll(".js-open-status-modal");
+        const closeButton = document.getElementById("closeStatusModal");
+        const maTaiKhoanInput = document.getElementById("modalMaTaiKhoan");
+        const hoTenText = document.getElementById("modalHoTen");
+        const lienHeText = document.getElementById("modalLienHe");
+        const trangThaiHienTaiText = document.getElementById("modalTrangThaiHienTai");
+        const trangThaiHoatDongInput = document.getElementById("modalTrangThaiHoatDong");
+        const trangThaiKhoaInput = document.getElementById("modalTrangThaiKhoa");
+
+        const closeModal = () => {
+            overlay.classList.remove("is-open");
+            overlay.setAttribute("aria-hidden", "true");
+        };
+
+        openButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const dangHoatDong = button.dataset.trangThai === "True" || button.dataset.trangThai === "true";
+
+                maTaiKhoanInput.value = button.dataset.maTaiKhoan || "";
+                hoTenText.textContent = button.dataset.hoTen || "";
+                lienHeText.textContent = button.dataset.lienHe || "";
+                trangThaiHienTaiText.textContent = button.dataset.trangThaiHienThi || "";
+                trangThaiHoatDongInput.checked = dangHoatDong;
+                trangThaiKhoaInput.checked = !dangHoatDong;
+
+                overlay.classList.add("is-open");
+                overlay.setAttribute("aria-hidden", "false");
+            });
+        });
+
+        closeButton.addEventListener("click", closeModal);
+        overlay.addEventListener("click", (event) => {
+            if (event.target === overlay) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && overlay.classList.contains("is-open")) {
+                closeModal();
+            }
+        });
+    })();
+</script>

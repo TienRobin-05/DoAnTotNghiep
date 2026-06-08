@@ -8,7 +8,10 @@
         return;
     }
 
-    capNhatTrangThaiBanDau();
+    capNhatTrangThaiBanDau().catch(() => {
+        checkbox.checked = false;
+        checkbox.disabled = Notification.permission === "denied";
+    });
 
     checkbox.addEventListener("change", async () => {
         const muonBatThongBao = checkbox.checked;
@@ -18,15 +21,15 @@
             if (muonBatThongBao) {
                 await batThongBao();
                 checkbox.checked = true;
-                alert("Da bat tu dong nhac lich.");
+                alert("Đã bật tự động nhắc lịch.");
             } else {
                 await tatThongBao();
                 checkbox.checked = false;
-                alert("Da tat tu dong nhac lich.");
+                alert("Đã tắt tự động nhắc lịch.");
             }
         } catch (error) {
             checkbox.checked = !muonBatThongBao;
-            alert(`Khong cap nhat duoc thong bao: ${layThongBaoLoi(error)}`);
+            alert(`Lỗi khi cập nhật nhắc lịch: ${layThongBaoLoi(error)}`);
         } finally {
             checkbox.disabled = Notification.permission === "denied";
         }
@@ -57,11 +60,19 @@
     async function batThongBao() {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
-            throw new Error("Ban can cho phep thong bao trong trinh duyet.");
+            throw new Error("Bạn cần cho phép thông báo trong trình duyệt.");
         }
 
         const publicKeyResponse = await fetch("/Push/PublicKey");
+        if (!publicKeyResponse.ok) {
+            throw new Error("Không lấy được khóa đăng ký thông báo.");
+        }
+
         const publicKeyData = await publicKeyResponse.json();
+        if (!publicKeyData.publicKey) {
+            throw new Error("Máy chủ chưa cấu hình khóa Web Push.");
+        }
+
         const registration = await layServiceWorkerDangHoatDong();
         const applicationServerKey = chuyenBase64UrlThanhUint8Array(publicKeyData.publicKey);
 
@@ -103,7 +114,7 @@
                 return;
             }
 
-            const timeout = setTimeout(() => reject(new Error("Service Worker chua san sang. Hay tai lai trang va thu lai.")), 10000);
+            const timeout = setTimeout(() => reject(new Error("Service Worker chưa sẵn sàng. Hãy tải lại trang và thử lại.")), 10000);
 
             worker.addEventListener("statechange", () => {
                 if (worker.state === "activated") {
@@ -122,13 +133,17 @@
             return;
         }
 
-        await fetch("/Push/HuyDangKy", {
+        const response = await fetch("/Push/HuyDangKy", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(subscription)
         });
+
+        if (!response.ok && response.status !== 401) {
+            throw new Error(`Không hủy được đăng ký thông báo. Mã lỗi: ${response.status}`);
+        }
 
         await subscription.unsubscribe();
     }
@@ -143,15 +158,19 @@
         });
 
         if (!response.ok) {
-            throw new Error(`Khong luu duoc dang ky thong bao. Ma loi: ${response.status}`);
+            if (response.status === 401) {
+                throw new Error("Vui lòng đăng nhập.");
+            }
+
+            throw new Error(`Không lưu được đăng ký thông báo. Mã lỗi: ${response.status}`);
         }
     }
 
     function layThongBaoLoi(error) {
-        const noiDungLoi = error?.message || error?.name || "loi khong xac dinh";
+        const noiDungLoi = error?.message || error?.name || "Lỗi không xác định";
 
         if (noiDungLoi.toLowerCase().includes("push service")) {
-            return "Trinh duyet dang chan dich vu Push. Hay thu bang Chrome/Edge, hoac bat dich vu Push Messaging trong Brave.";
+            return "Trình duyệt đang chặn dịch vụ Push. Hãy thử bằng Chrome/Edge, hoặc bật dịch vụ Push Messaging trong Brave.";
         }
 
         return noiDungLoi;

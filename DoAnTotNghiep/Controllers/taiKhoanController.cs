@@ -133,26 +133,35 @@ namespace DoAnTotNghiep.Controllers
                 return View();
             }
 
+            if (taiKhoan.DaXoa)
+            {
+                ViewBag.ThongBao = "Tài khoản đã bị xóa do không hoạt động quá lâu.";
+                return View();
+            }
+
             if (!taiKhoan.TrangThai)
             {
                 ViewBag.ThongBao = "Tài khoản đang bị khóa hoặc không hoạt động";
                 return View();
             }
 
+            taiKhoanDAL.CapNhatLanDangNhapCuoi(taiKhoan.MaTaiKhoan);
+
             HttpContext.Session.SetInt32("MaTaiKhoan", taiKhoan.MaTaiKhoan);
             HttpContext.Session.SetString("HoTen", taiKhoan.HoTen ?? "");
-            HttpContext.Session.SetString("VaiTro", taiKhoan.VaiTro ?? "");
+            var vaiTro = ChuanHoaVaiTro(taiKhoan.VaiTro);
+            HttpContext.Session.SetString("VaiTro", vaiTro);
             HttpContext.Session.SetString("SoDienThoai", taiKhoan.SoDienThoai ?? "");
             HttpContext.Session.SetString("Email", taiKhoan.Email ?? "");
 
             // Chỉ chấp nhận đúng hai vai trò trong database: Admin và User.
-            if (taiKhoan.VaiTro == "Admin")
+            if (vaiTro == "Admin")
             {
                 TempData["ThongBao"] = "Đăng nhập thành công";
                 return RedirectToAction("Index", "Admin");
             }
 
-            if (taiKhoan.VaiTro == "User")
+            if (vaiTro == "User")
             {
                 TempData["ThongBao"] = "Đăng nhập thành công";
                 if (!hoSoSucKhoeDAL.KiemTraTaiKhoanDaCoHoSo(taiKhoan.MaTaiKhoan))
@@ -166,6 +175,81 @@ namespace DoAnTotNghiep.Controllers
             ViewBag.ThongBao = "Vai trò tài khoản không hợp lệ";
             HttpContext.Session.Clear();
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult QuenMatKhau()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult QuenMatKhau(string soDienThoai, string email, string matKhauMoi, string xacNhanMatKhau)
+        {
+            soDienThoai = soDienThoai?.Trim() ?? string.Empty;
+            email = email?.Trim() ?? string.Empty;
+
+            ViewBag.SoDienThoai = soDienThoai;
+            ViewBag.Email = email;
+
+            if (string.IsNullOrWhiteSpace(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
+                return View();
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.ThongBao = "Email không được bỏ trống";
+                return View();
+            }
+
+            if (string.IsNullOrWhiteSpace(matKhauMoi))
+            {
+                ViewBag.ThongBao = "Mật khẩu mới không được bỏ trống";
+                return View();
+            }
+
+            if (string.IsNullOrWhiteSpace(xacNhanMatKhau))
+            {
+                ViewBag.ThongBao = "Xác nhận mật khẩu không được bỏ trống";
+                return View();
+            }
+
+            if (matKhauMoi != xacNhanMatKhau)
+            {
+                ViewBag.ThongBao = "Mật khẩu mới và xác nhận mật khẩu không trùng khớp";
+                return View();
+            }
+
+            var taiKhoan = taiKhoanDAL.LayTaiKhoanTheoSoDienThoaiVaEmail(soDienThoai, email);
+            if (taiKhoan == null)
+            {
+                ViewBag.ThongBao = "Số điện thoại hoặc email không đúng.";
+                return View();
+            }
+
+            if (taiKhoan.DaXoa)
+            {
+                ViewBag.ThongBao = "Tài khoản không tồn tại hoặc đã bị xóa.";
+                return View();
+            }
+
+            if (!taiKhoan.TrangThai)
+            {
+                ViewBag.ThongBao = "Tài khoản đang bị khóa, không thể đặt lại mật khẩu.";
+                return View();
+            }
+
+            if (!taiKhoanDAL.DatLaiMatKhau(taiKhoan.MaTaiKhoan, matKhauMoi))
+            {
+                ViewBag.ThongBao = "Đặt lại mật khẩu thất bại, vui lòng thử lại.";
+                return View();
+            }
+
+            TempData["ThongBao"] = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.";
+            return RedirectToAction(nameof(DangNhap));
         }
 
         // Mục đích: action DangXuat xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -206,6 +290,94 @@ namespace DoAnTotNghiep.Controllers
             };
 
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ThongTinCaNhan(ThongTinCaNhanViewModel model)
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (maTaiKhoan == null)
+            {
+                return RedirectToAction(nameof(DangNhap));
+            }
+
+            var taiKhoan = taiKhoanDAL.LayTaiKhoanTheoId(maTaiKhoan.Value);
+            if (taiKhoan == null)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction(nameof(DangNhap));
+            }
+
+            model.HoTen = model.HoTen?.Trim() ?? string.Empty;
+            model.Email = model.Email?.Trim() ?? string.Empty;
+            model.GioiTinh = model.GioiTinh?.Trim() ?? string.Empty;
+            model.SoDienThoai = taiKhoan.SoDienThoai;
+
+            if (string.IsNullOrWhiteSpace(model.HoTen)
+                || string.IsNullOrWhiteSpace(model.Email)
+                || string.IsNullOrWhiteSpace(model.GioiTinh)
+                || model.NgaySinh == null)
+            {
+                ViewBag.ThongBao = "Cập nhật thông tin thất bại.";
+                return View(model);
+            }
+
+            if (taiKhoanDAL.KiemTraEmailTonTaiChoTaiKhoanKhac(maTaiKhoan.Value, model.Email))
+            {
+                ViewBag.ThongBao = "Cập nhật thông tin thất bại.";
+                return View(model);
+            }
+
+            var capNhatTaiKhoanThanhCong = taiKhoanDAL.CapNhatThongTinCaNhan(maTaiKhoan.Value, model.HoTen, model.Email);
+            var hoSoCaNhan = hoSoSucKhoeDAL.LayHoSoDauTienTheoTaiKhoan(maTaiKhoan.Value);
+            var capNhatHoSoThanhCong = true;
+
+            if (hoSoCaNhan != null)
+            {
+                hoSoCaNhan.HoTen = model.HoTen;
+                hoSoCaNhan.GioiTinh = model.GioiTinh;
+                hoSoCaNhan.NgaySinh = model.NgaySinh.Value;
+                capNhatHoSoThanhCong = hoSoSucKhoeDAL.CapNhat(hoSoCaNhan);
+            }
+            else
+            {
+                capNhatHoSoThanhCong = hoSoSucKhoeDAL.Them(new HoSoSucKhoe
+                {
+                    MaTaiKhoan = maTaiKhoan.Value,
+                    HoTen = model.HoTen,
+                    GioiTinh = model.GioiTinh,
+                    NgaySinh = model.NgaySinh.Value,
+                    NgayTao = DateTime.Now
+                });
+            }
+
+            if (capNhatTaiKhoanThanhCong && capNhatHoSoThanhCong)
+            {
+                HttpContext.Session.SetString("HoTen", model.HoTen);
+                HttpContext.Session.SetString("Email", model.Email);
+                TempData["ThongBao"] = "Cập nhật thông tin thành công.";
+                return RedirectToAction(nameof(ThongTinCaNhan));
+            }
+
+            ViewBag.ThongBao = "Cập nhật thông tin thất bại.";
+            return View(model);
+        }
+
+        private static string ChuanHoaVaiTro(string? vaiTro)
+        {
+            if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Admin";
+            }
+
+            if (string.Equals(vaiTro, "User", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(vaiTro, "NguoiDung", StringComparison.OrdinalIgnoreCase))
+            {
+                return "User";
+            }
+
+            return string.Empty;
         }
 
     }
