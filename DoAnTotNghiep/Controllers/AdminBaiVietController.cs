@@ -10,10 +10,12 @@ namespace DoAnTotNghiep.Controllers
     public class AdminBaiVietController : Controller
     {
         private readonly BaiVietCamNang_DAL baiVietDAL;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public AdminBaiVietController(BaiVietCamNang_DAL baiVietDAL)
+        public AdminBaiVietController(BaiVietCamNang_DAL baiVietDAL, IWebHostEnvironment webHostEnvironment)
         {
             this.baiVietDAL = baiVietDAL;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp
@@ -36,7 +38,7 @@ namespace DoAnTotNghiep.Controllers
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
-            return View(new BaiVietCamNang { TrangThai = true });
+            return View(new BaiVietCamNang { TrangThai = true, LoaiBaiViet = "Cẩm nang" });
         }
 
         [HttpPost]
@@ -45,16 +47,24 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Create(BaiVietCamNang model)
+        public IActionResult Create(BaiVietCamNang model, IFormFile? anhDaiDienFile)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
+            model.LoaiBaiViet = BaiVietCamNang_DAL.ChuanHoaLoaiBaiViet(model.LoaiBaiViet) ?? string.Empty;
             if (!KiemTraHopLe(model))
             {
                 return View(model);
             }
 
+            var anhDaiDien = LuuAnhDaiDien(anhDaiDienFile);
+            if (anhDaiDien == null && ViewBag.ThongBao != null)
+            {
+                return View(model);
+            }
+
+            model.AnhDaiDien = anhDaiDien ?? string.Empty;
             model.MaTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan")!.Value;
             model.NgayTao = DateTime.Now;
 
@@ -88,14 +98,26 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Edit(BaiVietCamNang model)
+        public IActionResult Edit(BaiVietCamNang model, IFormFile? anhDaiDienFile)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
+            model.LoaiBaiViet = BaiVietCamNang_DAL.ChuanHoaLoaiBaiViet(model.LoaiBaiViet) ?? string.Empty;
             if (!KiemTraHopLe(model))
             {
                 return View(model);
+            }
+
+            var anhDaiDien = LuuAnhDaiDien(anhDaiDienFile);
+            if (anhDaiDien == null && ViewBag.ThongBao != null)
+            {
+                return View(model);
+            }
+
+            if (!string.IsNullOrEmpty(anhDaiDien))
+            {
+                model.AnhDaiDien = anhDaiDien;
             }
 
             if (!baiVietDAL.CapNhat(model))
@@ -185,7 +207,46 @@ namespace DoAnTotNghiep.Controllers
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(model.LoaiBaiViet))
+            {
+                ViewBag.ThongBao = "Vui lòng chọn loại bài viết.";
+                return false;
+            }
+
             return true;
+        }
+
+        private string? LuuAnhDaiDien(IFormFile? anhDaiDienFile)
+        {
+            if (anhDaiDienFile == null || anhDaiDienFile.Length == 0)
+            {
+                return null;
+            }
+
+            const long dungLuongToiDa = 2 * 1024 * 1024;
+            if (anhDaiDienFile.Length > dungLuongToiDa)
+            {
+                ViewBag.ThongBao = "Ảnh đại diện không được vượt quá 2MB.";
+                return null;
+            }
+
+            var duoiFile = Path.GetExtension(anhDaiDienFile.FileName).ToLowerInvariant();
+            var duoiHopLe = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            if (!duoiHopLe.Contains(duoiFile))
+            {
+                ViewBag.ThongBao = "Ảnh đại diện chỉ hỗ trợ JPG, PNG hoặc WEBP.";
+                return null;
+            }
+
+            var thuMucUpload = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "bai-viet");
+            Directory.CreateDirectory(thuMucUpload);
+
+            var tenFile = $"{Guid.NewGuid():N}{duoiFile}";
+            var duongDanVatLy = Path.Combine(thuMucUpload, tenFile);
+            using var stream = new FileStream(duongDanVatLy, FileMode.Create);
+            anhDaiDienFile.CopyTo(stream);
+
+            return $"/uploads/bai-viet/{tenFile}";
         }
 
         // Mục đích: action LaAdmin xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Lich tiem chung cho tre nho">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#e0f2fe"/>
+      <stop offset="0.52" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#14b8a6"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <circle cx="780" cy="100" r="78" fill="#ffffff" opacity=".45"/>
+  <circle cx="175" cy="420" r="110" fill="#facc15" opacity=".55"/>
+  <rect x="245" y="104" width="470" height="332" rx="34" fill="#ffffff"/>
+  <rect x="285" y="154" width="390" height="54" rx="12" fill="#dbeafe"/>
+  <rect x="285" y="238" width="390" height="34" rx="10" fill="#bfdbfe"/>
+  <rect x="285" y="296" width="280" height="34" rx="10" fill="#99f6e4"/>
+  <rect x="285" y="354" width="330" height="34" rx="10" fill="#fde68a"/>
+  <rect x="344" y="70" width="272" height="86" rx="22" fill="#0b63ce"/>
+  <text x="480" y="125" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" text-anchor="middle">LICH TIEM</text>
+  <circle cx="678" cy="386" r="72" fill="#0b63ce"/>
+  <path d="M650 386h56M678 358v56" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
+</svg>

@@ -15,7 +15,13 @@
 
 @if (Model.Count == 0)
 {
-    <div class="alert alert-info">Chưa có bài viết</div>
+    <div class="empty-state empty-action">
+        <div>
+            <strong>Chưa có bài viết cẩm nang</strong>
+            <span>Thêm bài viết để người dùng có nội dung tham khảo về vaccine và chăm sóc sức khỏe.</span>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">Thêm bài viết</a>
+    </div>
 }
 else
 {
@@ -24,6 +30,7 @@ else
     <thead>
         <tr>
             <th>Bài viết</th>
+            <th>Loại</th>
             <th>Tác giả</th>
             <th>Ngày tạo</th>
             <th>Trạng thái</th>
@@ -36,9 +43,20 @@ else
     {
         <tr>
             <td>
-                <div class="item-title">@item.TieuDe</div>
-                <div class="item-meta">Mã bài viết #@item.MaBaiViet</div>
+                <div class="admin-article-cell">
+                    <div class="admin-article-thumb">
+                        @if (!string.IsNullOrWhiteSpace(item.AnhDaiDien))
+                        {
+                            <img src="@item.AnhDaiDien" alt="@item.TieuDe" />
+                        }
+                    </div>
+                    <div>
+                        <div class="item-title">@item.TieuDe</div>
+                        <div class="item-meta">Mã bài viết #@item.MaBaiViet</div>
+                    </div>
+                </div>
             </td>
+            <td><span class="article-type-pill">@item.LoaiBaiViet</span></td>
             <td>@item.TenTacGia</td>
             <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
             <td>

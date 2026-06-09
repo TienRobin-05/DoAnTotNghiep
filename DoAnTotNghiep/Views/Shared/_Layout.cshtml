@@ -8,6 +8,7 @@
     <title>@ViewData["Title"] - Hồ sơ sức khỏe và tiêm chủng</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
 </head>
 <body>
     @{
@@ -39,17 +40,17 @@
                         <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="taiKhoan">Tài khoản</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="vaccine" asp-action="index">Vaccine</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="muiTiemVaccine" asp-action="index">Mũi tiêm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">Bài viết</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="AdminBaiViet" asp-action="Index">Bài viết</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
                     }
                     else if (daDangNhap)
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="NguoiDung" asp-action="Index">Trang người dùng</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="HoSoSucKhoe" asp-action="CapNhatThongTinCaNhan">Hồ sơ sức khỏe</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="index">Lịch tiêm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="lichTiem" asp-action="lichSu">Lịch sử tiêm</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="HoSoSucKhoe" asp-action="Index">Hồ sơ sức khỏe</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="LichTiem" asp-action="ChonHoSo">Lịch tiêm</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="LichSuTiem" asp-action="ChonHoSo">Lịch sử tiêm</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="vaccine" asp-action="TraCuu">Vaccine</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="baiViet" asp-action="index">Cẩm nang</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="BaiVietCamNang" asp-action="Index">Kiến thức</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
                     }
                 </ul>

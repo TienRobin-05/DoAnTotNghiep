@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Chuan bi truoc khi tiem vaccine">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ecfeff"/>
+      <stop offset="0.55" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <circle cx="160" cy="120" r="86" fill="#ffffff" opacity=".38"/>
+  <circle cx="820" cy="410" r="120" fill="#ffffff" opacity=".22"/>
+  <rect x="210" y="120" width="540" height="304" rx="34" fill="#ffffff"/>
+  <rect x="254" y="174" width="220" height="42" rx="12" fill="#dcfce7"/>
+  <rect x="254" y="246" width="350" height="32" rx="10" fill="#bbf7d0"/>
+  <rect x="254" y="302" width="290" height="32" rx="10" fill="#a7f3d0"/>
+  <rect x="254" y="358" width="390" height="32" rx="10" fill="#fde68a"/>
+  <circle cx="660" cy="202" r="54" fill="#0b63ce"/>
+  <path d="M632 202h56M660 174v56" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+  <path d="M628 312l34 34 70-84" fill="none" stroke="#16a34a" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="480" y="94" fill="#064e3b" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" text-anchor="middle">CHUAN BI TRUOC TIEM</text>
+</svg>

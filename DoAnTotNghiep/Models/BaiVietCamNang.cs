@@ -13,6 +13,8 @@
         public string TieuDe { get; set; } = string.Empty;
         // Thuộc tính NoiDung lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string NoiDung { get; set; } = string.Empty;
+        public string LoaiBaiViet { get; set; } = "Cẩm nang";
+        public string AnhDaiDien { get; set; } = string.Empty;
         // Thuộc tính NgayTao lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public DateTime NgayTao { get; set; }
         // Thuộc tính TrangThai lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.

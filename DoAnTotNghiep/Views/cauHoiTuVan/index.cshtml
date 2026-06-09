@@ -21,7 +21,16 @@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">@(laAdmin ? "Chưa có câu hỏi tư vấn nào." : "Bạn chưa gửi câu hỏi tư vấn nào.")</div>
+    <div class="empty-state empty-action">
+        <div>
+            <strong>@(laAdmin ? "Chưa có câu hỏi tư vấn nào" : "Bạn chưa gửi câu hỏi tư vấn nào")</strong>
+            <span>@(laAdmin ? "Khi người dùng gửi câu hỏi, danh sách chờ trả lời sẽ hiển thị tại đây." : "Gửi câu hỏi để quản trị viên có thể phản hồi tư vấn cho bạn.")</span>
+        </div>
+        @if (!laAdmin)
+        {
+            <a asp-action="Create" class="btn btn-primary">Gửi câu hỏi mới</a>
+        }
+    </div>
 }
 else
 {

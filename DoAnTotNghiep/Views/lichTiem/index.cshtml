@@ -49,7 +49,13 @@
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     @if (TempData["ThongBao"] == null)
     {
-        <div class="empty-state">Không có lịch tiêm phù hợp với bộ lọc đang chọn.</div>
+        <div class="empty-state empty-action">
+            <div>
+                <strong>Không có lịch tiêm phù hợp</strong>
+                <span>Hãy đổi bộ lọc hoặc chọn hồ sơ khác để xem lịch tiêm cần theo dõi.</span>
+            </div>
+            <a asp-action="ChonHoSo" class="btn btn-primary">Chọn hồ sơ khác</a>
+        </div>
     }
 }
 else

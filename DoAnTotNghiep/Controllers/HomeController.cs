@@ -29,6 +29,27 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
+            var dichDen = id switch
+            {
+                "quan-ly-vaccine" => ("Index", "Vaccine"),
+                "quan-ly-mui-tiem" => ("Index", "MuiTiemVaccine"),
+                "quan-ly-bai-viet" => ("Index", "AdminBaiViet"),
+                "quan-ly-tu-van" => ("Index", "CauHoiTuVan"),
+                "ho-so-suc-khoe" => ("Index", "HoSoSucKhoe"),
+                "lich-tiem" => ("ChonHoSo", "LichTiem"),
+                "cap-nhat-tiem" => ("ChonHoSo", "LichTiem"),
+                "lich-su-tiem" => ("ChonHoSo", "LichSuTiem"),
+                "thong-bao" => ("Index", "ThongBao"),
+                "tra-cuu-vaccine" => ("TraCuu", "Vaccine"),
+                "hoi-dap-tu-van" => ("Index", "CauHoiTuVan"),
+                _ => (string.Empty, string.Empty)
+            };
+
+            if (!string.IsNullOrEmpty(dichDen.Item1))
+            {
+                return RedirectToAction(dichDen.Item1, dichDen.Item2);
+            }
+
             ViewBag.MaChucNang = id;
             return View();
         }

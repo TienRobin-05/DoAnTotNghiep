@@ -2,54 +2,115 @@
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model List<BaiVietCamNang>
 @{
-    ViewData["Title"] = "Cẩm nang sức khỏe";
+    ViewData["Title"] = "Tin tức và cẩm nang";
+    var loaiDangChon = ViewBag.LoaiDangChon as string ?? "Tất cả";
+    var danhSachBaiViet = Model.OrderByDescending(item => item.NgayTao).ToList();
+    var baiNoiBat = danhSachBaiViet.FirstOrDefault();
+    var baiVietKhac = danhSachBaiViet.Skip(1).ToList();
 }
 
-<div class="list-page-head">
+@functions {
+    string RutGonNoiDung(string noiDung, int doDai = 150)
+    {
+        if (string.IsNullOrWhiteSpace(noiDung))
+        {
+            return "Thông tin sức khỏe được biên soạn để bạn tham khảo và chăm sóc gia đình tốt hơn.";
+        }
+
+        var tomTat = noiDung.Replace("\r", " ").Replace("\n", " ").Trim();
+        while (tomTat.Contains("  "))
+        {
+            tomTat = tomTat.Replace("  ", " ");
+        }
+
+        return tomTat.Length <= doDai ? tomTat : tomTat[..doDai].TrimEnd() + "...";
+    }
+
+    string ChonLopAnh(int viTri)
+    {
+        var lopAnh = new[] { "guide-card-vaccine", "guide-card-care", "guide-card-family", "guide-card-doctor" };
+        return lopAnh[viTri % lopAnh.Length];
+    }
+}
+
+<div class="list-page-head handbook-head">
     <div>
-        <h2>Cẩm nang sức khỏe</h2>
-        <p>@Model.Count bài viết đang hiển thị</p>
+        <h2>Tin tức &amp; Cẩm nang tiêm chủng</h2>
+        <p>Cập nhật kiến thức về vaccine, lịch tiêm và chăm sóc sau tiêm</p>
     </div>
+    <span class="handbook-count">@Model.Count bài viết</span>
+</div>
+
+<div class="handbook-tabs">
+    <a asp-action="Index" class="btn btn-outline-primary @(loaiDangChon == "Tất cả" ? "active" : "")">Tất cả</a>
+    <a asp-action="Index" asp-route-loai="Tin tức" class="btn btn-outline-primary @(loaiDangChon == "Tin tức" ? "active" : "")">Tin tức</a>
+    <a asp-action="Index" asp-route-loai="Cẩm nang" class="btn btn-outline-primary @(loaiDangChon == "Cẩm nang" ? "active" : "")">Cẩm nang</a>
 </div>
 
 @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
     @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-info">Chưa có bài viết nào.</div>
+    <div class="empty-state empty-action">
+        <div>
+            <strong>Chưa có bài viết phù hợp</strong>
+            <span>Hiện chưa có bài viết thuộc nhóm @loaiDangChon.ToLowerInvariant(). Hãy quay lại sau hoặc xem tất cả bài viết.</span>
+        </div>
+        <a asp-action="Index" class="btn btn-primary">Xem tất cả</a>
+    </div>
 }
 else
 {
-    <section class="list-card">
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table list-table">
-        <thead>
-            <tr>
-                <th>Bài viết</th>
-                <th>Tác giả</th>
-                <th>Ngày tạo</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-        @foreach (var item in Model)
+    <section class="handbook-news">
+        @if (baiNoiBat != null)
         {
-            <tr>
-                <td>
-                    <div class="item-title">
-                        <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet">@item.TieuDe</a>
+            <a asp-action="Details" asp-route-maBaiViet="@baiNoiBat.MaBaiViet" class="handbook-feature-card">
+                <div class="handbook-feature-visual guide-card-vaccine">
+                    @if (!string.IsNullOrWhiteSpace(baiNoiBat.AnhDaiDien))
+                    {
+                        <img src="@baiNoiBat.AnhDaiDien" alt="@baiNoiBat.TieuDe" />
+                    }
+                    <span>@baiNoiBat.LoaiBaiViet</span>
+                </div>
+                <div class="handbook-feature-body">
+                    <span class="handbook-topic">@baiNoiBat.LoaiBaiViet mới</span>
+                    <h3>@baiNoiBat.TieuDe</h3>
+                    <p>@RutGonNoiDung(baiNoiBat.NoiDung, 220)</p>
+                    <div class="handbook-meta">
+                        <span>@baiNoiBat.TenTacGia</span>
+                        <span>@baiNoiBat.NgayTao.ToString("dd/MM/yyyy")</span>
                     </div>
-                    <div class="item-meta">Mã bài viết #@item.MaBaiViet</div>
-                </td>
-                <td>@item.TenTacGia</td>
-                <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
-                <td class="table-actions">
-                    <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-primary">Đọc bài</a>
-                </td>
-            </tr>
+                    <span class="handbook-readmore">Đọc bài</span>
+                </div>
+            </a>
         }
-        </tbody>
-    </table>
+
+        @if (baiVietKhac.Count > 0)
+        {
+            <div class="handbook-grid">
+                @for (var i = 0; i < baiVietKhac.Count; i++)
+                {
+                    var item = baiVietKhac[i];
+                    <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet" class="handbook-card">
+                        <div class="handbook-card-visual @ChonLopAnh(i)">
+                            @if (!string.IsNullOrWhiteSpace(item.AnhDaiDien))
+                            {
+                                <img src="@item.AnhDaiDien" alt="@item.TieuDe" />
+                            }
+                            <span>@item.LoaiBaiViet</span>
+                        </div>
+                        <div class="handbook-card-body">
+                            <span class="handbook-topic">@item.NgayTao.ToString("dd/MM/yyyy")</span>
+                            <h3>@item.TieuDe</h3>
+                            <p>@RutGonNoiDung(item.NoiDung)</p>
+                            <div class="handbook-meta">
+                                <span>@item.TenTacGia</span>
+                                <span>@item.NgayTao.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
     </section>
 }

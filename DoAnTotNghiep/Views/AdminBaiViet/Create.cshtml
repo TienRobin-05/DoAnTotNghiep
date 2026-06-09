@@ -15,11 +15,23 @@
 }
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-<form asp-action="Create" method="post" class="col-md-8">
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="col-md-8">
     @Html.AntiForgeryToken()
     <div class="mb-3">
         <label class="form-label">Tiêu đề</label>
         <input asp-for="TieuDe" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Loại bài viết</label>
+        <select asp-for="LoaiBaiViet" class="form-select">
+            <option value="Cẩm nang">Cẩm nang</option>
+            <option value="Tin tức">Tin tức</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ảnh đại diện</label>
+        <input type="file" name="anhDaiDienFile" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+        <div class="item-meta">Hỗ trợ JPG, PNG, WEBP. Dung lượng tối đa 2MB.</div>
     </div>
     <div class="mb-3">
         <label class="form-label">Nội dung</label>

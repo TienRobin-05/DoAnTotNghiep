@@ -19,9 +19,11 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index()
+        public IActionResult Index(string? loai)
         {
-            return View(baiVietDAL.LayDanhSachHienThiChoUser());
+            var loaiDaChuanHoa = BaiVietCamNang_DAL.ChuanHoaLoaiBaiViet(loai);
+            ViewBag.LoaiDangChon = loaiDaChuanHoa ?? "Tất cả";
+            return View(baiVietDAL.LayDanhSachHienThiChoUser(loaiDaChuanHoa));
         }
 
         // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

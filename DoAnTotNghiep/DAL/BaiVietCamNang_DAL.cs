@@ -23,7 +23,7 @@ namespace DoAnTotNghiep.DAL
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"SELECT bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
+            const string sql = @"SELECT bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.loaiBaiViet, bv.anhDaiDien, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
 FROM BaiVietCamNang bv
 INNER JOIN TaiKhoan tk ON bv.maTaiKhoan = tk.maTaiKhoan
 ORDER BY bv.ngayTao DESC";
@@ -35,17 +35,33 @@ ORDER BY bv.ngayTao DESC";
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
         // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
-        public List<BaiVietCamNang> LayDanhSachHienThiChoUser()
+        public List<BaiVietCamNang> LayDanhSachHienThiChoUser(string? loaiBaiViet = null)
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"SELECT bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
+            var sql = @"SELECT bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.loaiBaiViet, bv.anhDaiDien, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
 FROM BaiVietCamNang bv
 INNER JOIN TaiKhoan tk ON bv.maTaiKhoan = tk.maTaiKhoan
-WHERE bv.trangThai = 1
-ORDER BY bv.ngayTao DESC";
+WHERE bv.trangThai = 1";
 
-            return DocDanhSach(sql);
+            var loaiDaChuanHoa = ChuanHoaLoaiBaiViet(loaiBaiViet);
+            if (!string.IsNullOrEmpty(loaiDaChuanHoa))
+            {
+                sql += " AND bv.loaiBaiViet = @LoaiBaiViet";
+            }
+
+            sql += " ORDER BY bv.ngayTao DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            if (!string.IsNullOrEmpty(loaiDaChuanHoa))
+            {
+                lenh.Parameters.AddWithValue("@LoaiBaiViet", loaiDaChuanHoa);
+            }
+
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            return DocDanhSachTuReader(doc);
         }
 
         // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -56,7 +72,7 @@ ORDER BY bv.ngayTao DESC";
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"SELECT bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
+            const string sql = @"SELECT bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.loaiBaiViet, bv.anhDaiDien, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
 FROM BaiVietCamNang bv
 INNER JOIN TaiKhoan tk ON bv.maTaiKhoan = tk.maTaiKhoan
 WHERE bv.maBaiViet = @MaBaiViet";
@@ -82,8 +98,8 @@ WHERE bv.maBaiViet = @MaBaiViet";
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"INSERT INTO BaiVietCamNang(maTaiKhoan, tieuDe, noiDung, ngayTao, trangThai)
-VALUES(@MaTaiKhoan, @TieuDe, @NoiDung, @NgayTao, @TrangThai)";
+            const string sql = @"INSERT INTO BaiVietCamNang(maTaiKhoan, tieuDe, noiDung, loaiBaiViet, anhDaiDien, ngayTao, trangThai)
+VALUES(@MaTaiKhoan, @TieuDe, @NoiDung, @LoaiBaiViet, @AnhDaiDien, @NgayTao, @TrangThai)";
 
             // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -92,6 +108,8 @@ VALUES(@MaTaiKhoan, @TieuDe, @NoiDung, @NgayTao, @TrangThai)";
             lenh.Parameters.AddWithValue("@MaTaiKhoan", bv.MaTaiKhoan);
             lenh.Parameters.AddWithValue("@TieuDe", bv.TieuDe);
             lenh.Parameters.AddWithValue("@NoiDung", bv.NoiDung);
+            lenh.Parameters.AddWithValue("@LoaiBaiViet", ChuanHoaLoaiBaiViet(bv.LoaiBaiViet) ?? "Cẩm nang");
+            lenh.Parameters.AddWithValue("@AnhDaiDien", string.IsNullOrWhiteSpace(bv.AnhDaiDien) ? DBNull.Value : bv.AnhDaiDien);
             lenh.Parameters.AddWithValue("@NgayTao", bv.NgayTao);
             lenh.Parameters.AddWithValue("@TrangThai", bv.TrangThai);
 
@@ -112,6 +130,8 @@ VALUES(@MaTaiKhoan, @TieuDe, @NoiDung, @NgayTao, @TrangThai)";
             const string sql = @"UPDATE BaiVietCamNang
 SET tieuDe = @TieuDe,
     noiDung = @NoiDung,
+    loaiBaiViet = @LoaiBaiViet,
+    anhDaiDien = @AnhDaiDien,
     trangThai = @TrangThai
 WHERE maBaiViet = @MaBaiViet";
 
@@ -122,6 +142,8 @@ WHERE maBaiViet = @MaBaiViet";
             lenh.Parameters.AddWithValue("@MaBaiViet", bv.MaBaiViet);
             lenh.Parameters.AddWithValue("@TieuDe", bv.TieuDe);
             lenh.Parameters.AddWithValue("@NoiDung", bv.NoiDung);
+            lenh.Parameters.AddWithValue("@LoaiBaiViet", ChuanHoaLoaiBaiViet(bv.LoaiBaiViet) ?? "Cẩm nang");
+            lenh.Parameters.AddWithValue("@AnhDaiDien", string.IsNullOrWhiteSpace(bv.AnhDaiDien) ? DBNull.Value : bv.AnhDaiDien);
             lenh.Parameters.AddWithValue("@TrangThai", bv.TrangThai);
 
             // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
@@ -190,6 +212,11 @@ WHERE maBaiViet = @MaBaiViet";
             // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
             using var doc = lenh.ExecuteReader();
 
+            return DocDanhSachTuReader(doc);
+        }
+
+        private static List<BaiVietCamNang> DocDanhSachTuReader(SqlDataReader doc)
+        {
             var danhSach = new List<BaiVietCamNang>();
             while (doc.Read())
             {
@@ -211,9 +238,30 @@ WHERE maBaiViet = @MaBaiViet";
                 MaTaiKhoan = Convert.ToInt32(doc["maTaiKhoan"]),
                 TieuDe = doc["tieuDe"] == DBNull.Value ? string.Empty : doc["tieuDe"].ToString() ?? string.Empty,
                 NoiDung = doc["noiDung"] == DBNull.Value ? string.Empty : doc["noiDung"].ToString() ?? string.Empty,
+                LoaiBaiViet = doc["loaiBaiViet"] == DBNull.Value ? "Cẩm nang" : doc["loaiBaiViet"].ToString() ?? "Cẩm nang",
+                AnhDaiDien = doc["anhDaiDien"] == DBNull.Value ? string.Empty : doc["anhDaiDien"].ToString() ?? string.Empty,
                 NgayTao = Convert.ToDateTime(doc["ngayTao"]),
                 TrangThai = Convert.ToBoolean(doc["trangThai"]),
                 TenTacGia = doc["tenTacGia"] == DBNull.Value ? string.Empty : doc["tenTacGia"].ToString() ?? string.Empty
+            };
+        }
+
+        public static string? ChuanHoaLoaiBaiViet(string? loaiBaiViet)
+        {
+            if (string.IsNullOrWhiteSpace(loaiBaiViet))
+            {
+                return null;
+            }
+
+            return loaiBaiViet.Trim() switch
+            {
+                "Tin tức" => "Tin tức",
+                "tin-tuc" => "Tin tức",
+                "Tin tuc" => "Tin tức",
+                "Cẩm nang" => "Cẩm nang",
+                "cam-nang" => "Cẩm nang",
+                "Cam nang" => "Cẩm nang",
+                _ => null
             };
         }
     }

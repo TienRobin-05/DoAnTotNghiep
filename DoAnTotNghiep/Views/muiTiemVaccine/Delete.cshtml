@@ -3,11 +3,21 @@
 @model MuiTiemVaccine
 @{
     ViewData["Title"] = "Xóa mũi tiêm";
+    var daDuocSuDungTrongLichTiem = ViewBag.DaDuocSuDungTrongLichTiem as bool? ?? false;
 }
 
 <h2>Xóa mũi tiêm vaccine</h2>
 @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-<div class="alert alert-warning">Bạn có chắc muốn xóa mũi tiêm này không?</div>
+@if (daDuocSuDungTrongLichTiem)
+{
+    <div class="alert alert-warning">
+        Mũi tiêm này đã được dùng trong lịch tiêm nên không thể xóa. Bạn có thể quay lại và sửa thông tin nếu cần.
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">Bạn có chắc muốn xóa mũi tiêm này không?</div>
+}
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
 <section class="card">
@@ -22,6 +32,6 @@
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">Xóa</button>
+    <button type="submit" class="btn btn-danger" disabled="@daDuocSuDungTrongLichTiem">Xóa</button>
     <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@Model.MaVaccine" class="btn btn-link">Hủy</a>
 </form>

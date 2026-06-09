@@ -6,7 +6,14 @@
 }
 
 <h2>@Model.TieuDe</h2>
+@if (!string.IsNullOrWhiteSpace(Model.AnhDaiDien))
+{
+    <div class="article-cover">
+        <img src="@Model.AnhDaiDien" alt="@Model.TieuDe" />
+    </div>
+}
 <section class="detail-card">
+    <p><strong>Loại bài viết:</strong> <span class="article-type-pill">@Model.LoaiBaiViet</span></p>
     <p><strong>Tác giả:</strong> @Model.TenTacGia</p>
     <p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
     <p><strong>Trạng thái:</strong> @(Model.TrangThai ? "Đang hiển thị" : "Đang ẩn")</p>

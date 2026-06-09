@@ -59,6 +59,7 @@ namespace DoAnTotNghiep.Controllers
             var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
             if (muiTiem == null) return NotFound();
 
+            ViewBag.DaDuocSuDungTrongLichTiem = muiTiemVaccineDAL.KiemTraDaCoLichTiemSuDung(id);
             return View(muiTiem);
         }
 
@@ -183,8 +184,22 @@ namespace DoAnTotNghiep.Controllers
             var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
             if (muiTiem == null) return NotFound();
 
-            muiTiemVaccineDAL.XoaMuiTiemVaccine(id);
+            if (muiTiemVaccineDAL.KiemTraDaCoLichTiemSuDung(id))
+            {
+                TempData["ThongBao"] = "Không thể xóa mũi tiêm này vì đã được dùng trong lịch tiêm. Bạn có thể sửa thông tin mũi tiêm nếu cần.";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = muiTiem.MaVaccine });
+            }
+
+            if (!muiTiemVaccineDAL.XoaMuiTiemVaccine(id))
+            {
+                TempData["ThongBao"] = "Xóa mũi tiêm vaccine thất bại, vui lòng thử lại";
+                TempData["LoaiThongBao"] = "danger";
+                return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = muiTiem.MaVaccine });
+            }
+
             TempData["ThongBao"] = "Xóa mũi tiêm vaccine thành công";
+            TempData["LoaiThongBao"] = "success";
             return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = muiTiem.MaVaccine });
         }
 

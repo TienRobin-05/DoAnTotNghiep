@@ -15,12 +15,31 @@
 }
 
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-<form asp-action="Edit" method="post" class="col-md-8">
+<form asp-action="Edit" method="post" enctype="multipart/form-data" class="col-md-8">
     @Html.AntiForgeryToken()
     <input asp-for="MaBaiViet" type="hidden" />
+    <input asp-for="AnhDaiDien" type="hidden" />
     <div class="mb-3">
         <label class="form-label">Tiêu đề</label>
         <input asp-for="TieuDe" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Loại bài viết</label>
+        <select asp-for="LoaiBaiViet" class="form-select">
+            <option value="Cẩm nang">Cẩm nang</option>
+            <option value="Tin tức">Tin tức</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ảnh đại diện</label>
+        @if (!string.IsNullOrWhiteSpace(Model.AnhDaiDien))
+        {
+            <div class="article-form-preview">
+                <img src="@Model.AnhDaiDien" alt="@Model.TieuDe" />
+            </div>
+        }
+        <input type="file" name="anhDaiDienFile" class="form-control mt-3" accept=".jpg,.jpeg,.png,.webp" />
+        <div class="item-meta">Để trống nếu muốn giữ ảnh hiện tại. Hỗ trợ JPG, PNG, WEBP, tối đa 2MB.</div>
     </div>
     <div class="mb-3">
         <label class="form-label">Nội dung</label>

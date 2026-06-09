@@ -15,7 +15,8 @@
 
 @if (TempData["ThongBao"] != null)
 {
-    <div class="alert alert-success">@TempData["ThongBao"]</div>
+    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
+    <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
 }
 
 <section class="list-card">
