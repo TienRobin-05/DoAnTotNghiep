@@ -1,6 +1,7 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.Controllers
 {
@@ -177,8 +178,31 @@ namespace DoAnTotNghiep.Controllers
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
-            vaccineDAL.XoaHoacAn(id);
-            TempData["ThongBao"] = "Đổi trạng thái thành công";
+
+            try
+            {
+                if (!vaccineDAL.XoaHoacAn(id))
+                {
+                    TempData["ThongBao"] = "Không thể xóa vaccine này";
+                    TempData["LoaiThongBao"] = "danger";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (SqlException ex) when (ex.Number == 547)
+            {
+                TempData["ThongBao"] = "Không thể xóa vaccine này vì đang có dữ liệu liên quan";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                TempData["ThongBao"] = "Không thể xóa vaccine này";
+                TempData["LoaiThongBao"] = "danger";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["ThongBao"] = "Xóa vaccine thành công";
+            TempData["LoaiThongBao"] = "success";
             return RedirectToAction(nameof(Index));
         }
 

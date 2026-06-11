@@ -2,13 +2,13 @@
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model Vaccine
 @{
-    ViewData["Title"] = "Ẩn vaccine";
+    ViewData["Title"] = "Xóa vaccine";
 }
 
-<h2>Ẩn vaccine</h2>
+<h2>Xóa vaccine</h2>
 @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
 <div class="alert alert-warning">
-    Hệ thống sẽ không xóa cứng dữ liệu. Vaccine này chỉ được cập nhật <strong>trangThai = false</strong>.
+    Bạn có chắc muốn xóa vaccine này không?
 </div>
 
 @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
@@ -24,6 +24,6 @@
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">Ẩn vaccine</button>
+    <button type="submit" class="btn btn-danger">Đồng ý</button>
     <a asp-action="Index" class="btn btn-link">Hủy</a>
 </form>
