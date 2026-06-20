@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = "_UserLayout";
     ViewData["Title"] = "Trang người dùng";
 
@@ -6,875 +6,424 @@
     var soMuiQuaHan = ViewBag.SoMuiQuaHan is int quaHan ? quaHan : 0;
     var soMuiHomNay = ViewBag.SoMuiHomNay is int homNay ? homNay : 0;
     var soMuiSapToi = ViewBag.SoMuiSapDenHan is int sapToi ? sapToi : 0;
-
+    var soMuiHoanThanh = ViewBag.SoMuiHoanThanh is int hoanThanh ? hoanThanh : 0;
+    var tongSoVaccine = ViewBag.TongSoVaccine is int soVaccine ? soVaccine : 0;
     var lichTiemQuaHan = ViewBag.LichTiemQuaHan as List<LichTiem> ?? new List<LichTiem>();
     var lichTiemHomNay = ViewBag.LichTiemHomNay as List<LichTiem> ?? new List<LichTiem>();
     var lichTiemSapToi = ViewBag.LichTiemSapToi as List<LichTiem> ?? new List<LichTiem>();
     var thongBaoMoiNhat = ViewBag.ThongBaoMoiNhat as List<ThongBao> ?? new List<ThongBao>();
     var danhSachHoSo = ViewBag.DanhSachHoSo as List<HoSoSucKhoe> ?? new List<HoSoSucKhoe>();
+    var camNangTinTuc = ViewBag.CamNangTinTucDashboard as DashboardCamNangTinTucViewModel ?? new DashboardCamNangTinTucViewModel();
+    var baiVietNoiBat = camNangTinTuc.BaiVietNoiBat;
+    var baiVietMoiNhat = camNangTinTuc.BaiVietMoiNhat;
+    var ngayHienTai = DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
 
-    string RutGon(string noiDung, int doDai = 86)
+    string RutGon(string noiDung, int doDai = 96)
     {
-        if (string.IsNullOrWhiteSpace(noiDung))
-        {
-            return string.Empty;
-        }
-
-        var ketQua = noiDung.Trim()
-            .Replace("Hồ sơ ", "")
-            .Replace("vaccine ", "")
-            .Replace("Vui lòng ", "");
-
-        var viTri = ketQua.IndexOf("Khoảng cách", StringComparison.OrdinalIgnoreCase);
-        if (viTri >= 0)
-        {
-            ketQua = ketQua[..viTri].Trim();
-        }
-
+        if (string.IsNullOrWhiteSpace(noiDung)) return string.Empty;
+        var ketQua = noiDung.Trim();
         return ketQua.Length <= doDai ? ketQua : ketQua[..doDai].TrimEnd() + "...";
     }
 
     string LayChuCai(string hoTenHoSo)
     {
-        if (string.IsNullOrWhiteSpace(hoTenHoSo))
-        {
-            return "HS";
-        }
-
+        if (string.IsNullOrWhiteSpace(hoTenHoSo)) return "HS";
         var cacTu = hoTenHoSo.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (cacTu.Length == 1)
-        {
-            return cacTu[0].Length >= 2 ? cacTu[0][..2].ToUpperInvariant() : cacTu[0].ToUpperInvariant();
-        }
-
+        if (cacTu.Length == 1) return cacTu[0].Length >= 2 ? cacTu[0][..2].ToUpperInvariant() : cacTu[0].ToUpperInvariant();
         return $"{cacTu[^2][0]}{cacTu[^1][0]}".ToUpperInvariant();
     }
 
-    string LopMauHoSo(string hoTenHoSo)
+    string RutGonBaiViet(string noiDung, int doDai = 130)
     {
-        return hoTenHoSo switch
+        if (string.IsNullOrWhiteSpace(noiDung)) return "Thông tin y tế hữu ích giúp bạn chủ động chăm sóc sức khỏe và theo dõi lịch tiêm.";
+        var tomTat = noiDung.Replace("\r", " ").Replace("\n", " ").Trim();
+        while (tomTat.Contains("  ")) tomTat = tomTat.Replace("  ", " ");
+        return tomTat.Length <= doDai ? tomTat : tomTat[..doDai].TrimEnd() + "...";
+    }
+
+    string AnhBaiViet(BaiVietCamNang baiViet, int viTri = 0)
+    {
+        if (!string.IsNullOrWhiteSpace(baiViet.AnhDaiDien)) return baiViet.AnhDaiDien;
+        var anhMacDinh = new[]
         {
-            "Bé Khôi" => "profile-color-1",
-            "Mẹ Hoa" => "profile-color-2",
-            "Bố Minh" => "profile-color-3",
-            "Bé Bình" => "profile-color-4",
-            "Lan Anh" => "profile-color-5",
-            "Bé An" => "profile-color-1",
-            _ => "profile-color-default"
+            "/images/articles/lich-tiem-tre-nho.svg",
+            "/images/articles/chuan-bi-truoc-tiem.svg",
+            "/images/articles/theo-doi-sau-tiem.svg",
+            "/images/articles/lich-su-tiem-chung.svg"
         };
+        return anhMacDinh[viTri % anhMacDinh.Length];
     }
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <style>
-    .page {
-        max-width: 1320px;
+    :root{--pc-blue:#1E63F0;--pc-blue-dark:#114ED1;--pc-blue-soft:#EAF2FF;--pc-green:#35B46A;--pc-green-soft:#EAF9F0;--pc-orange:#F7A928;--pc-orange-soft:#FFF6E7;--pc-red:#F25F5C;--pc-red-soft:#FFF1F1;--pc-text:#17325C;--pc-muted:#6B7A99;--pc-border:#DCE8FA;--pc-bg:#F7FBFF;--pc-white:#fff}body{background:var(--pc-bg)}.page{max-width:1320px;padding:24px}.dashboard-page{display:grid;gap:18px;color:var(--pc-text)}.dashboard-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.85fr) minmax(230px,.5fr);gap:22px;align-items:center;min-height:300px;padding:30px;border:1px solid var(--pc-border);border-radius:24px;background:radial-gradient(circle at 22% 22%,rgba(53,180,106,.12) 0 9%,transparent 10%),radial-gradient(circle at 82% 18%,rgba(30,99,240,.1) 0 10%,transparent 11%),linear-gradient(135deg,#fff,#f4faff 48%,#eaf7ff);box-shadow:0 18px 40px rgba(30,99,240,.08);overflow:hidden}.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;border-radius:999px;color:var(--pc-blue-dark);background:var(--pc-blue-soft);font-size:14px;font-weight:800}.hero-copy h1{margin:0 0 12px;color:var(--pc-text);font-size:32px;font-weight:850;line-height:1.25}.hero-copy h1 span{color:var(--pc-blue)}.hero-copy p{max-width:560px;margin:0;color:var(--pc-muted);font-size:17px;line-height:1.65}.hero-visual{position:relative;min-height:230px}.hero-circle{position:absolute;inset:14px 10px 4px;border-radius:50%;background:linear-gradient(145deg,#eef7ff,#fff);box-shadow:inset 0 0 0 1px rgba(30,99,240,.08),0 18px 40px rgba(30,99,240,.1)}.hero-family,.hero-shield,.hero-calendar,.hero-vial,.hero-leaf{position:absolute;display:inline-flex;align-items:center;justify-content:center;border-radius:22px;background:#fff;box-shadow:0 16px 28px rgba(23,50,92,.12)}.hero-family{left:52px;bottom:34px;width:112px;height:92px;color:var(--pc-blue);font-size:64px}.hero-shield{left:138px;top:30px;width:104px;height:104px;color:var(--pc-blue);font-size:58px}.hero-calendar{right:42px;top:56px;width:88px;height:78px;color:var(--pc-green);font-size:46px}.hero-vial{right:48px;bottom:30px;width:74px;height:74px;color:var(--pc-blue);font-size:38px}.hero-leaf{left:20px;top:42px;width:58px;height:58px;color:var(--pc-green);font-size:30px;border-radius:18px}.reminder-card{display:grid;gap:14px;padding:20px;border:1px solid var(--pc-border);border-radius:22px;background:rgba(255,255,255,.92);box-shadow:0 16px 32px rgba(23,50,92,.1)}.reminder-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.reminder-title{display:flex;align-items:center;gap:10px;color:var(--pc-text);font-weight:850}.reminder-title i{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:15px;color:#fff;background:var(--pc-green);box-shadow:0 10px 20px rgba(53,180,106,.26)}.switch{position:relative;width:54px;height:30px;flex:0 0 auto;cursor:pointer}.switch input{position:absolute;opacity:0;pointer-events:none}.switch span{position:absolute;inset:0;border-radius:999px;background:#CBD5E1;transition:background-color .22s ease,box-shadow .22s ease}.switch span:after{content:"";position:absolute;top:5px;left:5px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 4px 10px rgba(23,50,92,.22);transition:transform .22s ease}.switch input:checked+span{background:var(--pc-green);box-shadow:0 8px 18px rgba(53,180,106,.24)}.switch input:checked+span:after{transform:translateX(24px)}.switch input:focus-visible+span{outline:3px solid rgba(30,99,240,.24);outline-offset:3px}.reminder-date{display:flex;align-items:center;gap:9px;color:var(--pc-muted);font-weight:700;line-height:1.45}.dashboard-stats,.dashboard-trust-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.stat-card,.dashboard-cta,.dashboard-panel,.trust-item{border:1px solid var(--pc-border);background:var(--pc-white);box-shadow:0 12px 28px rgba(23,50,92,.07)}.stat-card{display:grid;grid-template-columns:58px minmax(0,1fr);gap:14px;align-items:center;min-height:132px;padding:18px;border-radius:20px;transition:transform .18s ease,box-shadow .18s ease}.stat-card:hover,.schedule-state:hover,.dashboard-cta:hover,.trust-item:hover{transform:translateY(-3px);box-shadow:0 18px 36px rgba(23,50,92,.11)}.stat-icon{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;color:var(--pc-blue);background:var(--pc-blue-soft);font-size:28px}.stat-icon.green{color:var(--pc-green);background:var(--pc-green-soft)}.stat-card strong{display:block;color:var(--pc-text);font-size:15px;line-height:1.35}.stat-value{margin:5px 0 2px;color:var(--pc-blue);font-size:30px;font-weight:900;line-height:1}.stat-card span{color:var(--pc-muted);font-size:13px;font-weight:700}.dashboard-cta{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px;border-radius:22px;background:radial-gradient(circle at 92% 20%,rgba(30,99,240,.13) 0 7%,transparent 8%),linear-gradient(135deg,#fff,#eef7ff)}.cta-copy{display:grid;grid-template-columns:62px minmax(0,1fr);gap:16px;align-items:center}.cta-icon{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:20px;color:var(--pc-blue);background:#fff;font-size:32px;box-shadow:0 12px 22px rgba(30,99,240,.12)}.dashboard-cta h2{margin:0 0 6px;color:var(--pc-text);font-size:22px;font-weight:900}.dashboard-cta p{max-width:680px;margin:0;color:var(--pc-muted);line-height:1.6}.primary-action,.secondary-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font-weight:850;white-space:nowrap}.primary-action{min-height:46px;padding:12px 18px;border:1px solid var(--pc-blue);color:#fff;background:var(--pc-blue);box-shadow:0 12px 22px rgba(30,99,240,.2)}.primary-action:hover{color:#fff;background:var(--pc-blue-dark)}.secondary-action{padding:9px 12px;border:1px solid var(--pc-blue);color:var(--pc-blue);background:#fff;font-size:14px}.dashboard-main-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(360px,.85fr);gap:18px;align-items:start}.dashboard-right{display:grid;gap:18px}.dashboard-panel{overflow:hidden;border-radius:22px}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 20px 14px}.panel-title{display:flex;align-items:center;gap:10px}.panel-title i{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:14px;color:var(--pc-blue);background:var(--pc-blue-soft);font-size:22px}.panel-head h2{margin:0;color:var(--pc-text);font-size:21px;font-weight:900}.panel-head p{margin:5px 0 0;color:var(--pc-muted);font-size:13px;line-height:1.45}.head-link{color:var(--pc-blue);font-size:14px;font-weight:850;white-space:nowrap}.schedule-body,.soft-list{display:grid;gap:14px;padding:0 20px 20px}.schedule-state{display:grid;grid-template-columns:58px minmax(0,1fr) 28px;gap:14px;align-items:center;padding:16px;border-radius:18px;border-left:5px solid;transition:transform .18s ease,box-shadow .18s ease}.schedule-state.late{border-left-color:var(--pc-red);background:var(--pc-red-soft)}.schedule-state.today{border-left-color:var(--pc-orange);background:var(--pc-orange-soft)}.schedule-state.upcoming{border-left-color:var(--pc-green);background:var(--pc-green-soft)}.state-icon{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:18px;background:rgba(255,255,255,.78);font-size:26px}.late .state-icon{color:var(--pc-red)}.today .state-icon{color:var(--pc-orange)}.upcoming .state-icon{color:var(--pc-green)}.state-content strong{display:block;color:var(--pc-text);font-size:17px;font-weight:900}.state-content p{margin:4px 0 0;color:var(--pc-muted);font-size:14px;line-height:1.5}.state-content ul{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none}.state-content li{display:flex;flex-wrap:wrap;gap:6px;color:var(--pc-text);font-size:14px;line-height:1.45}.state-content li span{color:var(--pc-muted)}.state-arrow{color:rgba(23,50,92,.42);font-size:22px}.notification-item,.profile-item{display:grid;gap:12px;align-items:center;min-width:0;padding:13px;border:1px solid #edf3fc;border-radius:16px;color:inherit;background:#fff}.notification-item{grid-template-columns:42px minmax(0,1fr) auto}.profile-item{grid-template-columns:44px minmax(0,1fr) auto}.notification-icon,.avatar{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:15px;color:var(--pc-blue);background:var(--pc-blue-soft);font-size:20px;font-weight:900}.avatar{width:44px;height:44px;color:var(--pc-green);background:var(--pc-green-soft);font-size:14px}.notification-content,.profile-info{min-width:0}.notification-content strong,.profile-info strong{display:block;overflow:hidden;color:var(--pc-text);font-weight:850;line-height:1.4;text-overflow:ellipsis;white-space:nowrap}.notification-content span,.profile-info span,.notice-time{color:var(--pc-muted);font-size:13px;line-height:1.45}.notification-content span{display:-webkit-box;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical}.notice-time{white-space:nowrap}.empty-visual{display:grid;justify-items:center;gap:9px;margin:0 20px 20px;padding:28px 18px;border:1px dashed var(--pc-border);border-radius:18px;background:linear-gradient(135deg,#f8fbff,#eef7ff);text-align:center}.empty-visual.green{background:linear-gradient(135deg,#fff,var(--pc-green-soft))}.empty-visual i{display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:24px;color:var(--pc-blue);background:#fff;font-size:40px;box-shadow:0 14px 26px rgba(23,50,92,.08)}.empty-visual.green i{color:var(--pc-green)}.empty-visual strong{color:var(--pc-text);font-size:16px;font-weight:900}.empty-visual p{max-width:320px;margin:0;color:var(--pc-muted);font-size:14px;line-height:1.55}.notification-hidden{display:none}.recent-notification-more{display:flex;justify-content:flex-end;padding:0 20px 20px}.recent-notification-more button{border:1px solid var(--pc-blue);border-radius:12px;padding:9px 13px;color:var(--pc-blue);background:#fff;font-family:inherit;font-weight:850;cursor:pointer}.trust-item{display:flex;align-items:center;gap:12px;min-height:86px;padding:16px;border-radius:18px;transition:transform .18s ease,box-shadow .18s ease}.trust-item i{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:15px;color:var(--pc-blue);background:var(--pc-blue-soft);font-size:22px;flex:0 0 auto}.trust-item:nth-child(1) i,.trust-item:nth-child(4) i{color:var(--pc-green);background:var(--pc-green-soft)}.trust-item strong{color:var(--pc-text);font-size:15px;font-weight:900;line-height:1.35}@@media (max-width:1180px){.dashboard-hero{grid-template-columns:minmax(0,1fr) minmax(260px,.72fr)}.reminder-card{grid-column:1/-1;grid-template-columns:minmax(0,1fr) auto;align-items:center}.dashboard-stats,.dashboard-trust-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-main-grid{grid-template-columns:1fr}}@@media (max-width:760px){.page{padding:16px}.dashboard-hero,.dashboard-cta{padding:18px;border-radius:20px}.dashboard-hero,.reminder-card,.dashboard-stats,.dashboard-trust-strip{grid-template-columns:1fr}.hero-copy h1{font-size:25px}.hero-visual{min-height:210px}.dashboard-cta,.cta-copy,.stat-card,.schedule-state,.notification-item,.profile-item{grid-template-columns:1fr}.dashboard-cta{align-items:flex-start;flex-direction:column}.primary-action{width:100%}.notice-time{white-space:normal}}
+    .recent-notification-card,
+    .health-profile-card {
+        transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
     }
 
-    .home-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        gap: 16px;
-        margin-bottom: 16px;
+    .recent-notification-card .panel-title i,
+    .health-profile-card .panel-title i {
+        transition: transform .22s ease, box-shadow .22s ease;
     }
 
-    .home-header h1 {
-        margin: 0 0 6px;
-        color: #111827;
-        font-size: 24px;
-        font-weight: 800;
+    .recent-notification-card:hover,
+    .health-profile-card:hover {
+        transform: translateY(-4px);
+        border-color: #BFD8F6;
+        box-shadow: 0 22px 44px rgba(23, 50, 92, .14);
     }
 
-    .home-header p,
-    .home-date {
-        margin: 0;
-        color: #64748b;
+    .recent-notification-card:hover .panel-title i,
+    .health-profile-card:hover .panel-title i {
+        transform: scale(1.08);
+        box-shadow: 0 12px 24px rgba(30, 99, 240, .16);
     }
 
-    .home-actions {
+    .dashboard-left {
         display: grid;
-        gap: 10px;
-        justify-items: end;
+        min-width: 0;
+        gap: 24px;
     }
 
-    .reminder-toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: #334155;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .reminder-toggle input {
-        width: 18px;
-        height: 18px;
-        margin: 0;
-        accent-color: #0b63ce;
-    }
-
-    .home-name {
-        color: #0b63ce;
-    }
-
-    .start-profile-cta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin: 0 0 16px;
-        padding: 16px 18px;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        background: #eff6ff;
-    }
-
-    .start-profile-cta strong {
-        display: block;
-        margin-bottom: 4px;
-        color: #0f172a;
-        font-size: 17px;
-        font-weight: 800;
-    }
-
-    .start-profile-cta span {
-        color: #475569;
-        font-size: 14px;
-        line-height: 1.45;
-    }
-
-    .start-profile-cta .btn {
-        white-space: nowrap;
-    }
-
-    .home-grid {
+    .health-news-section {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 400px;
-        gap: 16px;
-        align-items: start;
+        min-width: 0;
+        gap: 22px;
+        margin-top: 0;
+        color: #0F172A;
     }
 
-    .panel {
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+    .health-news-heading,
+    .health-news-slider {
+        border: 1px solid #DCE8FA;
+        border-radius: 12px;
         background: #ffffff;
-        box-shadow: 0 6px 18px rgba(15, 42, 77, 0.06);
-        overflow: hidden;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, .06);
     }
 
-    .panel-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 14px 16px;
-        border-bottom: 1px solid #eef2f7;
+    .health-news-heading {
+        padding: 20px;
     }
 
-    .panel-head h2 {
-        margin: 0;
-        color: #111827;
-        font-size: 19px;
-        font-weight: 800;
-    }
-
-    .panel-head p {
-        margin: 4px 0 0;
-        color: #64748b;
-        font-size: 13px;
-        font-weight: 500;
-    }
-
-    .head-link {
-        color: #0b63ce;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .schedule-body {
-        padding: 14px 16px 16px;
-    }
-
-    .schedule-group {
-        margin-bottom: 18px;
-    }
-
-    .schedule-group:last-child {
-        margin-bottom: 0;
-    }
-
-    .group-title {
+    .health-news-heading h2 {
         margin: 0 0 8px;
-        font-size: 16px;
-        font-weight: 800;
+        color: #0F172A;
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: 0;
     }
 
-    .title-late {
-        color: #dc2626;
+    .health-news-heading p {
+        margin: 0;
+        color: #64748B;
+        font-size: 15px;
+        line-height: 1.55;
     }
 
-    .title-today {
-        color: #ca8a04;
-    }
-
-    .title-upcoming {
-        color: #16a34a;
-    }
-
-    .schedule-table {
-        width: 100%;
+    .health-news-slider {
+        position: relative;
         overflow: hidden;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+        height: 320px;
+        margin-bottom: 18px;
+        background: #F8FAFC;
     }
 
-    .schedule-table table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 14px;
+    .health-news-swiper,
+    .health-news-swiper .swiper-wrapper,
+    .health-news-swiper .swiper-slide {
+        height: 100%;
     }
 
-    .col-profile {
-        width: 16%;
-    }
-
-    .col-vaccine {
-        width: 17%;
-    }
-
-    .col-dose {
-        width: 17%;
-    }
-
-    .col-date {
-        width: 18%;
-    }
-
-    .col-status {
-        width: 17%;
-    }
-
-    .col-action {
-        width: 15%;
-    }
-
-    .schedule-table th,
-    .schedule-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid #eef2f7;
-        text-align: left;
-        vertical-align: middle;
-        overflow-wrap: anywhere;
-    }
-
-    .schedule-table tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .schedule-table th {
-        color: #334155;
-        background: #f8fafc;
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-    .table-late th {
-        background: #f8fafc;
-    }
-
-    .table-today th {
-        background: #fffbeb;
-    }
-
-    .table-upcoming th {
-        background: #f0fdf4;
-    }
-
-    .date-late {
-        color: #dc2626;
-        font-weight: 800;
-    }
-
-    .date-today {
-        color: #ca8a04;
-        font-weight: 800;
-    }
-
-    .date-upcoming {
-        color: #111827;
-        font-weight: 800;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 78px;
-        padding: 4px 9px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .badge-late {
-        color: #dc2626;
-        background: #fee2e2;
-    }
-
-    .badge-today {
-        color: #a16207;
-        background: #fef3c7;
-    }
-
-    .badge-upcoming {
-        color: #15803d;
-        background: #dcfce7;
-    }
-
-    .badge-not-injected,
-    .badge-muted {
-        color: #475569;
-        background: #e2e8f0;
-    }
-
-    .badge-done {
-        color: #166534;
-        background: #dcfce7;
-    }
-
-    .badge-advice {
-        color: #a16207;
-        background: #fef3c7;
-    }
-
-    .profile-name {
-        color: #0b63ce;
-        font-weight: 700;
-    }
-
-    .group-link {
-        display: inline-block;
-        margin-top: 9px;
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-    .link-late {
-        color: #0b63ce;
-    }
-
-    .link-today {
-        color: #ca8a04;
-    }
-
-    .link-upcoming {
-        color: #16a34a;
-    }
-
-    .empty-row {
-        padding: 12px;
-        border: 1px dashed #cbd5e1;
-        border-radius: 8px;
-        color: #64748b;
-        background: #ffffff;
-    }
-
-    .side-column {
+    .featured-news-slide {
         display: grid;
-        gap: 14px;
-    }
-
-    .side-list {
-        display: grid;
-    }
-
-    .notice-item,
-    .profile-item {
-        display: grid;
-        gap: 10px;
-        align-items: center;
-        padding: 12px 14px;
-        border-bottom: 1px solid #eef2f7;
-        color: inherit;
-    }
-
-    .notice-item {
-        grid-template-columns: 12px minmax(0, 1fr) auto;
-        gap: 8px;
-    }
-
-    .profile-item {
-        grid-template-columns: 38px minmax(0, 1fr) auto;
-    }
-
-    .notice-item:last-child,
-    .profile-item:last-child {
-        border-bottom: 0;
-    }
-
-    .avatar {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        border-radius: 50%;
-        font-size: 13px;
-        font-weight: 800;
-        flex: 0 0 auto;
+        grid-template-columns: 46% 54%;
+        height: 100%;
         overflow: hidden;
-        justify-self: center;
     }
 
-    .notice-dot {
-        display: inline-block;
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: #dbeafe;
-        justify-self: center;
-    }
-
-    .notice-item:nth-child(1) .notice-dot {
-        background: #fee2e2;
-    }
-
-    .notice-item:nth-child(2) .notice-dot {
-        background: #ffedd5;
-    }
-
-    .notice-item:nth-child(3) .notice-dot {
-        background: #dcfce7;
-    }
-
-    .notice-item:nth-child(4) .notice-dot {
-        background: #dbeafe;
-    }
-
-    .avatar {
-        color: #0b63ce;
-        background: #eaf4ff;
-    }
-
-    .profile-item:nth-child(1) .avatar {
-        color: #be123c;
-        background: #ffe4e6;
-    }
-
-    .profile-item:nth-child(2) .avatar {
-        color: #1d4ed8;
-        background: #dbeafe;
-    }
-
-    .profile-item:nth-child(3) .avatar {
-        color: #15803d;
-        background: #dcfce7;
-    }
-
-    .profile-item:nth-child(4) .avatar {
-        color: #7c3aed;
-        background: #ede9fe;
-    }
-
-    .profile-item:nth-child(5) .avatar {
-        color: #b45309;
-        background: #fef3c7;
-    }
-
-    .notice-item strong,
-    .profile-item strong {
-        display: block;
-        margin-bottom: 3px;
-        color: #111827;
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-    .notice-content span,
-    .profile-info span {
-        display: -webkit-box;
-        overflow: hidden;
-        color: #64748b;
-        font-size: 13px;
-        line-height: 1.4;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    .notice-content span {
-        max-height: 39px;
-    }
-
-    .notice-time {
-        color: #94a3b8;
-        font-size: 11px;
-        white-space: nowrap;
-    }
-
-    .notification-hidden {
-        display: none;
-    }
-
-    .recent-notification-more {
+    .featured-news-copy {
         display: flex;
-        justify-content: flex-end;
-        padding: 12px 14px 14px;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: center;
+        padding: 22px;
+        background: linear-gradient(135deg, #ffffff 0%, #F8FAFC 100%);
     }
 
-    .recent-notification-more button {
-        border: 1px solid #0d6efd;
-        border-radius: 7px;
-        padding: 7px 13px;
-        color: #0d6efd;
-        background: #ffffff;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
+    .featured-news-badge {
+        width: fit-content;
+        max-width: 100%;
+        border-radius: 999px;
+        color: #2563EB;
+        background: #EAF2FF;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
     }
 
-    .recent-notification-more button:hover {
-        background: #eff6ff;
-    }
-
-    .profile-item .btn {
-        white-space: nowrap;
-    }
-
-    .add-profile {
-        display: block;
-        margin: 12px 14px 14px;
-        text-align: center;
-    }
-
-    .home-header .btn,
-    .home-grid .btn {
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-    .home-header .btn-sm,
-    .home-grid .btn-sm {
+    .featured-news-badge {
+        margin-bottom: 10px;
         padding: 6px 10px;
+    }
+
+    .featured-news-copy h3 {
+        display: -webkit-box;
+        margin: 0 0 12px;
+        overflow: hidden;
+        color: #0F172A;
+        font-size: 21px;
+        font-weight: 900;
+        line-height: 1.28;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .featured-news-copy p {
+        display: -webkit-box;
+        margin: 0 0 20px;
+        overflow: hidden;
+        color: #475569;
         font-size: 13px;
+        line-height: 1.55;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
     }
 
-    .home-grid .btn-outline-warning {
-        color: #a16207;
-        border-color: #eab308;
+    .featured-news-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        min-height: 38px;
+        padding: 9px 13px;
+        border-radius: 12px;
+        color: #ffffff;
+        background: #2563EB;
+        font-weight: 850;
+        box-shadow: 0 12px 20px rgba(37, 99, 235, .2);
     }
 
-    @@media (max-width: 1050px) {
-        .home-grid {
-            grid-template-columns: 1fr;
-        }
+    .featured-news-action:hover {
+        color: #ffffff;
+        background: #1D4ED8;
     }
 
-    @@media (max-width: 420px) {
-        .profile-item,
-        .notice-item {
-            grid-template-columns: 38px minmax(0, 1fr);
-        }
+    .featured-news-image {
+        min-width: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #EAF2FF;
+    }
 
-        .notice-item {
-            grid-template-columns: 12px minmax(0, 1fr);
-        }
+    .featured-news-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-        .profile-item .btn,
-        .notice-time {
-            grid-column: 2;
-            justify-self: start;
-        }
+    .health-news-slider .swiper-button-prev,
+    .health-news-slider .swiper-button-next {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        color: #2563EB;
+        background: rgba(255, 255, 255, .92);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, .16);
+    }
+
+    .health-news-slider .swiper-button-prev::after,
+    .health-news-slider .swiper-button-next::after {
+        font-size: 13px;
+        font-weight: 900;
+    }
+
+    .health-news-slider .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        background: #CBD5E1;
+        opacity: 1;
+    }
+
+    .health-news-slider .swiper-pagination-bullet-active {
+        width: 24px;
+        border-radius: 999px;
+        background: #2563EB;
+    }
+
+    .health-news-empty {
+        padding: 28px;
+        border: 1px dashed #CBD5E1;
+        border-radius: 16px;
+        color: #64748B;
+        background: #F8FAFC;
+        text-align: center;
+        font-weight: 750;
     }
 
     @@media (max-width: 760px) {
-        .home-header {
-            align-items: flex-start;
-            flex-direction: column;
+        .health-news-heading {
+            padding: 18px;
         }
 
-        .home-actions {
-            justify-items: start;
+        .health-news-slider {
+            height: auto;
+            margin-bottom: 0;
         }
 
-        .start-profile-cta {
-            align-items: flex-start;
-            flex-direction: column;
+        .featured-news-slide {
+            display: flex;
+            flex-direction: column-reverse;
         }
 
-        .schedule-table {
-            overflow-x: auto;
+        .featured-news-image {
+            height: 190px;
         }
 
-        .schedule-table table {
-            min-width: 720px;
+        .featured-news-copy {
+            padding: 20px;
         }
+
+        .featured-news-copy h3 {
+            font-size: 22px;
+        }
+
+        .health-news-slider .swiper-button-prev,
+        .health-news-slider .swiper-button-next {
+            width: 32px;
+            height: 32px;
+        }
+
     }
 </style>
 
-<section class="home-header">
-    <div>
-        <h1>Xin chào, <span class="home-name">@hoTen</span></h1>
-        <p>Cùng theo dõi sức khỏe và lịch tiêm của bạn và gia đình.</p>
-    </div>
-    <div class="home-actions">
-        <label class="reminder-toggle">
-            <input type="checkbox" id="btnBatThongBao" />
-            <span>Tự động nhắc lịch</span>
-        </label>
-        <div class="home-date">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
-    </div>
-</section>
-
-@if (danhSachHoSo.Count == 0)
-{
-    <section class="start-profile-cta">
-        <div>
-            <strong>Thêm hồ sơ sức khỏe để bắt đầu</strong>
-            <span>Tạo hồ sơ đầu tiên để hệ thống tự lập lịch tiêm và theo dõi nhắc lịch cho bạn.</span>
+<section class="dashboard-page">
+    <section class="dashboard-hero">
+        <div class="hero-copy">
+            <div class="hero-eyebrow"><i class="bi bi-heart-pulse"></i> Pharmacy City</div>
+            <h1>Chủ động sức khỏe – Đúng hẹn tiêm chủng</h1>
+            <p>Cùng theo dõi sức khỏe và lịch tiêm của bạn và gia đình.</p>
         </div>
-        <a class="btn btn-primary" href="/HoSoSucKhoe/Create">Thêm hồ sơ mới -&gt;</a>
+        <div class="hero-visual" aria-hidden="true">
+            <div class="hero-circle"></div><span class="hero-leaf"><i class="bi bi-flower1"></i></span><span class="hero-family"><i class="bi bi-people-fill"></i></span><span class="hero-shield"><i class="bi bi-shield-check"></i></span><span class="hero-calendar"><i class="bi bi-calendar2-check"></i></span><span class="hero-vial"><i class="bi bi-capsule-pill"></i></span>
+        </div>
+        <div class="reminder-card">
+            <div class="reminder-head"><div class="reminder-title"><i class="bi bi-bell-fill"></i><span>Tự động nhắc lịch</span></div><label class="switch" for="tuDongNhacLichSwitch" aria-label="Tự động nhắc lịch"><input type="checkbox" id="tuDongNhacLichSwitch" checked /><span aria-hidden="true"></span></label></div>
+            <div class="reminder-date"><i class="bi bi-calendar-event"></i> @ngayHienTai</div>
+        </div>
     </section>
-}
 
-<section class="home-grid">
-    <article class="panel">
-        <div class="panel-head">
-            <h2>Lịch tiêm</h2>
-        </div>
+    <section class="dashboard-stats" aria-label="Thống kê nhanh">
+        <article class="stat-card"><i class="stat-icon bi bi-person"></i><div><strong>Hồ sơ của tôi</strong><div class="stat-value">@danhSachHoSo.Count</div><span>Hồ sơ sức khỏe</span></div></article>
+        <article class="stat-card"><i class="stat-icon green bi bi-calendar-event"></i><div><strong>Lịch sắp tới</strong><div class="stat-value">@soMuiSapToi</div><span>Mũi tiêm sắp tới</span></div></article>
+        <article class="stat-card"><i class="stat-icon bi bi-shield-check"></i><div><strong>Mũi đã hoàn thành</strong><div class="stat-value">@soMuiHoanThanh</div><span>Mũi đã tiêm</span></div></article>
+        <article class="stat-card"><i class="stat-icon green bi bi-capsule-pill"></i><div><strong>Tổng số vaccine</strong><div class="stat-value">@tongSoVaccine</div><span>Vaccine trong hệ thống</span></div></article>
+    </section>
 
-        <div class="schedule-body">
-            <div class="schedule-group">
-                <h3 class="group-title title-late">Quá hạn (@soMuiQuaHan)</h3>
-                @if (lichTiemQuaHan.Count == 0)
-                {
-                    <div class="empty-row">Không có mũi quá hạn.</div>
-                }
-                else
-                {
-                    <div class="schedule-table table-late">
-                        <table>
-                            <colgroup>
-                                <col class="col-profile" />
-                                <col class="col-vaccine" />
-                                <col class="col-dose" />
-                                <col class="col-date" />
-                                <col class="col-status" />
-                                <col class="col-action" />
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th>Hồ sơ</th>
-                                    <th>Vaccine</th>
-                                    <th>Mũi</th>
-                                    <th>Ngày dự kiến</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var lich in lichTiemQuaHan)
-                                {
-                                    <tr>
-                                        <td><span class="profile-name @LopMauHoSo(lich.HoTenHoSo)">@lich.HoTenHoSo</span></td>
-                                        <td>@lich.TenVaccine</td>
-                                        <td>@lich.TenMui</td>
-                                        <td class="date-late">@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
-                                        <td><span class="status-badge badge-late">Quá hạn</span></td>
-                                        <td><a class="btn btn-sm btn-outline-danger" href="/LichTiem/CapNhatDaTiem?maLichTiem=@lich.MaLichTiem">Cập nhật</a></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    <a class="group-link link-late" href="/LichTiem/ChonHoSo">Xem tất cả (@soMuiQuaHan)</a>
-                }
+    <section class="dashboard-cta">
+        <div class="cta-copy"><span class="cta-icon"><i class="bi bi-folder-plus"></i></span><div><h2>Thêm hồ sơ sức khỏe để bắt đầu</h2><p>Tạo hồ sơ đầu tiên để hệ thống tự lập lịch tiêm và theo dõi nhắc lịch cho bạn.</p></div></div>
+        <a class="primary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a>
+    </section>
+
+    <section class="dashboard-main-grid">
+        <div class="dashboard-left">
+        <article class="dashboard-panel vaccination-schedule-card">
+            <div class="panel-head"><div class="panel-title"><i class="bi bi-calendar2-week"></i><div><h2>Lịch tiêm</h2></div></div></div>
+            <div class="schedule-body">
+                <a class="schedule-state late" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-alarm"></i></span><span class="state-content"><strong>Quá hạn (@soMuiQuaHan)</strong>@if (lichTiemQuaHan.Count == 0){<p>Không có mũi quá hạn.</p>}else{<p>Cần cập nhật các mũi đã quá ngày dự kiến.</p><ul>@foreach (var lich in lichTiemQuaHan.Take(3)){<li><b>@lich.HoTenHoSo</b><span>@lich.TenVaccine - @lich.TenMui - @lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span><span>Cập nhật trong chi tiết</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
+                <a class="schedule-state today" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-hourglass-split"></i></span><span class="state-content"><strong>Hôm nay (@soMuiHomNay)</strong>@if (lichTiemHomNay.Count == 0){<p>Hôm nay chưa có lịch tiêm.</p>}else{<p>Các mũi cần thực hiện trong hôm nay.</p><ul>@foreach (var lich in lichTiemHomNay.Take(3)){<li><b>@lich.HoTenHoSo</b><span>@lich.TenVaccine - @lich.TenMui - @lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span><span>Cập nhật trong chi tiết</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
+                <a class="schedule-state upcoming" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-calendar-check"></i></span><span class="state-content"><strong>Sắp tới (@soMuiSapToi)</strong>@if (lichTiemSapToi.Count == 0){<p>Chưa có lịch sắp tới.</p>}else{<p>Các mũi tiêm sắp đến hạn.</p><ul>@foreach (var lich in lichTiemSapToi.Take(3)){<li><b>@lich.HoTenHoSo</b><span>@lich.TenVaccine - @lich.TenMui - @lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span><span>Chi tiết trong lịch tiêm</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
             </div>
-
-            <div class="schedule-group">
-                <h3 class="group-title title-today">Hôm nay (@soMuiHomNay)</h3>
-                @if (lichTiemHomNay.Count == 0)
-                {
-                    <div class="empty-row">Hôm nay chưa có lịch tiêm.</div>
-                }
-                else
-                {
-                    <div class="schedule-table table-today">
-                        <table>
-                            <colgroup>
-                                <col class="col-profile" />
-                                <col class="col-vaccine" />
-                                <col class="col-dose" />
-                                <col class="col-date" />
-                                <col class="col-status" />
-                                <col class="col-action" />
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th>Hồ sơ</th>
-                                    <th>Vaccine</th>
-                                    <th>Mũi</th>
-                                    <th>Ngày dự kiến</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var lich in lichTiemHomNay)
-                                {
-                                    <tr>
-                                        <td><span class="profile-name @LopMauHoSo(lich.HoTenHoSo)">@lich.HoTenHoSo</span></td>
-                                        <td>@lich.TenVaccine</td>
-                                        <td>@lich.TenMui</td>
-                                        <td class="date-today">@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
-                                        <td><span class="status-badge badge-today">Hôm nay</span></td>
-                                        <td><a class="btn btn-sm btn-outline-warning" href="/LichTiem/CapNhatDaTiem?maLichTiem=@lich.MaLichTiem">Cập nhật</a></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    <a class="group-link link-today" href="/LichTiem/ChonHoSo">Xem tất cả (@soMuiHomNay)</a>
-                }
-            </div>
-
-            <div class="schedule-group">
-                <h3 class="group-title title-upcoming">Sắp tới (@soMuiSapToi)</h3>
-                @if (lichTiemSapToi.Count == 0)
-                {
-                    <div class="empty-row">Chưa có lịch sắp tới.</div>
-                }
-                else
-                {
-                    <div class="schedule-table table-upcoming">
-                        <table>
-                            <colgroup>
-                                <col class="col-profile" />
-                                <col class="col-vaccine" />
-                                <col class="col-dose" />
-                                <col class="col-date" />
-                                <col class="col-status" />
-                                <col class="col-action" />
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th>Hồ sơ</th>
-                                    <th>Vaccine</th>
-                                    <th>Mũi</th>
-                                    <th>Ngày dự kiến</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var lich in lichTiemSapToi)
-                                {
-                                    <tr>
-                                        <td><span class="profile-name @LopMauHoSo(lich.HoTenHoSo)">@lich.HoTenHoSo</span></td>
-                                        <td>@lich.TenVaccine</td>
-                                        <td>@lich.TenMui</td>
-                                        <td class="date-upcoming">@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
-                                        <td><span class="status-badge badge-upcoming">Sắp tới</span></td>
-                                        <td><a class="btn btn-sm btn-outline-primary" href="/LichTiem/Index?maHoSo=@lich.MaHoSo">Chi tiết</a></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    <a class="group-link link-upcoming" href="/LichTiem/ChonHoSo">Xem tất cả (@soMuiSapToi)</a>
-                }
-            </div>
-        </div>
-    </article>
-
-    <div class="side-column">
-        <article class="panel">
-            <div class="panel-head">
-                <div>
-                    <h2>Thông báo gần đây</h2>
-                    <p>Hiển thị thông báo trong 10 ngày gần nhất</p>
-                </div>
-            </div>
-
-            @if (thongBaoMoiNhat.Count == 0)
-            {
-                <div class="empty-row" style="margin: 14px;">Chưa có thông báo gần đây.</div>
-            }
-            else
-            {
-                <div class="side-list">
-                    @for (var i = 0; i < thongBaoMoiNhat.Count; i++)
-                    {
-                        var tb = thongBaoMoiNhat[i];
-                        var hiddenClass = i >= 3 ? "notification-hidden" : string.Empty;
-
-                        <a class="notice-item recent-notification-item @hiddenClass" href="/ThongBao/Details/@tb.MaThongBao">
-                            <span class="notice-dot"></span>
-                            <span class="notice-content">
-                                <strong>@tb.TieuDe</strong>
-                                <span>@RutGon(tb.NoiDung)</span>
-                            </span>
-                            <small class="notice-time">@tb.NgayGui.ToString("dd/MM HH:mm")</small>
-                        </a>
-                    }
-                </div>
-
-                @if (thongBaoMoiNhat.Count > 3)
-                {
-                    <div class="recent-notification-more">
-                        <button type="button" id="btnXemThemThongBao">Xem thêm</button>
-                    </div>
-                }
-            }
         </article>
 
-        <article class="panel">
-            <div class="panel-head">
-                <h2>Hồ sơ sức khỏe</h2>
-                <a class="head-link" href="/HoSoSucKhoe/Index">Xem tất cả</a>
-            </div>
+        <section class="health-news-section" aria-label="Cẩm nang và tin tức sức khỏe">
+            <header class="health-news-heading">
+                <h2>CẨM NANG &amp; TIN TỨC SỨC KHỎE</h2>
+                <p>Cập nhật thông tin y tế mới nhất và những kiến thức hữu ích</p>
+            </header>
 
-            @if (danhSachHoSo.Count == 0)
+            @if (baiVietNoiBat.Count > 0)
             {
-                <div class="empty-row" style="margin: 14px;">Bạn chưa có hồ sơ sức khỏe.</div>
-            }
-            else
-            {
-                <div class="side-list">
-                    @foreach (var hoSo in danhSachHoSo.Take(5))
-                    {
-                        <div class="profile-item">
-                            <span class="avatar">@LayChuCai(hoSo.HoTen)</span>
-                            <span class="profile-info">
-                                <strong>@hoSo.HoTen</strong>
-                                <span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span>
-                            </span>
-                            <a class="btn btn-sm btn-outline-primary" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem hồ sơ</a>
+                <section class="health-news-slider" aria-label="Bài viết nổi bật">
+                    <div class="swiper health-news-swiper">
+                        <div class="swiper-wrapper">
+                            @for (var i = 0; i < baiVietNoiBat.Count; i++)
+                            {
+                                var baiViet = baiVietNoiBat[i];
+                                <article class="swiper-slide">
+                                    <div class="featured-news-slide">
+                                        <div class="featured-news-copy">
+                                            <span class="featured-news-badge">CẨM NANG NỔI BẬT</span>
+                                            <h3>@baiViet.TieuDe</h3>
+                                            <p>@RutGonBaiViet(baiViet.NoiDung, 210)</p>
+                                            <a class="featured-news-action" href="/BaiVietCamNang/Details?maBaiViet=@baiViet.MaBaiViet">Xem chi tiết</a>
+                                        </div>
+                                        <div class="featured-news-image">
+                                            <img src="@AnhBaiViet(baiViet, i)" alt="@baiViet.TieuDe" />
+                                        </div>
+                                    </div>
+                                </article>
+                            }
                         </div>
-                    }
-                </div>
+                        <div class="swiper-button-prev" aria-label="Bài trước"></div>
+                        <div class="swiper-button-next" aria-label="Bài tiếp theo"></div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </section>
             }
+            else
+            {
+                <div class="health-news-empty">Chưa có bài viết nổi bật để hiển thị.</div>
+            }
+        </section>
+        </div>
 
-            <a class="btn btn-sm btn-outline-primary add-profile" href="/HoSoSucKhoe/Create">+ Thêm hồ sơ mới</a>
-        </article>
-    </div>
+        <div class="dashboard-right">
+            <article class="dashboard-panel recent-notification-card">
+                <div class="panel-head"><div class="panel-title"><i class="bi bi-megaphone"></i><div><h2>Thông báo gần đây</h2><p>Hiển thị thông báo trong 10 ngày gần nhất</p></div></div><a class="head-link" href="/ThongBao/Index">Xem tất cả</a></div>
+                @if (thongBaoMoiNhat.Count == 0){<div class="empty-visual"><i class="bi bi-bell"></i><strong>Chưa có thông báo gần đây.</strong><p>Bạn sẽ nhận được thông báo mới tại đây.</p></div>}else{<div class="soft-list">@for (var i = 0; i < thongBaoMoiNhat.Count; i++){var tb = thongBaoMoiNhat[i]; var hiddenClass = i >= 3 ? "notification-hidden" : string.Empty;<a class="notification-item recent-notification-item @hiddenClass" href="/ThongBao/Details/@tb.MaThongBao"><span class="notification-icon"><i class="bi bi-bell"></i></span><span class="notification-content"><strong>@tb.TieuDe</strong><span>@RutGon(tb.NoiDung)</span></span><small class="notice-time">@tb.NgayGui.ToString("dd/MM HH:mm")</small></a>}</div>@if (thongBaoMoiNhat.Count > 3){<div class="recent-notification-more"><button type="button" id="btnXemThemThongBao">Xem thêm</button></div>}}
+            </article>
+
+            <article class="dashboard-panel health-profile-card">
+                <div class="panel-head"><div class="panel-title"><i class="bi bi-clipboard2-pulse"></i><div><h2>Hồ sơ sức khỏe</h2></div></div><a class="head-link" href="/HoSoSucKhoe/Index">Xem tất cả</a></div>
+                @if (danhSachHoSo.Count == 0){<div class="empty-visual green"><i class="bi bi-journal-medical"></i><strong>Bạn chưa có hồ sơ sức khỏe.</strong><p>Tạo hồ sơ để bắt đầu theo dõi và quản lý sức khỏe.</p><a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}else{<div class="soft-list">@foreach (var hoSo in danhSachHoSo.Take(5)){<div class="profile-item"><span class="avatar">@LayChuCai(hoSo.HoTen)</span><span class="profile-info"><strong>@hoSo.HoTen</strong><span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span></span><a class="secondary-action" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem hồ sơ</a></div>}<a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}
+            </article>
+        </div>
+    </section>
+
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const btn = document.getElementById("btnXemThemThongBao");
-        if (!btn) return;
-
-        btn.addEventListener("click", function () {
-            document.querySelectorAll(".recent-notification-item.notification-hidden").forEach(function (item) {
-                item.classList.remove("notification-hidden");
+        if (btn) {
+            btn.addEventListener("click", function () {
+                document.querySelectorAll(".recent-notification-item.notification-hidden").forEach(function (item) { item.classList.remove("notification-hidden"); });
+                btn.style.display = "none";
             });
+        }
 
-            btn.style.display = "none";
-        });
+        if (window.Swiper && document.querySelector(".health-news-swiper")) {
+            new Swiper(".health-news-swiper", {
+                loop: true,
+                speed: 650,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true
+                },
+                pagination: {
+                    el: ".health-news-swiper .swiper-pagination",
+                    clickable: true
+                },
+                navigation: {
+                    nextEl: ".health-news-swiper .swiper-button-next",
+                    prevEl: ".health-news-swiper .swiper-button-prev"
+                }
+            });
+        }
     });
 </script>

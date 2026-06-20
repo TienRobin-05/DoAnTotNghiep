@@ -1,4 +1,5 @@
 :root {
+  --font-main: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
   --ui-primary: #0b63ce;
   --ui-primary-dark: #084f9f;
   --ui-primary-soft: #eaf4ff;
@@ -15,10 +16,95 @@
 }
 
 body {
+  font-family: var(--font-main) !important;
   color: var(--ui-text);
   background:
     linear-gradient(180deg, #f8fbff 0, var(--ui-page) 220px),
     var(--ui-page);
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+.form-control,
+.form-select,
+.btn,
+.navbar,
+.nav-link,
+.menu,
+.main-navbar,
+.dropdown-menu,
+.dropdown-item,
+.card,
+.table,
+.modal,
+form,
+label,
+span,
+p,
+a,
+div {
+  font-family: var(--font-main) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-main) !important;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.nav-link,
+.menu a,
+.main-navbar a,
+.dropdown-item {
+  font-weight: 600;
+}
+
+.btn {
+  font-weight: 600 !important;
+}
+
+.card-title,
+.section-title,
+.page-title {
+  font-weight: 700;
+}
+
+.text-muted,
+.card-description,
+.small-text {
+  font-weight: 400;
+}
+
+.page-title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.page-title-with-icon h1,
+.page-title-with-icon h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.page-title-icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .navbar {
@@ -486,4 +572,67 @@ td {
   .article-cover {
     aspect-ratio: 16 / 10;
   }
+}
+
+.navbar .nav-link,
+.main-navbar .nav-link,
+.main-navbar > a,
+.header-menu .nav-link,
+.top-menu .nav-link,
+.nav-links a,
+.lc-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: all 0.22s ease;
+  cursor: pointer;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active:hover,
+.main-navbar .nav-link:hover,
+.main-navbar .nav-link.active:hover,
+.main-navbar > a:hover,
+.main-navbar > a.active:hover,
+.header-menu .nav-link:hover,
+.header-menu .nav-link.active:hover,
+.top-menu .nav-link:hover,
+.top-menu .nav-link.active:hover,
+.nav-links a:hover,
+.lc-nav a:hover {
+  background-color: #43a047 !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(67, 160, 71, 0.28);
+  transform: translateY(-1px);
+}
+
+.navbar .nav-link:hover i,
+.navbar .nav-link:hover svg,
+.main-navbar .nav-link:hover i,
+.main-navbar .nav-link:hover svg,
+.main-navbar > a:hover i,
+.main-navbar > a:hover svg,
+.header-menu .nav-link:hover i,
+.header-menu .nav-link:hover svg,
+.top-menu .nav-link:hover i,
+.top-menu .nav-link:hover svg,
+.nav-links a:hover i,
+.nav-links a:hover svg,
+.lc-nav a:hover i,
+.lc-nav a:hover svg {
+  color: #ffffff !important;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.navbar .nav-link.active:hover,
+.main-navbar .nav-link.active:hover,
+.main-navbar > a.active:hover,
+.header-menu .nav-link.active:hover,
+.top-menu .nav-link.active:hover {
+  background-color: #43a047 !important;
+  color: #ffffff !important;
 }

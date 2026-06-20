@@ -16,7 +16,7 @@ self.addEventListener("push", event => {
     const title = data.title || "Thong bao";
     const options = {
         body: data.body || "",
-        icon: data.icon || "/favicon.ico",
+        icon: data.icon || "/images/logo/pharmacy-favicon.png",
         data: {
             url: data.url || "/ThongBao/Index"
         }

@@ -3,9 +3,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Hồ sơ sức khỏe và tiêm chủng</title>
+    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</title>
+    <link rel="icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
@@ -19,47 +24,55 @@
         var maTaiKhoan = Context.Session.GetInt32("MaTaiKhoan");
         var daDangNhap = maTaiKhoan.HasValue;
         var laAdmin = string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase);
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
         var tenHienThi = !string.IsNullOrWhiteSpace(hoTen)
             ? hoTen
             : (!string.IsNullOrWhiteSpace(soDienThoai) ? soDienThoai : email);
         tenHienThi = string.IsNullOrWhiteSpace(tenHienThi) ? "Tài khoản" : tenHienThi;
+
+        string Active(string tenController, string? tenAction = null)
+        {
+            var dungController = string.Equals(controller, tenController, StringComparison.OrdinalIgnoreCase);
+            var dungAction = tenAction == null || string.Equals(action, tenAction, StringComparison.OrdinalIgnoreCase);
+            return dungController && dungAction ? "active" : "";
+        }
     }
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
-        <div class="container">
-            <a class="navbar-brand" asp-controller="TaiKhoan" asp-action="DangNhap">Tiêm chủng</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuChinh">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="menuChinh">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <header class="top-header">
+        <a class="brand-area" asp-controller="Home" asp-action="Index" aria-label="Pharmacy City">
+            <img src="/images/logo/pharmacy-logo.png" alt="Pharmacy City" />
+            <div class="brand-text">
+                <h1>Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</h1>
+            </div>
+        </a>
+        <nav class="main-navbar" aria-label="Menu chức năng">
                     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                     @if (daDangNhap && laAdmin)
                     {
-                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Quản trị</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="taiKhoan">Tài khoản</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="vaccine" asp-action="index">Vaccine</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="muiTiemVaccine" asp-action="index">Mũi tiêm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="AdminBaiViet" asp-action="Index">Bài viết</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
+                        <a class="@Active("Admin", "Index")" asp-controller="Admin" asp-action="Index">Quản trị</a>
+                        <a class="@Active("Admin", "taiKhoan")" asp-controller="Admin" asp-action="taiKhoan">Tài khoản</a>
+                        <a class="@Active("vaccine")" asp-controller="vaccine" asp-action="index">Vaccine</a>
+                        <a class="@Active("muiTiemVaccine")" asp-controller="muiTiemVaccine" asp-action="index">Mũi tiêm</a>
+                        <a class="@Active("AdminBaiViet")" asp-controller="AdminBaiViet" asp-action="Index">Bài viết</a>
+                        <a class="@Active("cauHoiTuVan")" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a>
                     }
                     else if (daDangNhap)
                     {
-                        <li class="nav-item"><a class="nav-link" asp-controller="NguoiDung" asp-action="Index">Trang người dùng</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="HoSoSucKhoe" asp-action="Index">Hồ sơ sức khỏe</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="LichTiem" asp-action="ChonHoSo">Lịch tiêm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="LichSuTiem" asp-action="ChonHoSo">Lịch sử tiêm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="vaccine" asp-action="TraCuu">Vaccine</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="BaiVietCamNang" asp-action="Index">Kiến thức</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a></li>
+                        <a class="@Active("NguoiDung", "Index")" asp-controller="NguoiDung" asp-action="Index">Trang chủ</a>
+                        <a class="@Active("HoSoSucKhoe")" asp-controller="HoSoSucKhoe" asp-action="Index">Hồ sơ</a>
+                        <a class="@Active("LichTiem")" asp-controller="LichTiem" asp-action="ChonHoSo">Lịch tiêm</a>
+                        <a class="@Active("LichSuTiem")" asp-controller="LichSuTiem" asp-action="ChonHoSo">Lịch sử</a>
+                        <a class="@Active("vaccine")" asp-controller="vaccine" asp-action="TraCuu">Vaccine</a>
+                        <a class="@Active("ThongBao")" asp-controller="ThongBao" asp-action="Index">Thông báo</a>
+                        <a class="@Active("BaiVietCamNang")" asp-controller="BaiVietCamNang" asp-action="Index">Kiến thức</a>
+                        <a class="@Active("cauHoiTuVan")" asp-controller="cauHoiTuVan" asp-action="index">Tư vấn</a>
                     }
-                </ul>
-                <div class="d-flex gap-2 align-items-center">
                     @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
                     @if (daDangNhap)
                     {
                         <div class="dropdown account-dropdown">
-                            <button class="btn btn-outline-primary btn-sm dropdown-toggle account-name-button" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="account-name-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 @tenHienThi
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end account-dropdown-menu">
@@ -70,15 +83,13 @@
                     }
                     else
                     {
-                        <a class="btn btn-outline-primary btn-sm" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
-                        <a class="btn btn-primary btn-sm" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
+                        <a asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
+                        <a class="active" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
                     }
-                </div>
-            </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <main class="container pb-4">
+    <main class="container pb-4 mt-4">
         <partial name="_ThongBao" />
         @RenderBody()
     </main>

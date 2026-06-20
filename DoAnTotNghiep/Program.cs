@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.DataProtection;
 // Khởi tạo builder để đăng ký service, đọc cấu hình và chuẩn bị tạo ứng dụng ASP.NET Core MVC.
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // Đăng ký MVC để ứng dụng sử dụng Controller xử lý request và View Razor hiển thị giao diện.
 builder.Services.AddControllersWithViews();
 

@@ -7,10 +7,19 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Hệ thống quản lý sức khỏe và lịch tiêm chủng</title>
+    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</title>
+    <link rel="icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --font-main: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -18,9 +27,43 @@
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: var(--font-main);
             color: #17233c;
             background: linear-gradient(180deg, #f8fbff 0%, #ffffff 45%, #f7fbff 100%);
+        }
+
+        html,
+        body,
+        button,
+        input,
+        select,
+        textarea,
+        .form-control,
+        .form-select,
+        .btn,
+        .dropdown-menu,
+        .dropdown-item,
+        .card,
+        .table,
+        .modal,
+        form,
+        label,
+        span,
+        p,
+        a,
+        div {
+            font-family: var(--font-main) !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: var(--font-main) !important;
+            font-weight: 700;
+            letter-spacing: -0.2px;
         }
 
         .auth-page {
@@ -56,18 +99,11 @@
         }
 
         .auth-logo {
-            width: 46px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-size: 34px;
-            font-weight: bold;
-            line-height: 1;
-            background: linear-gradient(180deg, #2f80ff 0%, #0b63ce 100%);
-            border-radius: 12px 12px 22px 22px;
-            box-shadow: 0 8px 18px rgba(11, 99, 206, 0.22);
+            width: auto;
+            height: 52px;
+            display: block;
+            object-fit: contain;
+            flex-shrink: 0;
         }
 
         .auth-nav {
@@ -305,8 +341,8 @@
                 <header class="auth-header">
             <div class="auth-header-inner">
                 <a class="auth-brand" asp-controller="Home" asp-action="Index">
-                    <span class="auth-logo">+</span>
-                    <span>H&#7879; th&#7889;ng qu&#7843;n l&#253; s&#7913;c kh&#7887;e v&#224; l&#7883;ch ti&#234;m ch&#7911;ng</span>
+                    <img src="@Url.Content("~/images/logo/pharmacy-logo.png")" alt="Pharmacy City" class="auth-logo" />
+                    <span>Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</span>
                 </a>
 
                 <nav class="auth-nav">
@@ -328,7 +364,7 @@
         </main>
 
         <footer class="auth-footer">
-            © 2024 Hệ thống quản lý sức khỏe và lịch tiêm chủng. All rights reserved.
+            © 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng
         </footer>
     </div>
     <script>

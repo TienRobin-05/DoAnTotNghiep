@@ -14,7 +14,12 @@
 
 <div class="list-page-head">
     <div>
-        <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
+        <div class="page-title-with-icon">
+            <img src="@Url.Content("~/images/icons/lich-tiem.png")"
+                 alt="Icon lịch tiêm"
+                 class="page-title-icon" />
+            <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
+        </div>
         <p>@tongTatCa lịch tiêm trong hồ sơ</p>
     </div>
     <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>

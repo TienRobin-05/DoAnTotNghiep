@@ -1,4 +1,4 @@
-@inject DoAnTotNghiep.DAL.ThongBao_DAL ThongBaoDal
+﻿@inject DoAnTotNghiep.DAL.ThongBao_DAL ThongBaoDal
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
@@ -31,23 +31,374 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng</title>
+    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</title>
+    <link rel="icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
+        :root {
+            --font-main: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
         * {
             box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: var(--font-main);
             color: #1f2937;
             background: #f4f7fb;
         }
 
         a {
             text-decoration: none;
+        }
+
+        .dashboard-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #ffffff;
+            border-bottom: 1px solid #E5EDF7;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+        }
+
+        .dashboard-topbar-inner {
+            width: 100%;
+            max-width: none;
+            min-height: 76px;
+            margin: 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .dashboard-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            overflow: hidden;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .dashboard-brand-logo {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .dashboard-brand-title {
+            overflow: hidden;
+            color: #0066CC;
+            display: -webkit-box;
+            max-width: 150px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-overflow: ellipsis;
+            white-space: normal;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .dashboard-nav {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .dashboard-nav-link {
+            height: 44px;
+            padding: 0 10px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: #17325C;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .dashboard-nav-link i {
+            font-size: 17px;
+        }
+
+        .dashboard-nav-link:hover {
+            background: #EAF3FF;
+            color: #0066CC;
+        }
+
+        .dashboard-nav-link.active {
+            background: #0066CC;
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.22);
+        }
+
+        .dashboard-nav-link.active:hover {
+            background: #0056B3;
+            color: #ffffff;
+        }
+
+        .dashboard-nav .nav-badge {
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #35B46A;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-user {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .dashboard-user summary {
+            height: 46px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 12px;
+            background: #0066CC;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            list-style: none;
+            white-space: nowrap;
+            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.22);
+        }
+
+        .dashboard-user summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .dashboard-user summary i {
+            font-size: 18px;
+        }
+
+        .dashboard-user .account-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            z-index: 50;
+            display: grid;
+            min-width: 220px;
+            padding: 8px;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
+        }
+
+        .dashboard-user .account-dropdown a {
+            color: #1f2937;
+            background: transparent;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-weight: 700;
+        }
+
+        .dashboard-user .account-dropdown a:hover {
+            color: #0066CC;
+            background: #EAF3FF;
+        }
+
+        .dashboard-login-link {
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            color: #ffffff;
+            background: #0066CC;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .top-header {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            max-width: 1360px;
+            margin: 16px auto 0;
+            padding: 12px 22px;
+            border: 1px solid #dce8fa;
+            border-radius: 22px;
+            background: #ffffff;
+            box-shadow: 0 14px 32px rgba(23, 50, 92, 0.08);
+        }
+
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 0 0 auto;
+            min-width: 0;
+            color: inherit;
+        }
+
+        .brand-area img {
+            display: block;
+            height: 48px;
+            width: auto;
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            color: #0066cc;
+            font-size: 19px;
+            font-weight: 800;
+            line-height: 1.25;
+            white-space: nowrap;
+        }
+
+        .brand-text p {
+            margin: 2px 0 0;
+            color: #0066cc;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .main-navbar {
+            display: flex;
+            flex: 1 1 auto;
+            min-width: 0;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-left: 36px;
+            overflow: visible;
+        }
+
+        .main-navbar a,
+        .main-navbar summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 38px;
+            border-radius: 14px;
+            padding: 9px 12px;
+            color: #17325C;
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .main-navbar a:hover,
+        .main-navbar summary:hover {
+            color: #114ED1;
+            background: #EAF2FF;
+        }
+
+        .main-navbar a.active {
+            color: #ffffff;
+            background: #1E63F0;
+            box-shadow: 0 10px 18px rgba(30, 99, 240, 0.18);
+        }
+
+        .main-navbar a i,
+        .main-navbar summary i {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .main-navbar .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 999px;
+            color: #ffffff;
+            background: #35B46A;
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .main-navbar .account-menu {
+            position: relative;
+            flex: 0 0 auto;
+        }
+
+        .main-navbar .account-menu summary {
+            max-width: 210px;
+            overflow: hidden;
+            color: #ffffff;
+            background: #1E63F0;
+            cursor: pointer;
+            list-style: none;
+            text-overflow: ellipsis;
+        }
+
+        .main-navbar .account-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .main-navbar .account-menu summary::after {
+            content: none;
+        }
+
+        .main-navbar .account-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            z-index: 50;
+            display: grid;
+            min-width: 220px;
+            padding: 8px;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
+        }
+
+        .main-navbar .account-dropdown a {
+            color: #1f2937;
+            background: transparent;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+
+        .main-navbar .account-dropdown a:hover {
+            color: #0066cc;
+            background: #eaf4ff;
         }
 
         .navbar {
@@ -257,10 +608,82 @@
 
         .footer {
             margin-top: 30px;
-            padding: 18px 24px;
+            padding: 34px 24px 20px;
             background: #ffffff;
             border-top: 1px solid #e5e7eb;
-            color: #6b7280;
+            color: #475569;
+        }
+
+        .footer-inner {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.35fr) repeat(2, minmax(180px, 1fr));
+            gap: 28px;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            width: auto;
+            height: 48px;
+            margin-bottom: 12px;
+            object-fit: contain;
+        }
+
+        .footer h3,
+        .footer h4 {
+            margin: 0 0 10px;
+            color: #17325C;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .footer p {
+            max-width: 360px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: grid;
+            gap: 8px;
+        }
+
+        .footer-links a {
+            color: #475569;
+            font-weight: 650;
+        }
+
+        .footer-links a:hover {
+            color: #0b63ce;
+        }
+
+        .footer-socials {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .footer-socials button {
+            min-height: 34px;
+            padding: 7px 12px;
+            border: 1px solid #d8e4f2;
+            border-radius: 8px;
+            color: #17325C;
+            background: #f8fbff;
+            font-family: inherit;
+            font-weight: 750;
+            cursor: default;
+        }
+
+        .footer-bottom {
+            max-width: 1180px;
+            margin: 24px auto 0;
+            padding-top: 16px;
+            border-top: 1px solid #e8eef6;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 700;
             text-align: center;
         }
 
@@ -1049,7 +1472,147 @@
             color: #1f2937;
         }
 
+        @@media (max-width: 1200px) {
+            .top-header {
+                padding: 0 20px;
+            }
+
+            .main-navbar {
+                gap: 10px;
+                margin-left: 20px;
+            }
+
+            .main-navbar a,
+            .main-navbar summary {
+                padding: 8px 9px;
+                font-size: 14px;
+            }
+
+            .brand-text h1 {
+                font-size: 22px;
+            }
+
+            .brand-text p {
+                font-size: 12px;
+            }
+        }
+
+        @@media (max-width: 1500px) {
+            .dashboard-topbar-inner {
+                grid-template-columns: 220px minmax(0, 1fr) auto;
+                gap: 14px;
+            }
+
+            .dashboard-brand-logo {
+                width: 28px;
+                height: 28px;
+            }
+
+            .dashboard-brand-title {
+                max-width: 150px;
+                font-size: 11px;
+            }
+
+            .dashboard-nav-link {
+                padding: 0 10px;
+                font-size: 14px;
+            }
+        }
+
+        @@media (max-width: 1280px) {
+            .dashboard-topbar-inner {
+                grid-template-columns: 210px minmax(0, 1fr) auto;
+                gap: 12px;
+                padding: 0 16px;
+            }
+
+            .dashboard-brand-logo {
+                width: 28px;
+                height: 28px;
+            }
+
+            .dashboard-brand-title {
+                max-width: 145px;
+                font-size: 11px;
+                -webkit-line-clamp: 2;
+            }
+
+            .dashboard-nav {
+                justify-content: flex-start;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+
+            .dashboard-nav::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 992px) {
+            .dashboard-topbar-inner {
+                grid-template-columns: 1fr auto;
+                grid-template-areas:
+                    "brand user"
+                    "nav nav";
+                padding: 12px 16px;
+                gap: 12px;
+            }
+
+            .dashboard-brand {
+                grid-area: brand;
+            }
+
+            .dashboard-user,
+            .dashboard-login-link {
+                grid-area: user;
+            }
+
+            .dashboard-nav {
+                grid-area: nav;
+                width: 100%;
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+        }
+
+        @@media (max-width: 640px) {
+            .dashboard-brand-title {
+                display: none;
+            }
+
+            .dashboard-user summary span {
+                display: none;
+            }
+
+            .dashboard-user summary {
+                width: 46px;
+                padding: 0;
+                justify-content: center;
+            }
+        }
+
         @@media (max-width: 1050px) {
+            .top-header {
+                align-items: flex-start;
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+            }
+
+            .main-navbar {
+                width: 100%;
+                margin-left: 0;
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+
+            .main-navbar a,
+            .main-navbar summary {
+                flex: 0 0 auto;
+            }
+
             .navbar-inner {
                 align-items: center;
                 flex-direction: row;
@@ -1068,6 +1631,14 @@
         }
 
         @@media (max-width: 900px) {
+            .footer-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                text-align: left;
+            }
+
             .page {
                 padding: 16px;
             }
@@ -1148,33 +1719,38 @@
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
 </head>
 <body>
-    <header class="navbar">
-        <div class="navbar-inner">
-            <span class="brand">Quản lý sức khỏe và lịch tiêm chủng</span>
-            <nav class="menu">
-                <a class="@Active("NguoiDung", "Index")" href="/NguoiDung/Index">Trang chủ</a>
-                <a class="@Active("HoSoSucKhoe")" href="/HoSoSucKhoe/Index">Hồ sơ</a>
-                <a class="@Active("LichTiem")" href="/LichTiem/ChonHoSo">Lịch tiêm</a>
-                <a class="@Active("LichSuTiem")" href="/LichSuTiem/ChonHoSo">Lịch sử</a>
-                <a class="@Active("vaccine")" href="/vaccine/TraCuu">Vaccine</a>
-                <a class="@Active("ThongBao")" href="/ThongBao/Index">Thông báo (@thongBaoChuaDoc)</a>
-                <a class="@Active("BaiVietCamNang")" href="/BaiVietCamNang/Index">Kiến thức</a>
-                <a class="@Active("CauHoiTuVan")" href="/CauHoiTuVan/Index">Tư vấn</a>
-                @if (maTaiKhoanDangNhap.HasValue)
-                {
-                    <details class="account-menu">
-                        <summary>@tenTaiKhoanHienThi</summary>
-                        <div class="account-dropdown">
-                            <a href="/TaiKhoan/ThongTinCaNhan">Thông tin cá nhân</a>
-                            <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
-                        </div>
-                    </details>
-                }
-                else
-                {
-                    <a href="/TaiKhoan/DangNhap">Đăng nhập</a>
-                }
+    <header class="dashboard-topbar">
+        <div class="dashboard-topbar-inner">
+            <a class="dashboard-brand" href="/NguoiDung/Index" aria-label="Pharmacy City">
+                <img class="dashboard-brand-logo" src="/images/logo/pharmacy-logo.png" alt="Pharmacy City" />
+                <span class="dashboard-brand-title">Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</span>
+            </a>
+
+            <nav class="dashboard-nav" aria-label="Menu chức năng">
+                <a class="dashboard-nav-link @Active("NguoiDung", "Index")" href="/NguoiDung/Index"><i class="bi bi-house-door-fill"></i><span>Trang chủ</span></a>
+                <a class="dashboard-nav-link @Active("HoSoSucKhoe")" href="/HoSoSucKhoe/Index"><i class="bi bi-person-vcard"></i><span>Hồ sơ</span></a>
+                <a class="dashboard-nav-link @Active("LichTiem")" href="/LichTiem/ChonHoSo"><i class="bi bi-calendar2-check"></i><span>Lịch tiêm</span></a>
+                <a class="dashboard-nav-link @Active("LichSuTiem")" href="/LichSuTiem/ChonHoSo"><i class="bi bi-clock-history"></i><span>Lịch sử</span></a>
+                <a class="dashboard-nav-link @Active("vaccine")" href="/vaccine/TraCuu"><i class="bi bi-shield-check"></i><span>Vaccine</span></a>
+                <a class="dashboard-nav-link @Active("ThongBao")" href="/ThongBao/Index"><i class="bi bi-bell"></i><span>Thông báo</span><span class="nav-badge">@thongBaoChuaDoc</span></a>
+                <a class="dashboard-nav-link @Active("BaiVietCamNang")" href="/BaiVietCamNang/Index"><i class="bi bi-book"></i><span>Kiến thức</span></a>
+                <a class="dashboard-nav-link @Active("CauHoiTuVan")" href="/CauHoiTuVan/Index"><i class="bi bi-chat-dots"></i><span>Tư vấn</span></a>
             </nav>
+
+            @if (maTaiKhoanDangNhap.HasValue)
+            {
+                <details class="dashboard-user account-menu">
+                    <summary><i class="bi bi-person-circle"></i><span>@tenTaiKhoanHienThi</span><i class="bi bi-chevron-down"></i></summary>
+                    <div class="account-dropdown">
+                        <a href="/TaiKhoan/ThongTinCaNhan">Thông tin cá nhân</a>
+                        <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
+                    </div>
+                </details>
+            }
+            else
+            {
+                <a class="dashboard-login-link" href="/TaiKhoan/DangNhap">Đăng nhập</a>
+            }
         </div>
     </header>
 
@@ -1184,7 +1760,38 @@
     </main>
 
     <footer class="footer">
-        Hệ thống quản lý sức khỏe và lịch tiêm chủng
+        <div class="footer-inner">
+            <section>
+                <img class="footer-logo" src="/images/logo/pharmacy-logo.png" alt="Pharmacy City" />
+                <h3>Quản lý sức khỏe và lịch tiêm chủng</h3>
+                <p>Theo dõi hồ sơ, lịch tiêm và nhắc lịch cho người dùng.</p>
+            </section>
+            <section>
+                <h4>Chức năng</h4>
+                <div class="footer-links">
+                    <a href="/HoSoSucKhoe/Index">Hồ sơ sức khỏe</a>
+                    <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
+                    <a href="/LichSuTiem/ChonHoSo">Lịch sử tiêm</a>
+                    <a href="/vaccine/TraCuu">Vaccine</a>
+                    <a href="/ThongBao/Index">Thông báo</a>
+                </div>
+            </section>
+            <section>
+                <h4>Thông tin</h4>
+                <div class="footer-links">
+                    <a href="/Home/Index">Giới thiệu hệ thống</a>
+                    <a href="/BaiVietCamNang/Index">Kiến thức tiêm chủng</a>
+                    <a href="/Home/ChucNang">Hướng dẫn sử dụng</a>
+                    <a href="/Home/Privacy">Chính sách bảo mật</a>
+                </div>
+                <div class="footer-socials" aria-label="Mạng xã hội">
+                    <button type="button">Facebook</button>
+                    <button type="button">Zalo</button>
+                    <button type="button">Youtube</button>
+                </div>
+            </section>
+        </div>
+        <div class="footer-bottom">© 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng</div>
     </footer>
     <script>
         (() => {
@@ -1211,3 +1818,4 @@
     <script src="/js/push-notification.js?v=6"></script>
 </body>
 </html>
+

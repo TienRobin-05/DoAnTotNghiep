@@ -64,6 +64,54 @@ WHERE bv.trangThai = 1";
             return DocDanhSachTuReader(doc);
         }
 
+        public List<BaiVietCamNang> LayBaiVietNoiBatDashboard(int soLuong = 5)
+        {
+            if (!CoCotNoiBat())
+            {
+                return LayBaiVietMoiNhatDashboard(soLuong);
+            }
+
+            const string sql = @"SELECT TOP (@SoLuong) bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.loaiBaiViet, bv.anhDaiDien, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
+FROM BaiVietCamNang bv
+INNER JOIN TaiKhoan tk ON bv.maTaiKhoan = tk.maTaiKhoan
+WHERE bv.trangThai = 1 AND bv.noiBat = 1
+ORDER BY bv.ngayTao DESC";
+
+            return DocDanhSachCoGioiHan(sql, soLuong);
+        }
+
+        public List<BaiVietCamNang> LayBaiVietMoiNhatDashboard(int soLuong = 8)
+        {
+            const string sql = @"SELECT TOP (@SoLuong) bv.maBaiViet, bv.maTaiKhoan, bv.tieuDe, bv.noiDung, bv.loaiBaiViet, bv.anhDaiDien, bv.ngayTao, bv.trangThai, tk.hoTen AS tenTacGia
+FROM BaiVietCamNang bv
+INNER JOIN TaiKhoan tk ON bv.maTaiKhoan = tk.maTaiKhoan
+WHERE bv.trangThai = 1
+ORDER BY bv.ngayTao DESC";
+
+            return DocDanhSachCoGioiHan(sql, soLuong);
+        }
+
+        private List<BaiVietCamNang> DocDanhSachCoGioiHan(string sql, int soLuong)
+        {
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@SoLuong", Math.Max(1, soLuong));
+
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            return DocDanhSachTuReader(doc);
+        }
+
+        private bool CoCotNoiBat()
+        {
+            const string sql = "SELECT CASE WHEN COL_LENGTH('dbo.BaiVietCamNang', 'noiBat') IS NULL THEN 0 ELSE 1 END";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar()) == 1;
+        }
+
         // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
