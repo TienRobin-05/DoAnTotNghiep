@@ -49,11 +49,18 @@
             box-sizing: border-box;
         }
 
+        html {
+            min-height: 100%;
+        }
+
         body {
+            min-height: 100vh;
             margin: 0;
+            display: flex;
+            flex-direction: column;
             font-family: var(--font-main);
-            color: #1f2937;
-            background: #f4f7fb;
+            color: #1E293B;
+            background: #F5F9FF;
         }
 
         a {
@@ -65,18 +72,18 @@
             top: 0;
             z-index: 1000;
             background: #ffffff;
-            border-bottom: 1px solid #E5EDF7;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+            border-bottom: 1px solid #E2E8F0;
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
         }
 
         .dashboard-topbar-inner {
             width: 100%;
             max-width: none;
-            min-height: 76px;
+            min-height: 72px;
             margin: 0;
             padding: 0 20px;
             display: grid;
-            grid-template-columns: 220px minmax(0, 1fr) auto;
+            grid-template-columns: 286px minmax(0, 1fr) auto;
             align-items: center;
             gap: 14px;
         }
@@ -92,20 +99,20 @@
         }
 
         .dashboard-brand-logo {
-            width: 28px;
-            height: 28px;
+            width: 46px;
+            height: 46px;
             object-fit: contain;
             flex-shrink: 0;
         }
 
         .dashboard-brand-title {
             overflow: hidden;
-            color: #0066CC;
+            color: #2563EB;
             display: -webkit-box;
-            max-width: 150px;
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 1.2;
+            max-width: 212px;
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1.28;
             text-overflow: ellipsis;
             white-space: normal;
             -webkit-line-clamp: 2;
@@ -117,24 +124,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             overflow: hidden;
         }
 
         .dashboard-nav-link {
-            height: 44px;
-            padding: 0 10px;
-            border-radius: 10px;
+            height: 42px;
+            padding: 0 13px;
+            border-radius: 11px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 7px;
-            color: #17325C;
+            color: #123B73;
             font-size: 14px;
             font-weight: 700;
             text-decoration: none;
             white-space: nowrap;
-            transition: all 0.2s ease;
+            transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
             flex-shrink: 0;
         }
 
@@ -143,18 +150,19 @@
         }
 
         .dashboard-nav-link:hover {
-            background: #EAF3FF;
-            color: #0066CC;
+            background: #EFF6FF;
+            color: #2563EB;
+            transform: translateY(-1px);
         }
 
         .dashboard-nav-link.active {
-            background: #0066CC;
+            background: #2563EB;
             color: #ffffff;
-            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.22);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.26);
         }
 
         .dashboard-nav-link.active:hover {
-            background: #0056B3;
+            background: #1D4ED8;
             color: #ffffff;
         }
 
@@ -163,7 +171,7 @@
             height: 22px;
             padding: 0 6px;
             border-radius: 999px;
-            background: #35B46A;
+            background: #EF4444;
             color: #ffffff;
             font-size: 12px;
             font-weight: 800;
@@ -184,9 +192,9 @@
             height: 46px;
             padding: 0 16px;
             border: none;
-            border-radius: 12px;
-            background: #0066CC;
-            color: #ffffff;
+            border-radius: 999px;
+            background: #F8FBFF;
+            color: #123B73;
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -195,7 +203,7 @@
             cursor: pointer;
             list-style: none;
             white-space: nowrap;
-            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.22);
+            box-shadow: none;
         }
 
         .dashboard-user summary::-webkit-details-marker {
@@ -228,8 +236,8 @@
         }
 
         .dashboard-user .account-dropdown a:hover {
-            color: #0066CC;
-            background: #EAF3FF;
+            color: #2563EB;
+            background: #EFF6FF;
         }
 
         .dashboard-login-link {
@@ -239,7 +247,7 @@
             display: inline-flex;
             align-items: center;
             color: #ffffff;
-            background: #0066CC;
+            background: #2563EB;
             font-weight: 800;
             white-space: nowrap;
         }
@@ -531,9 +539,11 @@
         }
 
         .page {
-            max-width: 1200px;
+            max-width: 1480px;
+            width: 100%;
+            flex: 1 0 auto;
             margin: 0 auto;
-            padding: 24px;
+            padding: 24px 32px 32px;
         }
 
         .card {
@@ -607,83 +617,21 @@
         }
 
         .footer {
-            margin-top: 30px;
-            padding: 34px 24px 20px;
-            background: #ffffff;
-            border-top: 1px solid #e5e7eb;
-            color: #475569;
-        }
-
-        .footer-inner {
-            display: grid;
-            grid-template-columns: minmax(260px, 1.35fr) repeat(2, minmax(180px, 1fr));
-            gap: 28px;
-            max-width: 1180px;
-            margin: 0 auto;
-        }
-
-        .footer-logo {
-            width: auto;
-            height: 48px;
-            margin-bottom: 12px;
-            object-fit: contain;
-        }
-
-        .footer h3,
-        .footer h4 {
-            margin: 0 0 10px;
-            color: #17325C;
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .footer p {
-            max-width: 360px;
-            margin: 0;
-            line-height: 1.6;
-        }
-
-        .footer-links {
-            display: grid;
-            gap: 8px;
-        }
-
-        .footer-links a {
-            color: #475569;
-            font-weight: 650;
-        }
-
-        .footer-links a:hover {
-            color: #0b63ce;
-        }
-
-        .footer-socials {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 14px;
-        }
-
-        .footer-socials button {
-            min-height: 34px;
-            padding: 7px 12px;
-            border: 1px solid #d8e4f2;
-            border-radius: 8px;
-            color: #17325C;
-            background: #f8fbff;
-            font-family: inherit;
-            font-weight: 750;
-            cursor: default;
+            flex-shrink: 0;
+            margin-top: 0;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #082B4F 0%, #063B67 55%, #0A5C8F 100%) !important;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            color: #FFFFFF !important;
         }
 
         .footer-bottom {
-            max-width: 1180px;
-            margin: 24px auto 0;
-            padding-top: 16px;
-            border-top: 1px solid #e8eef6;
-            color: #64748b;
+            max-width: 1260px;
+            margin: 0 auto;
+            color: #FFFFFF !important;
             font-size: 14px;
             font-weight: 700;
+            opacity: 1 !important;
             text-align: center;
         }
 
@@ -1499,18 +1447,18 @@
 
         @@media (max-width: 1500px) {
             .dashboard-topbar-inner {
-                grid-template-columns: 220px minmax(0, 1fr) auto;
+                grid-template-columns: 286px minmax(0, 1fr) auto;
                 gap: 14px;
             }
 
             .dashboard-brand-logo {
-                width: 28px;
-                height: 28px;
+                width: 46px;
+                height: 46px;
             }
 
             .dashboard-brand-title {
-                max-width: 150px;
-                font-size: 11px;
+                max-width: 212px;
+                font-size: 15px;
             }
 
             .dashboard-nav-link {
@@ -1521,19 +1469,19 @@
 
         @@media (max-width: 1280px) {
             .dashboard-topbar-inner {
-                grid-template-columns: 210px minmax(0, 1fr) auto;
+                grid-template-columns: 250px minmax(0, 1fr) auto;
                 gap: 12px;
                 padding: 0 16px;
             }
 
             .dashboard-brand-logo {
-                width: 28px;
-                height: 28px;
+                width: 42px;
+                height: 42px;
             }
 
             .dashboard-brand-title {
-                max-width: 145px;
-                font-size: 11px;
+                max-width: 190px;
+                font-size: 14px;
                 -webkit-line-clamp: 2;
             }
 
@@ -1631,14 +1579,6 @@
         }
 
         @@media (max-width: 900px) {
-            .footer-inner {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-bottom {
-                text-align: left;
-            }
-
             .page {
                 padding: 16px;
             }
@@ -1760,37 +1700,6 @@
     </main>
 
     <footer class="footer">
-        <div class="footer-inner">
-            <section>
-                <img class="footer-logo" src="/images/logo/pharmacy-logo.png" alt="Pharmacy City" />
-                <h3>Quản lý sức khỏe và lịch tiêm chủng</h3>
-                <p>Theo dõi hồ sơ, lịch tiêm và nhắc lịch cho người dùng.</p>
-            </section>
-            <section>
-                <h4>Chức năng</h4>
-                <div class="footer-links">
-                    <a href="/HoSoSucKhoe/Index">Hồ sơ sức khỏe</a>
-                    <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
-                    <a href="/LichSuTiem/ChonHoSo">Lịch sử tiêm</a>
-                    <a href="/vaccine/TraCuu">Vaccine</a>
-                    <a href="/ThongBao/Index">Thông báo</a>
-                </div>
-            </section>
-            <section>
-                <h4>Thông tin</h4>
-                <div class="footer-links">
-                    <a href="/Home/Index">Giới thiệu hệ thống</a>
-                    <a href="/BaiVietCamNang/Index">Kiến thức tiêm chủng</a>
-                    <a href="/Home/ChucNang">Hướng dẫn sử dụng</a>
-                    <a href="/Home/Privacy">Chính sách bảo mật</a>
-                </div>
-                <div class="footer-socials" aria-label="Mạng xã hội">
-                    <button type="button">Facebook</button>
-                    <button type="button">Zalo</button>
-                    <button type="button">Youtube</button>
-                </div>
-            </section>
-        </div>
         <div class="footer-bottom">© 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng</div>
     </footer>
     <script>

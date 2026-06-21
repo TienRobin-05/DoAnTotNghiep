@@ -163,25 +163,7 @@
         .pc-visual-card { width: 100%; max-width: 760px; }
         .pc-hero-image { display: block; width: 100%; height: auto; object-fit: contain; }
 
-        .pc-reminder-floating {
-            position: absolute;
-            left: 4%;
-            bottom: 14px;
-            display: flex;
-            gap: 14px;
-            width: 320px;
-            border: 1px solid var(--pc-border);
-            border-radius: 12px;
-            background: #ffffff;
-            padding: 18px;
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
-        }
-
-        .pc-reminder-icon, .pc-feature-arrow, .pc-socials a { display: flex; align-items: center; justify-content: center; }
-        .pc-reminder-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px; background: var(--pc-soft-blue); color: var(--pc-primary); font-size: 22px; font-weight: 800; }
-        .pc-reminder-label { margin-bottom: 6px; color: var(--pc-green); font-size: 12px; font-weight: 800; text-transform: uppercase; }
-        .pc-reminder-title { margin-bottom: 6px; color: var(--pc-text); font-size: 16px; font-weight: 800; }
-        .pc-reminder-text { color: var(--pc-muted); font-size: 14px; line-height: 1.5; }
+        .pc-feature-arrow { display: flex; align-items: center; justify-content: center; }
 
         .pc-features { background: #ffffff; }
         .pc-feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding-top: 26px; padding-bottom: 18px; }
@@ -217,23 +199,12 @@
         .pc-trust-item h4 { margin: 0 0 6px; color: var(--pc-text); font-size: 16px; font-weight: 800; }
         .pc-trust-item p { margin: 0; color: var(--pc-muted); font-size: 14px; line-height: 1.45; }
 
-        .pc-footer { background: var(--pc-footer); color: #ffffff; padding: 34px 0 36px; }
-        .pc-footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 42px; align-items: flex-start; }
-        .pc-footer-logo { width: auto; height: 58px; object-fit: contain; margin-bottom: 14px; border-radius: 8px; background: #ffffff; padding: 4px 8px; }
-        .pc-footer-brand p { max-width: 340px; margin: 0; color: #D7E8F7; font-size: 14px; line-height: 1.6; }
-        .pc-footer-brand h3 { margin: 0 0 10px; color: #ffffff; font-size: 17px; font-weight: 800; line-height: 1.35; }
-        .pc-footer-col { display: flex; flex-direction: column; gap: 10px; }
-        .pc-footer-col h4 { margin: 0 0 8px; color: #ffffff; font-size: 15px; font-weight: 800; }
-        .pc-footer-col a { color: #D7E8F7; font-size: 14px; }
-        .pc-footer-col a:hover { color: #ffffff; }
-        .pc-socials { display: flex; align-items: center; gap: 10px; }
-        .pc-socials button { min-height: 34px; padding: 7px 12px; border: 1px solid rgba(255,255,255,.28); border-radius: 8px; color: #ffffff; background: transparent; font-family: inherit; font-size: 12px; font-weight: 800; cursor: default; }
-        .pc-footer-bottom { max-width: 1440px; margin: 26px auto 0; padding: 16px 32px 0; border-top: 1px solid rgba(255,255,255,.18); color: #D7E8F7; font-size: 14px; font-weight: 700; text-align: center; }
+        .pc-footer { background: var(--pc-footer); color: #ffffff; padding: 0; }
+        .pc-footer-bottom { max-width: 1440px; margin: 0 auto; padding: 16px 32px; border-top: 1px solid rgba(255,255,255,.18); color: #D7E8F7; font-size: 14px; font-weight: 700; text-align: center; }
 
         @@media (max-width: 1200px) {
             .pc-hero-inner { grid-template-columns: 1fr; }
             .pc-feature-grid, .pc-trust-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .pc-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .pc-brand-title { white-space: normal; font-size: 17px; }
         }
 
@@ -249,8 +220,7 @@
             .pc-hero-chips { flex-direction: column; }
             .pc-chip { border-right: none; border-bottom: 1px solid #E5EDF7; }
             .pc-chip:last-child { border-bottom: none; }
-            .pc-reminder-floating { position: static; width: 100%; margin-top: 16px; }
-            .pc-feature-grid, .pc-trust-strip, .pc-footer-grid { grid-template-columns: 1fr; }
+            .pc-feature-grid, .pc-trust-strip { grid-template-columns: 1fr; }
             .pc-trust-item { border-right: none; border-bottom: 1px solid #E5EDF7; }
             .pc-trust-item:last-child { border-bottom: none; }
         }
@@ -292,14 +262,6 @@
                 <div class="pc-hero-visual">
                     <div class="pc-visual-card">
                         <img src="@Url.Content("~/images/hero/health-hero.png")" alt="Theo dõi sức khỏe và lịch tiêm chủng" class="pc-hero-image" />
-                    </div>
-                    <div class="pc-reminder-floating">
-                        <div class="pc-reminder-icon">✓</div>
-                        <div>
-                            <div class="pc-reminder-label">Lịch hẹn sắp tới</div>
-                            <div class="pc-reminder-title">Nhắc lịch tiêm đúng thời điểm</div>
-                            <div class="pc-reminder-text">Theo dõi ngày dự kiến, mũi tiêm cần hoàn thành và trạng thái của từng hồ sơ.</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -343,33 +305,6 @@
     </main>
 
     <footer class="pc-footer">
-        <div class="pc-container pc-footer-grid">
-            <div class="pc-footer-brand">
-                <img src="@Url.Content("~/images/logo/pharmacy-logo.png")" alt="Pharmacy City" class="pc-footer-logo" />
-                <h3>Quản lý sức khỏe và lịch tiêm chủng</h3>
-                <p>Theo dõi hồ sơ, lịch tiêm và nhắc lịch cho người dùng.</p>
-            </div>
-            <div class="pc-footer-col">
-                <h4>CHỨC NĂNG</h4>
-                <a href="/HoSoSucKhoe/Index">Hồ sơ sức khỏe</a>
-                <a href="/LichTiem/ChonHoSo">Lịch tiêm</a>
-                <a href="/LichSuTiem/ChonHoSo">Lịch sử tiêm</a>
-                <a href="/vaccine/TraCuu">Vaccine</a>
-                <a href="/ThongBao/Index">Thông báo</a>
-            </div>
-            <div class="pc-footer-col">
-                <h4>THÔNG TIN</h4>
-                <a href="/Home/Index">Giới thiệu hệ thống</a>
-                <a href="/BaiVietCamNang/Index">Kiến thức tiêm chủng</a>
-                <a href="/Home/ChucNang">Hướng dẫn sử dụng</a>
-                <a href="/Home/Privacy">Chính sách bảo mật</a>
-                <div class="pc-socials" aria-label="Mạng xã hội">
-                    <button type="button">Facebook</button>
-                    <button type="button">Zalo</button>
-                    <button type="button">Youtube</button>
-                </div>
-            </div>
-        </div>
         <div class="pc-footer-bottom">© 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng</div>
     </footer>
 </body>
