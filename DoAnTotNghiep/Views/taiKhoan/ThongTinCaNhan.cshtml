@@ -145,11 +145,6 @@
             <p>Cập nhật thông tin tài khoản đang đăng nhập.</p>
         </div>
 
-        @if (ViewBag.ThongBao != null)
-        {
-            <div class="alert alert-danger">@ViewBag.ThongBao</div>
-        }
-
         <form asp-action="ThongTinCaNhan" method="post" class="profile-form">
             @Html.AntiForgeryToken()
 

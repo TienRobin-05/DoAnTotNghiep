@@ -13,12 +13,6 @@
     <a asp-action="Create" asp-route-maVaccine="@ViewBag.MaVaccine" class="btn btn-primary">Thêm mũi tiêm</a>
 </div>
 
-@if (TempData["ThongBao"] != null)
-{
-    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
-    <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
-}
-
 <section class="list-card">
 @if (Model.Count == 0)
 {
@@ -63,7 +57,12 @@ else
             <td class="table-actions">
                 <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-light">Chi tiết</a>
                 <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sửa</a>
-                <a asp-action="Delete" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-danger">Xóa</a>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger js-delete-confirm"
+                        data-delete-url="@Url.Action("Delete", new { id = item.MaMuiTiem })"
+                        data-delete-title="Xóa mũi tiêm">
+                    Xóa
+                </button>
             </td>
         </tr>
     }
@@ -73,3 +72,5 @@ else
 </section>
 
 <a asp-controller="Vaccine" asp-action="Index" class="btn btn-link mt-2">Quay lại danh sách vaccine</a>
+
+<partial name="_ConfirmDeleteModal" />

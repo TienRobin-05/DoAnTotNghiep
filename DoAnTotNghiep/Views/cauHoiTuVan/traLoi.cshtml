@@ -5,11 +5,6 @@
 
 <h2>Trả lời câu hỏi tư vấn</h2>
 
-@if (ViewBag.ThongBao != null)
-{
-    <div class="alert alert-danger">@ViewBag.ThongBao</div>
-}
-
 <section class="detail-card mb-3">
     <p><strong>Người gửi:</strong> @Model.TenNguoiGui</p>
     <p><strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>

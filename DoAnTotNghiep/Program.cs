@@ -27,7 +27,6 @@ builder.Services.AddSession(options =>
 });
 
 // Đăng ký dependency injection dạng Scoped để mỗi request dùng một instance phù hợp của DAL/service.
-builder.Services.AddScoped<coSoDuLieu>();
 builder.Services.AddScoped<TaiKhoan_DAL>();
 builder.Services.AddScoped<HoSoSucKhoe_DAL>();
 builder.Services.AddScoped<Vaccine_DAL>();
@@ -44,16 +43,6 @@ builder.Services.AddScoped<TaoLichTiemService>();
 // Đăng ký dependency injection dạng Scoped để mỗi request dùng một instance phù hợp của DAL/service.
 builder.Services.AddScoped<ThongBaoNhacLichService>();
 builder.Services.AddScoped<PushNotificationService>();
-builder.Services.AddScoped<taiKhoanDAL>();
-builder.Services.AddScoped<hoSoSucKhoeDAL>();
-builder.Services.AddScoped<vaccineDAL>();
-builder.Services.AddScoped<muiTiemVaccineDAL>();
-builder.Services.AddScoped<lichTiemDAL>();
-// Đăng ký dependency injection dạng Scoped để mỗi request dùng một instance phù hợp của DAL/service.
-builder.Services.AddScoped<lichSuTiemDAL>();
-builder.Services.AddScoped<thongBaoDAL>();
-builder.Services.AddScoped<baiVietCamNangDAL>();
-builder.Services.AddScoped<cauHoiTuVanDAL>();
 
 // Tạo đối tượng app sau khi đã hoàn tất đăng ký service và cấu hình ban đầu.
 var app = builder.Build();

@@ -6,6 +6,8 @@
 
     string LayNhomThongBao(ThongBao thongBao)
     {
+        if (!string.IsNullOrWhiteSpace(thongBao.NhomThongBao)) return thongBao.NhomThongBao;
+
         var tieuDe = thongBao.TieuDe ?? string.Empty;
         if (tieuDe.Contains("Quá hạn", StringComparison.OrdinalIgnoreCase)) return "qua-han";
         if (tieuDe.Contains("đến lịch", StringComparison.OrdinalIgnoreCase)
@@ -359,6 +361,17 @@
     .notification-pagination-info { color: #718096; font-size: 13px; }
     .notification-pagination { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 
+    .notification-inline-success {
+        margin: 0 0 14px;
+        padding: 10px 12px;
+        border: 1px solid #b8e2cc;
+        border-radius: 8px;
+        color: #17663b;
+        background: #f1fbf5;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
     .notification-page-link {
         display: inline-flex;
         align-items: center;
@@ -411,7 +424,8 @@
                 <button type="submit" aria-label="Tìm kiếm"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
             </form>
 
-            <form asp-action="DanhDauTatCaDaDoc" method="post">
+            <form asp-action="DanhDauTatCaDaDoc" method="post" class="mark-all-read-form">
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="trangThai" value="@Model.TrangThai" />
                 <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                 <input type="hidden" name="trang" value="@Model.TrangHienTai" />
@@ -489,3 +503,59 @@
         }
     </footer>
 </main>
+
+<script>
+    (function () {
+        if (window.__notificationMarkAllBound) return;
+        window.__notificationMarkAllBound = true;
+
+        document.addEventListener("submit", async function (event) {
+            const form = event.target.closest(".mark-all-read-form");
+            if (!form) return;
+
+            event.preventDefault();
+            const button = form.querySelector("button[type='submit']");
+            const oldButtonHtml = button ? button.innerHTML : "";
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = '<i class="bi bi-check2-all" aria-hidden="true"></i> Đang cập nhật...';
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+
+                if (!response.ok) throw new Error("Request failed");
+
+                const html = await response.text();
+                const nextDocument = new DOMParser().parseFromString(html, "text/html");
+                const nextPage = nextDocument.querySelector(".my-notifications-page");
+                const currentPage = document.querySelector(".my-notifications-page");
+                if (!nextPage || !currentPage) throw new Error("Invalid response");
+
+                currentPage.replaceWith(nextPage);
+
+                const nextBadge = nextDocument.querySelector(".dashboard-nav .nav-badge");
+                const nextBadgeText = nextBadge ? nextBadge.textContent.trim() : "0";
+                document.querySelectorAll(".dashboard-nav .nav-badge, .main-navbar .nav-badge").forEach(function (badge) {
+                    badge.textContent = nextBadgeText;
+                });
+
+                const notice = document.createElement("div");
+                notice.className = "notification-inline-success";
+                notice.textContent = "Đã đánh dấu tất cả thông báo là đã đọc.";
+                document.querySelector(".my-notifications-page")?.prepend(notice);
+                window.setTimeout(function () { notice.remove(); }, 1800);
+            } catch {
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = oldButtonHtml;
+                }
+                form.submit();
+            }
+        });
+    })();
+</script>

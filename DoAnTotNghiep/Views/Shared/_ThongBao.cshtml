@@ -1,69 +1,148 @@
 @{
-    var thongBao = TempData["ThongBao"]?.ToString();
-    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
+    var thongBaoTempData = TempData["ThongBao"]?.ToString();
+    var thongBaoViewBag = ViewBag.ThongBao?.ToString();
+    var thongBao = !string.IsNullOrWhiteSpace(thongBaoTempData) ? thongBaoTempData : thongBaoViewBag;
+    var loaiThongBao = TempData["LoaiThongBao"]?.ToString()
+        ?? (!string.IsNullOrWhiteSpace(thongBaoTempData) ? "success" : "error");
     var cssClass = string.Equals(loaiThongBao, "error", StringComparison.OrdinalIgnoreCase)
-        ? "alert-danger"
+        ? "app-flash-danger"
         : string.Equals(loaiThongBao, "warning", StringComparison.OrdinalIgnoreCase)
-            ? "alert-warning"
-            : "alert-success";
+            ? "app-flash-warning"
+            : "app-flash-success";
+    var iconClass = string.Equals(loaiThongBao, "error", StringComparison.OrdinalIgnoreCase)
+        ? "bi-x-circle"
+        : string.Equals(loaiThongBao, "warning", StringComparison.OrdinalIgnoreCase)
+            ? "bi-exclamation-triangle"
+            : "bi-check-circle";
 }
 
-@* Hiển thị thông báo dùng chung cho toàn bộ hệ thống, lấy từ TempData để tránh trùng với cảnh báo ViewBag sẵn có trong từng form. *@
 @if (!string.IsNullOrWhiteSpace(thongBao))
 {
     <style>
-        .js-auto-alert {
-            max-width: 860px;
-            margin: 0 auto 16px;
-            padding: 12px 14px;
+        .app-flash {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: min(100%, 980px);
+            margin: 0 auto 14px;
+            padding: 10px 12px;
+            border: 1px solid;
             border-radius: 6px;
-            font-weight: 600;
-            transition: opacity 0.25s ease, transform 0.25s ease;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.45;
+            transition: opacity .22s ease, transform .22s ease, margin .22s ease, padding .22s ease;
         }
-        .js-auto-alert.is-hiding {
+
+        .app-flash.is-hiding {
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
             opacity: 0;
             transform: translateY(-4px);
         }
-        .js-auto-alert.alert-success {
-            color: #146c43;
-            background: #d1e7dd;
-            border: 1px solid #badbcc;
+
+        .app-flash-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            font-size: 18px;
         }
-        .js-auto-alert.alert-danger {
-            color: #842029;
-            background: #f8d7da;
-            border: 1px solid #f5c2c7;
+
+        .app-flash-message {
+            min-width: 0;
+            flex: 1 1 auto;
         }
-        .js-auto-alert.alert-warning {
+
+        .app-flash-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 28px;
+            height: 28px;
+            border: 0;
+            border-radius: 6px;
+            color: inherit;
+            background: transparent;
+            cursor: pointer;
+            opacity: .72;
+        }
+
+        .app-flash-close:hover {
+            background: rgba(15, 23, 42, .06);
+            opacity: 1;
+        }
+
+        .app-flash-success {
+            color: #047857;
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .app-flash-danger {
+            color: #b91c1c;
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .app-flash-warning {
             color: #8a5a00;
-            background: #fff3cd;
-            border: 1px solid #ffecb5;
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        @@media (max-width: 640px) {
+            .app-flash {
+                align-items: flex-start;
+                font-size: 13px;
+            }
         }
     </style>
-    <div class="alert @cssClass js-auto-alert" role="alert">
-        @thongBao
+
+    <div class="app-flash @cssClass js-auto-alert" role="status" aria-live="polite">
+        <i class="bi @iconClass app-flash-icon" aria-hidden="true"></i>
+        <span class="app-flash-message">@thongBao</span>
+        <button type="button" class="app-flash-close" data-alert-close aria-label="Đóng thông báo">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
     </div>
 }
 
 <script>
-    // Tự ẩn thông báo sau vài giây để không che giao diện thao tác.
-    window.setTimeout(function () {
-        document.querySelectorAll(".js-auto-alert").forEach(function (alert) {
-            alert.classList.add("is-hiding");
-            window.setTimeout(function () {
-                alert.style.display = "none";
-            }, 250);
-        });
-    }, 1600);
+    function hideAppFlash(alert) {
+        if (!alert || alert.classList.contains("is-hiding")) return;
+        alert.classList.add("is-hiding");
+        window.setTimeout(function () {
+            alert.remove();
+        }, 260);
+    }
 
-    // Xác nhận các thao tác quan trọng: đăng xuất, xóa/ẩn dữ liệu và đổi trạng thái.
+    document.querySelectorAll(".js-auto-alert").forEach(function (alert) {
+        window.setTimeout(function () {
+            hideAppFlash(alert);
+        }, 3000);
+    });
+
     document.addEventListener("click", function (event) {
+        var closeButton = event.target.closest("[data-alert-close]");
+        if (closeButton) {
+            hideAppFlash(closeButton.closest(".js-auto-alert"));
+            return;
+        }
+
         var target = event.target.closest("a, button");
         if (!target) return;
+
+        if (target.closest(".js-delete-confirm")) return;
 
         var message = target.getAttribute("data-confirm");
         var href = target.getAttribute("href") || "";
         var form = target.closest("form");
+        if (form && form.id === "deleteConfirmForm") return;
+
         var formAction = form ? (form.getAttribute("action") || "") : "";
         var text = (target.textContent || "").trim().toLowerCase();
 

@@ -1,6 +1,9 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace DoAnTotNghiep.Controllers
 {
@@ -25,6 +28,7 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DangKy()
         {
+            XoaPhienDatLaiMatKhau();
             return View();
         }
 
@@ -46,14 +50,29 @@ namespace DoAnTotNghiep.Controllers
                 ViewBag.ThongBao = "Email không được bỏ trống";
                 return View();
             }
+            if (!EmailHopLe(email))
+            {
+                ViewBag.ThongBao = "Email không đúng định dạng";
+                return View();
+            }
             if (string.IsNullOrWhiteSpace(soDienThoai))
             {
                 ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
                 return View();
             }
+            if (!SoDienThoaiHopLe(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại phải gồm 10-11 chữ số và bắt đầu bằng 0";
+                return View();
+            }
             if (string.IsNullOrWhiteSpace(matKhau))
             {
                 ViewBag.ThongBao = "Mật khẩu không được bỏ trống";
+                return View();
+            }
+            if (!MatKhauHopLe(matKhau))
+            {
+                ViewBag.ThongBao = "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số";
                 return View();
             }
             if (string.IsNullOrWhiteSpace(nhapLaiMatKhau))
@@ -80,9 +99,9 @@ namespace DoAnTotNghiep.Controllers
             var taiKhoan = new TaiKhoan
             {
                 HoTen = hoTen,
-                Email = email,
+                Email = email.Trim(),
                 MatKhau = matKhau,
-                SoDienThoai = soDienThoai,
+                SoDienThoai = soDienThoai.Trim(),
                 VaiTro = "User",
                 TrangThai = true,
                 NgayTao = DateTime.Now
@@ -105,6 +124,7 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DangNhap()
         {
+            XoaPhienDatLaiMatKhau();
             return View();
         }
 
@@ -175,34 +195,56 @@ namespace DoAnTotNghiep.Controllers
         [HttpGet]
         public IActionResult QuenMatKhau()
         {
+            GanTrangThaiNhapMaXacNhan();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult QuenMatKhau(string soDienThoai, string email, string matKhauMoi, string xacNhanMatKhau)
+        public IActionResult QuenMatKhau(string soDienThoai, string email, string matKhauMoi, string xacNhanMatKhau, string maXacNhan)
         {
             soDienThoai = soDienThoai?.Trim() ?? string.Empty;
             email = email?.Trim() ?? string.Empty;
+            maXacNhan = maXacNhan?.Trim() ?? string.Empty;
 
             ViewBag.SoDienThoai = soDienThoai;
             ViewBag.Email = email;
 
-            if (string.IsNullOrWhiteSpace(soDienThoai))
+            if (!KiemTraThongTinTaiKhoanDatLaiMatKhau(soDienThoai, email, out var taiKhoan))
             {
-                ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
                 return View();
             }
 
-            if (string.IsNullOrWhiteSpace(email))
+            var maXacNhanTrongPhien = HttpContext.Session.GetString("DatLaiMatKhau_MaXacNhan");
+            var maTaiKhoanTrongPhien = HttpContext.Session.GetInt32("DatLaiMatKhau_MaTaiKhoan");
+            var hetHanTicks = HttpContext.Session.GetString("DatLaiMatKhau_HetHanTicks");
+            var daCoMaHopLe = !string.IsNullOrWhiteSpace(maXacNhanTrongPhien)
+                && maTaiKhoanTrongPhien == taiKhoan!.MaTaiKhoan
+                && long.TryParse(hetHanTicks, out var ticks)
+                && new DateTime(ticks, DateTimeKind.Utc) >= DateTime.UtcNow;
+
+            if (!daCoMaHopLe || string.IsNullOrWhiteSpace(maXacNhan))
             {
-                ViewBag.ThongBao = "Email không được bỏ trống";
+                var maMoi = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+                HttpContext.Session.SetInt32("DatLaiMatKhau_MaTaiKhoan", taiKhoan!.MaTaiKhoan);
+                HttpContext.Session.SetString("DatLaiMatKhau_MaXacNhan", maMoi);
+                HttpContext.Session.SetString("DatLaiMatKhau_HetHanTicks", DateTime.UtcNow.AddMinutes(10).Ticks.ToString());
+                ViewBag.YeuCauMaXacNhan = true;
+                ViewBag.MaXacNhanDemo = maMoi;
+                ViewBag.ThongBao = "Đã tạo mã xác nhận. Nhập mã này để đặt lại mật khẩu.";
                 return View();
             }
 
+            ViewBag.YeuCauMaXacNhan = true;
             if (string.IsNullOrWhiteSpace(matKhauMoi))
             {
                 ViewBag.ThongBao = "Mật khẩu mới không được bỏ trống";
+                return View();
+            }
+
+            if (!MatKhauHopLe(matKhauMoi))
+            {
+                ViewBag.ThongBao = "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số";
                 return View();
             }
 
@@ -218,31 +260,19 @@ namespace DoAnTotNghiep.Controllers
                 return View();
             }
 
-            var taiKhoan = taiKhoanDAL.LayTaiKhoanTheoSoDienThoaiVaEmail(soDienThoai, email);
-            if (taiKhoan == null)
+            if (!string.Equals(maXacNhan, maXacNhanTrongPhien, StringComparison.Ordinal))
             {
-                ViewBag.ThongBao = "Số điện thoại hoặc email không đúng.";
+                ViewBag.ThongBao = "Mã xác nhận không đúng hoặc đã hết hạn.";
                 return View();
             }
 
-            if (taiKhoan.DaXoa)
-            {
-                ViewBag.ThongBao = "Tài khoản không tồn tại hoặc đã bị xóa.";
-                return View();
-            }
-
-            if (!taiKhoan.TrangThai)
-            {
-                ViewBag.ThongBao = "Tài khoản đang bị khóa, không thể đặt lại mật khẩu.";
-                return View();
-            }
-
-            if (!taiKhoanDAL.DatLaiMatKhau(taiKhoan.MaTaiKhoan, matKhauMoi))
+            if (!taiKhoanDAL.DatLaiMatKhau(taiKhoan!.MaTaiKhoan, matKhauMoi))
             {
                 ViewBag.ThongBao = "Đặt lại mật khẩu thất bại, vui lòng thử lại.";
                 return View();
             }
 
+            XoaPhienDatLaiMatKhau();
             TempData["ThongBao"] = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.";
             return RedirectToAction(nameof(DangNhap));
         }
@@ -361,7 +391,8 @@ namespace DoAnTotNghiep.Controllers
 
         private static string ChuanHoaVaiTro(string? vaiTro)
         {
-            if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase))
             {
                 return "Admin";
             }
@@ -373,6 +404,96 @@ namespace DoAnTotNghiep.Controllers
             }
 
             return string.Empty;
+        }
+
+        private bool KiemTraThongTinTaiKhoanDatLaiMatKhau(string soDienThoai, string email, out TaiKhoan? taiKhoan)
+        {
+            taiKhoan = null;
+
+            if (string.IsNullOrWhiteSpace(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại không được bỏ trống";
+                return false;
+            }
+
+            if (!SoDienThoaiHopLe(soDienThoai))
+            {
+                ViewBag.ThongBao = "Số điện thoại phải gồm 10-11 chữ số và bắt đầu bằng 0";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.ThongBao = "Email không được bỏ trống";
+                return false;
+            }
+
+            if (!EmailHopLe(email))
+            {
+                ViewBag.ThongBao = "Email không đúng định dạng";
+                return false;
+            }
+
+            taiKhoan = taiKhoanDAL.LayTaiKhoanTheoSoDienThoaiVaEmail(soDienThoai, email);
+            if (taiKhoan == null)
+            {
+                ViewBag.ThongBao = "Số điện thoại hoặc email không đúng.";
+                return false;
+            }
+
+            if (taiKhoan.DaXoa)
+            {
+                ViewBag.ThongBao = "Tài khoản không tồn tại hoặc đã bị xóa.";
+                return false;
+            }
+
+            if (!taiKhoan.TrangThai)
+            {
+                ViewBag.ThongBao = "Tài khoản đang bị khóa, không thể đặt lại mật khẩu.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private void GanTrangThaiNhapMaXacNhan()
+        {
+            var hetHanTicks = HttpContext.Session.GetString("DatLaiMatKhau_HetHanTicks");
+            ViewBag.YeuCauMaXacNhan = long.TryParse(hetHanTicks, out var ticks)
+                && new DateTime(ticks, DateTimeKind.Utc) >= DateTime.UtcNow;
+        }
+
+        private void XoaPhienDatLaiMatKhau()
+        {
+            HttpContext.Session.Remove("DatLaiMatKhau_MaTaiKhoan");
+            HttpContext.Session.Remove("DatLaiMatKhau_MaXacNhan");
+            HttpContext.Session.Remove("DatLaiMatKhau_HetHanTicks");
+        }
+
+        private static bool EmailHopLe(string email)
+        {
+            try
+            {
+                var diaChi = new MailAddress(email.Trim());
+                return string.Equals(diaChi.Address, email.Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool SoDienThoaiHopLe(string soDienThoai)
+        {
+            return Regex.IsMatch(soDienThoai.Trim(), @"^0\d{9,10}$");
+        }
+
+        private static bool MatKhauHopLe(string matKhau)
+        {
+            return matKhau.Length >= 8
+                && matKhau.Any(char.IsUpper)
+                && matKhau.Any(char.IsLower)
+                && matKhau.Any(char.IsDigit);
         }
 
     }

@@ -9,27 +9,27 @@ namespace DoAnTotNghiep.Controllers
     /// </summary>
     public class AdminController : Controller
     {
-        private readonly taiKhoanDAL taiKhoanDAL;
-        private readonly vaccineDAL vaccineDAL;
-        private readonly muiTiemVaccineDAL muiTiemVaccineDAL;
-        private readonly lichTiemDAL lichTiemDAL;
-        private readonly cauHoiTuVanDAL cauHoiTuVanDAL;
-        private readonly baiVietCamNangDAL baiVietCamNangDAL;
+        private readonly TaiKhoan_DAL taiKhoanDAL;
+        private readonly Vaccine_DAL vaccineDAL;
+        private readonly MuiTiemVaccine_DAL muiTiemVaccineDAL;
+        private readonly LichTiem_DAL lichTiemDAL;
+        private readonly CauHoiTuVan_DAL cauHoiTuVanDAL;
+        private readonly BaiVietCamNang_DAL baiVietDAL;
 
         public AdminController(
-            taiKhoanDAL taiKhoanDAL,
-            vaccineDAL vaccineDAL,
-            muiTiemVaccineDAL muiTiemVaccineDAL,
-            lichTiemDAL lichTiemDAL,
-            cauHoiTuVanDAL cauHoiTuVanDAL,
-            baiVietCamNangDAL baiVietCamNangDAL)
+            TaiKhoan_DAL taiKhoanDAL,
+            Vaccine_DAL vaccineDAL,
+            MuiTiemVaccine_DAL muiTiemVaccineDAL,
+            LichTiem_DAL lichTiemDAL,
+            CauHoiTuVan_DAL cauHoiTuVanDAL,
+            BaiVietCamNang_DAL baiVietDAL)
         {
             this.taiKhoanDAL = taiKhoanDAL;
             this.vaccineDAL = vaccineDAL;
             this.muiTiemVaccineDAL = muiTiemVaccineDAL;
             this.lichTiemDAL = lichTiemDAL;
             this.cauHoiTuVanDAL = cauHoiTuVanDAL;
-            this.baiVietCamNangDAL = baiVietCamNangDAL;
+            this.baiVietDAL = baiVietDAL;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -41,18 +41,18 @@ namespace DoAnTotNghiep.Controllers
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
-            var danhSachVaccine = vaccineDAL.layTatCa();
-            var danhSachMuiTiem = muiTiemVaccineDAL.layTatCa();
-            var danhSachCauHoi = cauHoiTuVanDAL.layTatCa();
-            var danhSachBaiViet = baiVietCamNangDAL.layTatCa();
+            var danhSachVaccine = vaccineDAL.LayDanhSach();
+            var danhSachMuiTiem = muiTiemVaccineDAL.LayDanhSach();
+            var danhSachCauHoi = cauHoiTuVanDAL.LayTatCa();
+            var danhSachBaiViet = baiVietDAL.LayTatCaChoAdmin();
 
             ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
-            ViewBag.SoTaiKhoan = taiKhoanDAL.demTatCa();
+            ViewBag.SoTaiKhoan = taiKhoanDAL.DemTatCa();
             ViewBag.SoVaccine = danhSachVaccine.Count;
             ViewBag.SoMuiTiem = danhSachMuiTiem.Count;
-            ViewBag.SoLichTiem = lichTiemDAL.demTatCa();
+            ViewBag.SoLichTiem = lichTiemDAL.DemTatCa();
             ViewBag.SoBaiViet = danhSachBaiViet.Count;
-            ViewBag.SoCauHoiChoTraLoi = danhSachCauHoi.Count(x => x.trangThai != "Đã trả lời");
+            ViewBag.SoCauHoiChoTraLoi = danhSachCauHoi.Count(x => x.TrangThai != "Đã trả lời");
             ViewBag.DanhSachVaccine = danhSachVaccine.Take(5).ToList();
             ViewBag.CauHoiMoi = danhSachCauHoi.Take(5).ToList();
             ViewBag.BaiVietMoi = danhSachBaiViet.Take(4).ToList();
@@ -67,7 +67,7 @@ namespace DoAnTotNghiep.Controllers
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
-            return View(taiKhoanDAL.layTatCa());
+            return View(taiKhoanDAL.LayTatCa());
         }
 
         [HttpPost]
@@ -81,7 +81,7 @@ namespace DoAnTotNghiep.Controllers
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
-            var taiKhoan = taiKhoanDAL.layTheoMa(maTaiKhoan);
+            var taiKhoan = taiKhoanDAL.LayTaiKhoanTheoId(maTaiKhoan);
             if (taiKhoan == null)
             {
                 TempData["ThongBao"] = "Không tìm thấy tài khoản cần cập nhật";
@@ -97,7 +97,7 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction(nameof(taiKhoan));
             }
 
-            taiKhoanDAL.doiTrangThai(maTaiKhoan, trangThai);
+            taiKhoanDAL.DoiTrangThai(maTaiKhoan, trangThai);
             TempData["ThongBao"] = "Đổi trạng thái thành công";
             return RedirectToAction(nameof(taiKhoan));
         }

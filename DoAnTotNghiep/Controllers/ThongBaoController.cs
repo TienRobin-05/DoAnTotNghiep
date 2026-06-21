@@ -72,7 +72,7 @@ namespace DoAnTotNghiep.Controllers
             return RedirectToAction(nameof(Index), new { trangThai, tuKhoa, trang });
         }
 
-        public IActionResult Details(int id, int maThongBao = 0, bool chuyenHuongLichTiem = false)
+        public IActionResult Details(int id = 0, int maThongBao = 0, bool chuyenHuongLichTiem = false)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");

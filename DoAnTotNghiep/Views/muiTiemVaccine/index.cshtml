@@ -53,7 +53,12 @@ else
             <td class="table-actions">
                 <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-light">Chi tiết</a>
                 <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sửa</a>
-                <a asp-action="Delete" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-danger">Xóa</a>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger js-delete-confirm"
+                        data-delete-url="@Url.Action("Delete", new { id = item.MaMuiTiem })"
+                        data-delete-title="Xóa mũi tiêm">
+                    Xóa
+                </button>
                 <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Theo vaccine</a>
             </td>
         </tr>
@@ -62,3 +67,5 @@ else
 </table>
 }
 </section>
+
+<partial name="_ConfirmDeleteModal" />

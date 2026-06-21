@@ -506,7 +506,14 @@
                                 <div class="health-record-actions">
                                     <a asp-action="Details" asp-route-id="@item.MaHoSo" class="health-record-action" title="Xem hồ sơ" aria-label="Xem hồ sơ"><i class="bi bi-eye" aria-hidden="true"></i></a>
                                     <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="health-record-action edit" title="Sửa hồ sơ" aria-label="Sửa hồ sơ"><i class="bi bi-pencil" aria-hidden="true"></i></a>
-                                    <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="health-record-action delete" title="Xóa hồ sơ" aria-label="Xóa hồ sơ"><i class="bi bi-trash3" aria-hidden="true"></i></a>
+                                    <button type="button"
+                                            class="health-record-action delete js-delete-confirm"
+                                            title="Xóa hồ sơ"
+                                            aria-label="Xóa hồ sơ"
+                                            data-delete-url="@Url.Action("Delete", new { id = item.MaHoSo })"
+                                            data-delete-title="Xóa hồ sơ sức khỏe">
+                                        <i class="bi bi-trash3" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -569,3 +576,5 @@
         });
     </script>
 }
+
+<partial name="_ConfirmDeleteModal" />

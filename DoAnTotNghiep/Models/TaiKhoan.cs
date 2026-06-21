@@ -26,4 +26,11 @@
         public DateTime? NgayXoaMem { get; set; }
         public string? LyDoXoa { get; set; }
     }
+
+    public class KetQuaDonDepTaiKhoan
+    {
+        public int SoTaiKhoanXoaMem { get; set; }
+        public int SoTaiKhoanXoaCung { get; set; }
+        public string ThongBao { get; set; } = string.Empty;
+    }
 }

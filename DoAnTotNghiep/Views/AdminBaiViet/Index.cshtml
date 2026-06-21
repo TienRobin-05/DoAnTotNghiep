@@ -67,7 +67,12 @@ else
             <td class="table-actions">
                 <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
                 <a asp-action="Edit" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-primary">Sửa</a>
-                <a asp-action="Delete" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-danger">Xóa</a>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger js-delete-confirm"
+                        data-delete-url="@Url.Action("DeleteConfirmed", new { maBaiViet = item.MaBaiViet })"
+                        data-delete-title="Xóa bài viết">
+                    Xóa
+                </button>
                 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
                 <form asp-action="AnHien" method="post" class="d-inline">
                     @Html.AntiForgeryToken()
@@ -82,3 +87,5 @@ else
 </table>
 </section>
 }
+
+<partial name="_ConfirmDeleteModal" />

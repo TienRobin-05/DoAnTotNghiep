@@ -194,6 +194,62 @@ WHERE maTaiKhoan = @MaTaiKhoan";
             return doc.Read() ? DocTaiKhoan(doc) : null;
         }
 
+        public List<TaiKhoan> LayTatCa()
+        {
+            DamBaoCotDonDepTaiKhoan();
+            const string sql = @"SELECT
+    maTaiKhoan,
+    hoTen,
+    email,
+    matKhau,
+    soDienThoai,
+    vaiTro,
+    trangThai,
+    ngayTao,
+    LanDangNhapCuoi,
+    DaXoa,
+    NgayXoaMem,
+    LyDoXoa
+FROM TaiKhoan
+ORDER BY maTaiKhoan DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<TaiKhoan>();
+            while (doc.Read())
+            {
+                danhSach.Add(DocTaiKhoan(doc));
+            }
+
+            return danhSach;
+        }
+
+        public int DemTatCa()
+        {
+            const string sql = "SELECT COUNT(*) FROM TaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
+        public bool DoiTrangThai(int maTaiKhoan, bool trangThai)
+        {
+            const string sql = "UPDATE TaiKhoan SET trangThai = @TrangThai WHERE maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@TrangThai", trangThai);
+
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
         public TaiKhoan? LayTaiKhoanTheoSoDienThoaiVaEmail(string soDienThoai, string email)
         {
             DamBaoCotDonDepTaiKhoan();
@@ -293,6 +349,37 @@ AND DaXoa = 0";
             lenh.ExecuteNonQuery();
         }
 
+        public KetQuaDonDepTaiKhoan DonDepTaiKhoanKhongHoatDong(int? maTaiKhoanDangNhap)
+        {
+            DamBaoCotDonDepTaiKhoan();
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            ketNoi.Open();
+            using var giaoDich = ketNoi.BeginTransaction();
+
+            try
+            {
+                var soXoaMem = DanhDauTaiKhoanKhongHoatDong(ketNoi, giaoDich, maTaiKhoanDangNhap);
+                var soXoaCung = XoaCungTaiKhoanDaXoaMem(ketNoi, giaoDich, maTaiKhoanDangNhap);
+
+                giaoDich.Commit();
+                return new KetQuaDonDepTaiKhoan
+                {
+                    SoTaiKhoanXoaMem = soXoaMem,
+                    SoTaiKhoanXoaCung = soXoaCung,
+                    ThongBao = $"Đã xóa mềm {soXoaMem} tài khoản, xóa cứng {soXoaCung} tài khoản."
+                };
+            }
+            catch (Exception ex)
+            {
+                giaoDich.Rollback();
+                return new KetQuaDonDepTaiKhoan
+                {
+                    ThongBao = $"Dọn tài khoản thất bại: {ex.Message}"
+                };
+            }
+        }
+
         public bool KiemTraEmailTonTaiChoTaiKhoanKhac(int maTaiKhoan, string email)
         {
             const string sql = @"SELECT COUNT(*)
@@ -321,6 +408,86 @@ WHERE maTaiKhoan = @MaTaiKhoan";
             lenh.Parameters.AddWithValue("@MatKhau", matKhauDaHash);
             ketNoi.Open();
             lenh.ExecuteNonQuery();
+        }
+
+        private static int DanhDauTaiKhoanKhongHoatDong(SqlConnection ketNoi, SqlTransaction giaoDich, int? maTaiKhoanDangNhap)
+        {
+            const string sql = @"
+UPDATE TaiKhoan
+SET DaXoa = 1,
+    NgayXoaMem = GETDATE(),
+    LyDoXoa = N'Tài khoản không đăng nhập quá 2 năm'
+WHERE DaXoa = 0
+AND ISNULL(vaiTro, N'') NOT IN (N'Admin', N'Quản trị viên')
+AND (@MaTaiKhoanDangNhap IS NULL OR maTaiKhoan <> @MaTaiKhoanDangNhap)
+AND LanDangNhapCuoi IS NOT NULL
+AND LanDangNhapCuoi < DATEADD(YEAR, -2, GETDATE());";
+
+            using var lenh = new SqlCommand(sql, ketNoi, giaoDich);
+            lenh.Parameters.AddWithValue("@MaTaiKhoanDangNhap", (object?)maTaiKhoanDangNhap ?? DBNull.Value);
+            return lenh.ExecuteNonQuery();
+        }
+
+        private static int XoaCungTaiKhoanDaXoaMem(SqlConnection ketNoi, SqlTransaction giaoDich, int? maTaiKhoanDangNhap)
+        {
+            const string sql = @"
+DECLARE @TaiKhoanCanXoa TABLE (maTaiKhoan INT PRIMARY KEY);
+DECLARE @HoSoCanXoa TABLE (maHoSo INT PRIMARY KEY);
+DECLARE @LichTiemCanXoa TABLE (maLichTiem INT PRIMARY KEY);
+
+INSERT INTO @TaiKhoanCanXoa(maTaiKhoan)
+SELECT maTaiKhoan
+FROM TaiKhoan
+WHERE DaXoa = 1
+AND NgayXoaMem IS NOT NULL
+AND NgayXoaMem < DATEADD(DAY, -90, GETDATE())
+AND ISNULL(vaiTro, N'') NOT IN (N'Admin', N'Quản trị viên')
+AND (@MaTaiKhoanDangNhap IS NULL OR maTaiKhoan <> @MaTaiKhoanDangNhap);
+
+INSERT INTO @HoSoCanXoa(maHoSo)
+SELECT maHoSo
+FROM HoSoSucKhoe
+WHERE maTaiKhoan IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa);
+
+INSERT INTO @LichTiemCanXoa(maLichTiem)
+SELECT maLichTiem
+FROM LichTiem
+WHERE maHoSo IN (SELECT maHoSo FROM @HoSoCanXoa);
+
+DELETE FROM LichSuTiem
+WHERE maLichTiem IN (SELECT maLichTiem FROM @LichTiemCanXoa);
+
+DELETE FROM ThongBao
+WHERE maTaiKhoan IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa)
+OR maLichTiem IN (SELECT maLichTiem FROM @LichTiemCanXoa);
+
+DELETE FROM LichTiem
+WHERE maLichTiem IN (SELECT maLichTiem FROM @LichTiemCanXoa);
+
+DELETE FROM HoSoSucKhoe
+WHERE maHoSo IN (SELECT maHoSo FROM @HoSoCanXoa);
+
+DELETE FROM PushSubscription
+WHERE maTaiKhoan IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa);
+
+DELETE FROM BaiVietCamNang
+WHERE maTaiKhoan IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa);
+
+UPDATE CauHoiTuVan
+SET maNguoiTraLoi = NULL
+WHERE maNguoiTraLoi IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa);
+
+DELETE FROM CauHoiTuVan
+WHERE maNguoiGui IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa);
+
+DELETE FROM TaiKhoan
+WHERE maTaiKhoan IN (SELECT maTaiKhoan FROM @TaiKhoanCanXoa);
+
+SELECT @@ROWCOUNT;";
+
+            using var lenh = new SqlCommand(sql, ketNoi, giaoDich);
+            lenh.Parameters.AddWithValue("@MaTaiKhoanDangNhap", (object?)maTaiKhoanDangNhap ?? DBNull.Value);
+            return Convert.ToInt32(lenh.ExecuteScalar());
         }
 
         // Mục đích: phương thức GanThamSoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -394,7 +561,8 @@ END;";
 
         private static string ChuanHoaVaiTro(string? vaiTro)
         {
-            if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase))
             {
                 return "Admin";
             }

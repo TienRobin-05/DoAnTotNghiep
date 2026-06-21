@@ -1,12 +1,23 @@
 @{
     ViewData["Title"] = "Quên mật khẩu";
     Layout = "_AuthLayout";
+    var yeuCauMaXacNhan = ViewBag.YeuCauMaXacNhan as bool? ?? false;
 }
 
 <style>
     .forgot-password-back-link {
         margin-top: 22px;
         text-align: center;
+    }
+
+    .reset-demo-code {
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        color: #155724;
+        background: #d4edda;
+        font-size: 14px;
+        font-weight: 600;
     }
 </style>
 
@@ -17,6 +28,13 @@
     @if (ViewBag.ThongBao != null)
     {
         <div class="auth-alert error">@ViewBag.ThongBao</div>
+    }
+
+    @if (ViewBag.MaXacNhanDemo != null)
+    {
+        <div class="reset-demo-code">
+            Mã xác nhận demo: <strong>@ViewBag.MaXacNhanDemo</strong>
+        </div>
     }
 
     <form method="post" autocomplete="off">
@@ -49,29 +67,44 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Mật khẩu mới</label>
-            <div class="input-box">
-                <input
-                    type="password"
-                    name="matKhauMoi"
-                    autocomplete="new-password"
-                    placeholder="Nhập mật khẩu mới" />
+        @if (yeuCauMaXacNhan)
+        {
+            <div class="form-group">
+                <label>Mã xác nhận</label>
+                <div class="input-box">
+                    <input
+                        type="text"
+                        name="maXacNhan"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        placeholder="Nhập mã xác nhận" />
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label>Xác nhận mật khẩu</label>
-            <div class="input-box">
-                <input
-                    type="password"
-                    name="xacNhanMatKhau"
-                    autocomplete="new-password"
-                    placeholder="Nhập lại mật khẩu mới" />
+            <div class="form-group">
+                <label>Mật khẩu mới</label>
+                <div class="input-box">
+                    <input
+                        type="password"
+                        name="matKhauMoi"
+                        autocomplete="new-password"
+                        placeholder="Nhập mật khẩu mới" />
+                </div>
             </div>
-        </div>
 
-        <button type="submit" class="auth-button">Đặt lại mật khẩu</button>
+            <div class="form-group">
+                <label>Xác nhận mật khẩu</label>
+                <div class="input-box">
+                    <input
+                        type="password"
+                        name="xacNhanMatKhau"
+                        autocomplete="new-password"
+                        placeholder="Nhập lại mật khẩu mới" />
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="auth-button">@(yeuCauMaXacNhan ? "Đặt lại mật khẩu" : "Lấy mã xác nhận")</button>
 
         <div class="auth-switch forgot-password-back-link">
             <a class="auth-link" asp-action="DangNhap">Quay lại đăng nhập</a>

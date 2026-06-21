@@ -155,22 +155,6 @@ namespace DoAnTotNghiep.Controllers
             return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = mt.MaVaccine });
         }
 
-        [HttpGet]
-        // Mục đích: action Delete xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Delete(int id)
-        {
-            var chanQuyen = ChanNeuKhongPhaiAdmin();
-            if (chanQuyen != null) return chanQuyen;
-
-            var muiTiem = muiTiemVaccineDAL.LayTheoId(id);
-            if (muiTiem == null) return NotFound();
-
-            return View(muiTiem);
-        }
-
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         // Mục đích: action DeleteConfirmed xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

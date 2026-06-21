@@ -78,6 +78,16 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             return danhSach;
         }
 
+        public int DemTatCa()
+        {
+            const string sql = "SELECT COUNT(*) FROM LichTiem";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
         // Mục đích: phương thức KiemTraHoSoCoLichTiem thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.

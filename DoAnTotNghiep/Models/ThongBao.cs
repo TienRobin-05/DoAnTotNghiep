@@ -22,6 +22,7 @@
         // Thông tin hồ sơ liên quan chỉ dùng để trình bày và điều hướng, được JOIN khi đọc; không tạo cột mới trong bảng ThongBao.
         public int? MaHoSo { get; set; }
         public string HoTenHoSo { get; set; } = string.Empty;
+        public string NhomThongBao { get; set; } = "da-cap-nhat";
         public string TrangThaiDoc => DaDoc ? "Đã đọc" : "Chưa đọc";
     }
 }

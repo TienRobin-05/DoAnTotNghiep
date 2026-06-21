@@ -7,13 +7,6 @@
 
 <h2>Sửa bài viết</h2>
 
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (ViewBag.ThongBao != null)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="alert alert-danger">@ViewBag.ThongBao</div>
-}
-
 @* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
 <form asp-action="Edit" method="post" enctype="multipart/form-data" class="col-md-8">
     @Html.AntiForgeryToken()

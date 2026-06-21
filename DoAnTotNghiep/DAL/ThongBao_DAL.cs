@@ -10,6 +10,18 @@ namespace DoAnTotNghiep.DAL
     public class ThongBao_DAL
     {
         private readonly string chuoiKetNoi;
+        private const string BieuThucNhomThongBao = @"CASE
+        WHEN lt.maLichTiem IS NOT NULL
+            AND lt.trangThai = N'Chưa tiêm'
+            AND CAST(lt.ngayTiemDuKien AS DATE) < CAST(GETDATE() AS DATE) THEN N'qua-han'
+        WHEN ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN N'qua-han'
+        WHEN lt.maLichTiem IS NOT NULL
+            AND lt.trangThai = N'Chưa tiêm'
+            AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, 2, CAST(GETDATE() AS DATE)) THEN N'den-lich'
+        WHEN ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%'
+            OR (ISNULL(tb.tieuDe, N'') LIKE N'%Hôm nay%' AND ISNULL(tb.tieuDe, N'') LIKE N'%lịch tiêm%') THEN N'den-lich'
+        ELSE N'da-cap-nhat'
+    END";
         private static readonly string[] TieuDeThongBaoNhacLich =
         {
             "Sắp đến lịch tiêm",
@@ -74,7 +86,8 @@ ORDER BY ngayGui DESC";
             var dieuKienDaDoc = daDoc.HasValue ? "AND tb.daDoc = @DaDoc" : string.Empty;
             var sql = $@"SELECT
     tb.maThongBao, tb.maTaiKhoan, tb.maLichTiem, tb.tieuDe, tb.noiDung, tb.ngayGui, tb.daDoc,
-    lt.maHoSo, hs.hoTen AS hoTenHoSo
+    lt.maHoSo, hs.hoTen AS hoTenHoSo,
+    {BieuThucNhomThongBao} AS nhomThongBao
 FROM ThongBao tb
 LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
 LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
@@ -133,12 +146,9 @@ AND (
         {
             var dieuKienDaDoc = daDoc.HasValue ? "AND tb.daDoc = @DaDoc" : string.Empty;
             var sql = $@"SELECT
-    COALESCE(SUM(CASE WHEN ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN 1 ELSE 0 END), 0) AS quaHan,
-    COALESCE(SUM(CASE WHEN ISNULL(tb.tieuDe, N'') NOT LIKE N'%Quá hạn%'
-        AND (ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%' OR ISNULL(tb.tieuDe, N'') LIKE N'%Hôm nay%lịch tiêm%') THEN 1 ELSE 0 END), 0) AS denLich,
-    COALESCE(SUM(CASE WHEN ISNULL(tb.tieuDe, N'') NOT LIKE N'%Quá hạn%'
-        AND ISNULL(tb.tieuDe, N'') NOT LIKE N'%đến lịch%'
-        AND ISNULL(tb.tieuDe, N'') NOT LIKE N'%Hôm nay%lịch tiêm%' THEN 1 ELSE 0 END), 0) AS daCapNhat
+    COALESCE(SUM(CASE WHEN {BieuThucNhomThongBao} = N'qua-han' THEN 1 ELSE 0 END), 0) AS quaHan,
+    COALESCE(SUM(CASE WHEN {BieuThucNhomThongBao} = N'den-lich' THEN 1 ELSE 0 END), 0) AS denLich,
+    COALESCE(SUM(CASE WHEN {BieuThucNhomThongBao} = N'da-cap-nhat' THEN 1 ELSE 0 END), 0) AS daCapNhat
 FROM ThongBao tb
 LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
 LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
@@ -307,9 +317,10 @@ ORDER BY ngayGui DESC";
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = @"SELECT
+            var sql = $@"SELECT
     tb.maThongBao, tb.maTaiKhoan, tb.maLichTiem, tb.tieuDe, tb.noiDung, tb.ngayGui, tb.daDoc,
-    lt.maHoSo, hs.hoTen AS hoTenHoSo
+    lt.maHoSo, hs.hoTen AS hoTenHoSo,
+    {BieuThucNhomThongBao} AS nhomThongBao
 FROM ThongBao tb
 LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
 LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
@@ -623,7 +634,10 @@ AND maTaiKhoan = @MaTaiKhoan";
                 MaHoSo = CoCot(doc, "maHoSo") && doc["maHoSo"] != DBNull.Value ? Convert.ToInt32(doc["maHoSo"]) : null,
                 HoTenHoSo = CoCot(doc, "hoTenHoSo") && doc["hoTenHoSo"] != DBNull.Value
                     ? doc["hoTenHoSo"].ToString() ?? string.Empty
-                    : string.Empty
+                    : string.Empty,
+                NhomThongBao = CoCot(doc, "nhomThongBao") && doc["nhomThongBao"] != DBNull.Value
+                    ? doc["nhomThongBao"].ToString() ?? "da-cap-nhat"
+                    : "da-cap-nhat"
             };
         }
 

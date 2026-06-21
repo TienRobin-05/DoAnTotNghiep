@@ -25,14 +25,6 @@
     <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
 </div>
 
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (TempData["ThongBao"] != null)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
-    <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
-}
-
 <div class="filter-bar compact-filter">
     <a asp-action="Index" asp-route-maHoSo="@maHoSo" asp-route-trangThai="tat-ca" class="btn btn-outline-primary @(boLocTrangThai == "tat-ca" ? "active" : "")">
         Tất cả (@tongTatCa)

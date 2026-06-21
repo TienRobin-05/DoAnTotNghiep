@@ -3,9 +3,9 @@
     Layout = "_AdminLayout";
 
     var hoTen = ViewBag.HoTen as string ?? "Quản trị viên";
-    var danhSachVaccine = ViewBag.DanhSachVaccine as List<vaccineModels> ?? new List<vaccineModels>();
-    var cauHoiMoi = ViewBag.CauHoiMoi as List<cauHoiTuVanModels> ?? new List<cauHoiTuVanModels>();
-    var baiVietMoi = ViewBag.BaiVietMoi as List<baiVietCamNangModels> ?? new List<baiVietCamNangModels>();
+    var danhSachVaccine = ViewBag.DanhSachVaccine as List<Vaccine> ?? new List<Vaccine>();
+    var cauHoiMoi = ViewBag.CauHoiMoi as List<CauHoiTuVan> ?? new List<CauHoiTuVan>();
+    var baiVietMoi = ViewBag.BaiVietMoi as List<BaiVietCamNang> ?? new List<BaiVietCamNang>();
 }
 
 <section class="card welcome">
@@ -69,11 +69,11 @@
                     @foreach (var vaccine in danhSachVaccine)
                     {
                         <tr>
-                            <td>@vaccine.tenVaccine</td>
-                            <td>@(vaccine.nhomVaccine ?? "Chưa phân nhóm")</td>
+                            <td>@vaccine.TenVaccine</td>
+                            <td>@(vaccine.NhomVaccine ?? "Chưa phân nhóm")</td>
                             <td>@HienThiDoTuoi(vaccine)</td>
                             <td>
-                                @if (vaccine.trangThai)
+                                @if (vaccine.TrangThai)
                                 {
                                     <span class="status status-active">Đang dùng</span>
                                 }
@@ -82,7 +82,7 @@
                                     <span class="status status-hide">Tạm ẩn</span>
                                 }
                             </td>
-                            <td><a class="btn btn-sm" href="/vaccine/edit/@vaccine.maVaccine">Sửa</a></td>
+                            <td><a class="btn btn-sm" href="/vaccine/edit/@vaccine.MaVaccine">Sửa</a></td>
                         </tr>
                     }
                 </tbody>
@@ -106,10 +106,10 @@
                 <div class="list">
                     @foreach (var cauHoi in cauHoiMoi)
                     {
-                        <a class="list-item" href="/cauHoiTuVan/traLoi/@cauHoi.maCauHoi">
-                            <strong>@(cauHoi.tenNguoiGui ?? "Người dùng")</strong>
-                            <span>@cauHoi.cauHoi</span><br />
-                            <small>@cauHoi.ngayGui.ToString("dd/MM/yyyy HH:mm") - @cauHoi.trangThai</small>
+                        <a class="list-item" href="/cauHoiTuVan/traLoi/@cauHoi.MaCauHoi">
+                            <strong>@(cauHoi.TenNguoiGui ?? "Người dùng")</strong>
+                            <span>@cauHoi.CauHoi</span><br />
+                            <small>@cauHoi.NgayGui.ToString("dd/MM/yyyy HH:mm") - @cauHoi.TrangThai</small>
                         </a>
                     }
                 </div>
@@ -140,9 +140,9 @@
                         @foreach (var baiViet in baiVietMoi)
                         {
                             <tr>
-                                <td>@baiViet.tieuDe</td>
+                                <td>@baiViet.TieuDe</td>
                                 <td>
-                                    @if (baiViet.trangThai)
+                                    @if (baiViet.TrangThai)
                                     {
                                         <span class="status status-active">Đã đăng</span>
                                     }
@@ -151,7 +151,7 @@
                                         <span class="status status-hide">Bản nháp</span>
                                     }
                                 </td>
-                                <td><a class="btn btn-sm" href="/AdminBaiViet/Edit?maBaiViet=@baiViet.maBaiViet">Sửa</a></td>
+                                <td><a class="btn btn-sm" href="/AdminBaiViet/Edit?maBaiViet=@baiViet.MaBaiViet">Sửa</a></td>
                             </tr>
                         }
                     </tbody>
@@ -166,24 +166,24 @@
 </div>
 
 @functions {
-    private static string HienThiDoTuoi(vaccineModels vaccine)
+    private static string HienThiDoTuoi(Vaccine vaccine)
     {
-        if (vaccine.doTuoiToiThieu == null && vaccine.doTuoiToiDa == null)
+        if (vaccine.DoTuoiToiThieu == null && vaccine.DoTuoiToiDa == null)
         {
             return "Chưa nhập";
         }
 
-        var donVi = string.IsNullOrWhiteSpace(vaccine.donViTuoi) ? "tháng" : vaccine.donViTuoi;
-        if (vaccine.doTuoiToiThieu != null && vaccine.doTuoiToiDa != null)
+        var donVi = string.IsNullOrWhiteSpace(vaccine.DonViTuoi) ? "tháng" : vaccine.DonViTuoi;
+        if (vaccine.DoTuoiToiThieu != null && vaccine.DoTuoiToiDa != null)
         {
-            return $"{vaccine.doTuoiToiThieu}-{vaccine.doTuoiToiDa} {donVi}";
+            return $"{vaccine.DoTuoiToiThieu}-{vaccine.DoTuoiToiDa} {donVi}";
         }
 
-        if (vaccine.doTuoiToiThieu != null)
+        if (vaccine.DoTuoiToiThieu != null)
         {
-            return $"Từ {vaccine.doTuoiToiThieu} {donVi}";
+            return $"Từ {vaccine.DoTuoiToiThieu} {donVi}";
         }
 
-        return $"Đến {vaccine.doTuoiToiDa} {donVi}";
+        return $"Đến {vaccine.DoTuoiToiDa} {donVi}";
     }
 }

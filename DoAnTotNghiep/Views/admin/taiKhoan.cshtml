@@ -1,6 +1,6 @@
 ﻿@* Khu vực giao diện của view taiKhoan.
    View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model List<taiKhoanModels>
+@model List<TaiKhoan>
 @{
     ViewData["Title"] = "Quản lý tài khoản";
 }
@@ -103,33 +103,33 @@
     @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
     @foreach (var item in Model)
     {
-        var trangThaiHienThi = item.trangThai ? "Hoạt động" : "Khóa";
-        var lienHeHienThi = !string.IsNullOrWhiteSpace(item.email)
-            ? item.email
-            : (!string.IsNullOrWhiteSpace(item.soDienThoai) ? item.soDienThoai : "Chưa có thông tin liên hệ");
+        var trangThaiHienThi = item.TrangThai ? "Hoạt động" : "Khóa";
+        var lienHeHienThi = !string.IsNullOrWhiteSpace(item.Email)
+            ? item.Email
+            : (!string.IsNullOrWhiteSpace(item.SoDienThoai) ? item.SoDienThoai : "Chưa có thông tin liên hệ");
         <tr>
             <td>
-                <div class="item-title">@item.hoTen</div>
-                <div class="item-meta">Mã tài khoản #@item.maTaiKhoan</div>
+                <div class="item-title">@item.HoTen</div>
+                <div class="item-meta">Mã tài khoản #@item.MaTaiKhoan</div>
             </td>
             <td>
-                <div>@item.email</div>
-                <div class="item-meta">@(string.IsNullOrWhiteSpace(item.soDienThoai) ? "Chưa có số điện thoại" : item.soDienThoai)</div>
+                <div>@item.Email</div>
+                <div class="item-meta">@(string.IsNullOrWhiteSpace(item.SoDienThoai) ? "Chưa có số điện thoại" : item.SoDienThoai)</div>
             </td>
-            <td><span class="soft-badge">@item.vaiTro</span></td>
+            <td><span class="soft-badge">@item.VaiTro</span></td>
             <td>
-                @(item.lanDangNhapCuoi.HasValue ? item.lanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa ghi nhận")
+                @(item.LanDangNhapCuoi.HasValue ? item.LanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa ghi nhận")
             </td>
             <td>
-                @if (item.daXoa)
+                @if (item.DaXoa)
                 {
                     <span class="status-badge status-locked">Đã xóa mềm</span>
                     <div class="item-meta">
-                        @(item.ngayXoaMem.HasValue ? item.ngayXoaMem.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                        @(item.NgayXoaMem.HasValue ? item.NgayXoaMem.Value.ToString("dd/MM/yyyy HH:mm") : "")
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(item.lyDoXoa))
+                    @if (!string.IsNullOrWhiteSpace(item.LyDoXoa))
                     {
-                        <div class="item-meta">@item.lyDoXoa</div>
+                        <div class="item-meta">@item.LyDoXoa</div>
                     }
                 }
                 else
@@ -138,17 +138,17 @@
                 }
             </td>
             <td>
-                <span class="status-badge @(item.trangThai ? "status-ok" : "status-locked")">
+                <span class="status-badge @(item.TrangThai ? "status-ok" : "status-locked")">
                     @trangThaiHienThi
                 </span>
             </td>
             <td class="table-actions">
                 <button class="btn btn-sm btn-outline-secondary js-open-status-modal"
                         type="button"
-                        data-ma-tai-khoan="@item.maTaiKhoan"
-                        data-ho-ten="@item.hoTen"
+                        data-ma-tai-khoan="@item.MaTaiKhoan"
+                        data-ho-ten="@item.HoTen"
                         data-lien-he="@lienHeHienThi"
-                        data-trang-thai="@item.trangThai"
+                        data-trang-thai="@item.TrangThai"
                         data-trang-thai-hien-thi="@trangThaiHienThi">
                     Đổi trạng thái
                 </button>
