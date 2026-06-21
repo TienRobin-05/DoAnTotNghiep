@@ -19,6 +19,9 @@
         public DateTime NgayGui { get; set; }
         // Thuộc tính DaDoc lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public bool DaDoc { get; set; }
+        // Thông tin hồ sơ liên quan chỉ dùng để trình bày và điều hướng, được JOIN khi đọc; không tạo cột mới trong bảng ThongBao.
+        public int? MaHoSo { get; set; }
+        public string HoTenHoSo { get; set; } = string.Empty;
         public string TrangThaiDoc => DaDoc ? "Đã đọc" : "Chưa đọc";
     }
 }

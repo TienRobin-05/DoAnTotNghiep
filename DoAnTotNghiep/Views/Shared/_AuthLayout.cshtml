@@ -336,7 +336,7 @@
         }
     </style>
 </head>
-<body>
+<body class="site-page-shell">
     <div class="auth-page">
                 <header class="auth-header">
             <div class="auth-header-inner">
@@ -363,9 +363,7 @@
             @RenderBody()
         </main>
 
-        <footer class="auth-footer">
-            © 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng
-        </footer>
+        <partial name="_Footer" />
     </div>
     <script>
         window.setTimeout(function () {

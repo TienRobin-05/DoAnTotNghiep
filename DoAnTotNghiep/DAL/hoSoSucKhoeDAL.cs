@@ -5,7 +5,7 @@ namespace DoAnTotNghiep.DAL
 {
     /// <summary>
     /// Lớp hoSoSucKhoeDAL chịu trách nhiệm truy cập dữ liệu cho chức năng liên quan, bao gồm mở kết nối SQL Server, truyền tham số an toàn và chuyển dữ liệu database thành model.
-    /// </summary>
+
     public class hoSoSucKhoeDAL
     {
         private readonly coSoDuLieu coSoDuLieu;

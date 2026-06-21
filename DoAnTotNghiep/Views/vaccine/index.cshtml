@@ -1,100 +1,639 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang dùng chung cho tra cứu vaccine của người dùng và quản lý vaccine của admin. *@
 @model List<Vaccine>
 @{
     ViewData["Title"] = ViewBag.LaTraCuu == true ? "Tra cứu vaccine" : "Quản lý vaccine";
     var laTraCuu = ViewBag.LaTraCuu == true;
     var tuKhoa = ViewBag.TuKhoa as string ?? string.Empty;
     var actionLamMoi = laTraCuu ? "TraCuu" : "Index";
-    // Trang tra cứu dùng menu người dùng; trang quản lý vaccine vẫn giữ layout quản trị hiện tại.
+
     if (laTraCuu)
     {
         Layout = "_UserLayout";
     }
+
+    string ChuanHoaTuKhoaIcon(string? giaTri)
+    {
+        if (string.IsNullOrWhiteSpace(giaTri)) return string.Empty;
+
+        var chuoiPhanRa = giaTri.Trim().ToLowerInvariant()
+            .Normalize(System.Text.NormalizationForm.FormD);
+        var ketQua = new System.Text.StringBuilder();
+
+        foreach (var kyTu in chuoiPhanRa)
+        {
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(kyTu)
+                == System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            ketQua.Append(kyTu == 'đ' ? 'd' : kyTu);
+        }
+
+        return string.Join(" ", ketQua.ToString()
+            .Normalize(System.Text.NormalizationForm.FormC)
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    string? TimIconTheoNoiDung(string noiDung)
+    {
+        if (string.IsNullOrWhiteSpace(noiDung)) return null;
+
+        // Tên vaccine phối hợp cụ thể được ưu tiên trước các bệnh thành phần.
+        if (noiDung.Contains("mmrv") || noiDung.Contains("mmr") || noiDung.Contains("3 trong 1")) return "bi-patch-plus";
+        if (noiDung.Contains("4 trong 1") || noiDung.Contains("5 trong 1") || noiDung.Contains("6 trong 1") || noiDung.Contains("phoi hop")) return "bi-patch-plus";
+        if (noiDung.Contains("influenza") || noiDung.Contains("cum")) return "bi-snow";
+        if (noiDung.Contains("hpv")) return "bi-shield-check";
+        if (noiDung.Contains("rotavirus") || noiDung.Contains("cholera") || noiDung.Contains("ta ") || noiDung == "ta" || noiDung.Contains("vaccine uong")) return "bi-droplet-fill";
+        if (noiDung.Contains("viem gan") || noiDung.Contains("hepatitis")) return "bi-heart-pulse";
+        if (noiDung.Contains("bcg") || noiDung.Contains("lao") || noiDung.Contains("phe cau") || noiDung.Contains("pneumococcal") || noiDung.Contains("ho ga") || noiDung.Contains("pertussis") || noiDung.Contains("rsv")) return "bi-lungs";
+        if (noiDung.Contains("bach hau") || noiDung.Contains("diphtheria")) return "bi-shield";
+        if (noiDung.Contains("uon van") || noiDung.Contains("tetanus")) return "bi-bandaid";
+        if (noiDung.Contains("bai liet") || noiDung.Contains("polio") || noiDung.Contains("ipv") || noiDung.Contains("opv")) return "bi-universal-access";
+        if (noiDung.Contains("hib")) return "bi-microscope";
+        if (noiDung.Contains("nao mo cau") || noiDung.Contains("viem nao nhat ban") || noiDung.Contains("encephalitis")) return "bi-diagram-3";
+        if (noiDung.Contains("thuy dau") || noiDung.Contains("varicella") || noiDung.Contains("zona") || noiDung.Contains("soi") || noiDung.Contains("measles")) return "bi-record-circle";
+        if (noiDung.Contains("quai bi") || noiDung.Contains("rubella")) return "bi-circle";
+        if (noiDung.Contains("covid") || noiDung.Contains("sars-cov-2") || noiDung.Contains("sars cov 2")) return "bi-virus";
+        if (noiDung.Contains("dai") || noiDung.Contains("rabies")) return "bi-exclamation-triangle";
+        if (noiDung.Contains("thuong han") || noiDung.Contains("typhoid")) return "bi-thermometer-half";
+        if (noiDung.Contains("sot vang") || noiDung.Contains("sot xuat huyet") || noiDung.Contains("dengue")) return "bi-bug";
+        if (noiDung.Contains("hang nam") || noiDung.Contains("annual")) return "bi-calendar2-week";
+
+        return null;
+    }
+
+    string GetVaccineIcon(string? tenVaccine, string? nhomVaccine)
+    {
+        var iconTheoTen = TimIconTheoNoiDung(ChuanHoaTuKhoaIcon(tenVaccine));
+        if (!string.IsNullOrWhiteSpace(iconTheoTen)) return iconTheoTen;
+
+        var iconTheoNhom = TimIconTheoNoiDung(ChuanHoaTuKhoaIcon(nhomVaccine));
+        return string.IsNullOrWhiteSpace(iconTheoNhom) ? "bi-eyedropper" : iconTheoNhom;
+    }
+
+    string HienThiDoTuoi(Vaccine vaccine)
+    {
+        if (!vaccine.DoTuoiToiThieu.HasValue && !vaccine.DoTuoiToiDa.HasValue)
+        {
+            return "Chưa cấu hình";
+        }
+
+        var toiThieu = vaccine.DoTuoiToiThieu?.ToString() ?? "0";
+        var toiDa = vaccine.DoTuoiToiDa?.ToString() ?? "không giới hạn";
+        var donVi = string.IsNullOrWhiteSpace(vaccine.DonViTuoi) ? string.Empty : $" {vaccine.DonViTuoi.Trim()}";
+        return $"{toiThieu} - {toiDa}{donVi}";
+    }
 }
 
-<div class="list-page-head">
-    <div>
-        <h2>@ViewData["Title"]</h2>
-        <p>@Model.Count vaccine trong danh sách</p>
-    </div>
-    @if (!laTraCuu)
-    {
-        <a asp-action="Create" class="btn btn-primary">Thêm vaccine</a>
-    }
-</div>
-
-<form method="get" class="list-toolbar">
-    <input id="tuKhoa" name="tuKhoa" value="@tuKhoa" class="form-control" placeholder="Tìm tên hoặc nhóm vaccine" />
-    <button type="submit" class="btn btn-primary">Tìm</button>
-    <a asp-action="@actionLamMoi" class="btn btn-outline-secondary">Làm mới</a>
-</form>
-
-<section class="list-card">
-    @if (Model.Count == 0)
-    {
-        <div class="empty-state empty-action">
-            <div>
-                <strong>Chưa có vaccine phù hợp</strong>
-                <span>Thử nhập từ khóa khác hoặc làm mới danh sách vaccine.</span>
-            </div>
-            <a asp-action="@actionLamMoi" class="btn btn-primary">Làm mới</a>
-        </div>
-    }
-    else
-    {
-    <table class="table list-table">
-        <thead>
-            <tr>
-                <th>Vaccine</th>
-                <th>Nhóm</th>
-                <th>Độ tuổi</th>
-                <th>Trạng thái</th>
-                @if (!laTraCuu)
-                {
-                    <th>Thao tác</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model)
-        {
-            var doTuoi = item.DoTuoiToiThieu.HasValue || item.DoTuoiToiDa.HasValue
-                ? $"{item.DoTuoiToiThieu?.ToString() ?? "0"} - {item.DoTuoiToiDa?.ToString() ?? "không giới hạn"} {item.DonViTuoi}"
-                : "Chưa cấu hình";
-            <tr>
-                <td>
-                    <div class="item-title">
-                        @if (laTraCuu)
-                        {
-                            <a asp-action="Details" asp-route-id="@item.MaVaccine">@item.TenVaccine</a>
-                        }
-                        else
-                        {
-                            @item.TenVaccine
-                        }
-                    </div>
-                    <div class="item-meta">Mã #@item.MaVaccine</div>
-                </td>
-                <td><span class="soft-badge">@item.NhomVaccine</span></td>
-                <td>@doTuoi</td>
-                <td>
-                    <span class="status-badge @(item.TrangThai ? "status-ok" : "status-muted")">
-                        @(item.TrangThai ? "Đang dùng" : "Đã ẩn")
-                    </span>
-                </td>
-                @if (!laTraCuu)
-                {
-                    <td class="table-actions">
-                        <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-light">Chi tiết</a>
-                        <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Mũi</a>
-                        <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
-                        <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Xóa</a>
-                    </td>
-                }
-            </tr>
+@if (laTraCuu)
+{
+    <style>
+        .vaccine-lookup-page {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            color: #1d2b40;
         }
-        </tbody>
-    </table>
-    }
-</section>
+
+        .vaccine-lookup-page * {
+            box-sizing: border-box;
+        }
+
+        .vaccine-lookup-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .vaccine-lookup-heading-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            flex: 0 0 46px;
+            border: 1px solid #b9dcf5;
+            border-radius: 8px;
+            color: #0878d1;
+            background: #eaf6ff;
+            font-size: 23px;
+        }
+
+        .vaccine-lookup-header h1 {
+            margin: 0 0 4px;
+            color: #16243a;
+            font-size: 28px;
+            font-weight: 780;
+            line-height: 1.2;
+        }
+
+        .vaccine-lookup-header p {
+            margin: 0;
+            color: #718096;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vaccine-lookup-toolbar {
+            display: grid;
+            grid-template-columns: minmax(240px, 1fr) auto auto;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 14px;
+            border: 1px solid #d9e5ee;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 5px 16px rgba(34, 67, 93, .05);
+        }
+
+        .vaccine-search-field {
+            position: relative;
+            min-width: 0;
+        }
+
+        .vaccine-search-field .bi-search {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            color: #8292a6;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .vaccine-search-input {
+            width: 100%;
+            height: 44px;
+            padding: 10px 14px 10px 41px;
+            border: 1px solid #cad8e3;
+            border-radius: 6px;
+            outline: none;
+            color: #23344b;
+            background: #fbfdff;
+        }
+
+        .vaccine-search-input:focus {
+            border-color: #3d96d5;
+            box-shadow: 0 0 0 3px rgba(8, 120, 209, .1);
+        }
+
+        .vaccine-lookup-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 102px;
+            min-height: 44px;
+            padding: 10px 18px;
+            border: 1px solid #0878d1;
+            border-radius: 6px;
+            font-weight: 700;
+            line-height: 1;
+            text-decoration: none;
+        }
+
+        .vaccine-lookup-submit {
+            color: #fff;
+            background: #0878d1;
+        }
+
+        .vaccine-lookup-submit:hover {
+            border-color: #0668b7;
+            color: #fff;
+            background: #0668b7;
+        }
+
+        .vaccine-lookup-reset {
+            color: #0878d1;
+            background: #fff;
+        }
+
+        .vaccine-lookup-reset:hover {
+            color: #0668b7;
+            background: #f1f8fd;
+        }
+
+        .vaccine-lookup-card {
+            overflow: hidden;
+            border: 1px solid #d9e5ee;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 6px 20px rgba(34, 67, 93, .06);
+        }
+
+        .vaccine-lookup-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+        .vaccine-lookup-table thead th {
+            padding: 14px 20px;
+            border-bottom: 1px solid #dbe5ed;
+            color: #53657a;
+            background: #f5f9fc;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .45px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .vaccine-lookup-table tbody td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e7edf2;
+            color: #3e4d61;
+            vertical-align: middle;
+        }
+
+        .vaccine-lookup-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .vaccine-lookup-table tbody tr:hover {
+            background: #f9fcfe;
+        }
+
+        .vaccine-identity {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 220px;
+        }
+
+        .vaccine-row-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            border: 1px solid #cae6f8;
+            border-radius: 50%;
+            color: #0878d1;
+            background: #eaf6ff;
+            font-size: 19px;
+        }
+
+        .vaccine-identity-copy {
+            min-width: 0;
+        }
+
+        .vaccine-name-link {
+            display: block;
+            margin-bottom: 3px;
+            overflow-wrap: anywhere;
+            color: #0872c5;
+            font-size: 15px;
+            font-weight: 780;
+            line-height: 1.35;
+            text-decoration: none;
+        }
+
+        .vaccine-name-link:hover {
+            color: #055f9f;
+            text-decoration: underline;
+        }
+
+        .vaccine-code {
+            display: block;
+            color: #7c8b9c;
+            font-size: 12px;
+        }
+
+        .vaccine-group-badge,
+        .vaccine-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .vaccine-group-badge {
+            color: #17699f;
+            background: #e5f3fc;
+        }
+
+        .vaccine-age {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #53657a;
+            line-height: 1.4;
+        }
+
+        .vaccine-age .bi {
+            flex: 0 0 auto;
+            color: #4387b8;
+        }
+
+        .vaccine-status-badge.active {
+            color: #187248;
+            background: #e1f5e9;
+        }
+
+        .vaccine-status-badge.inactive {
+            color: #59697b;
+            background: #e9eef3;
+        }
+
+        .vaccine-lookup-empty {
+            padding: 48px 24px;
+            color: #718096;
+            text-align: center;
+        }
+
+        .vaccine-lookup-empty .bi {
+            display: block;
+            margin-bottom: 10px;
+            color: #91a4b5;
+            font-size: 36px;
+        }
+
+        .vaccine-lookup-empty strong,
+        .vaccine-lookup-empty span {
+            display: block;
+        }
+
+        .vaccine-lookup-empty strong {
+            margin-bottom: 6px;
+            color: #2b3b51;
+        }
+
+        .vaccine-lookup-empty .vaccine-lookup-reset {
+            width: max-content;
+            margin: 18px auto 0;
+        }
+
+        @@media (max-width: 767.98px) {
+            .vaccine-lookup-header {
+                align-items: flex-start;
+            }
+
+            .vaccine-lookup-header h1 {
+                font-size: 24px;
+            }
+
+            .vaccine-lookup-toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .vaccine-search-field {
+                grid-column: 1 / -1;
+            }
+
+            .vaccine-lookup-button {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .vaccine-lookup-card {
+                overflow: visible;
+                border: 0;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            .vaccine-lookup-table,
+            .vaccine-lookup-table tbody,
+            .vaccine-lookup-table tr,
+            .vaccine-lookup-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .vaccine-lookup-table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+            }
+
+            .vaccine-lookup-table tbody {
+                display: grid;
+                gap: 12px;
+            }
+
+            .vaccine-lookup-table tbody tr {
+                overflow: hidden;
+                border: 1px solid #d9e5ee;
+                border-radius: 8px;
+                background: #fff;
+                box-shadow: 0 4px 14px rgba(34, 67, 93, .05);
+            }
+
+            .vaccine-lookup-table tbody td {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 11px 15px;
+                text-align: right;
+            }
+
+            .vaccine-lookup-table tbody td::before {
+                flex: 0 0 78px;
+                color: #6c7b8d;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: .3px;
+                text-align: left;
+                text-transform: uppercase;
+                content: attr(data-label);
+            }
+
+            .vaccine-lookup-table tbody td:first-child {
+                display: block;
+                padding: 15px;
+                text-align: left;
+            }
+
+            .vaccine-lookup-table tbody td:first-child::before {
+                display: none;
+            }
+
+            .vaccine-identity {
+                min-width: 0;
+            }
+
+            .vaccine-group-badge,
+            .vaccine-age,
+            .vaccine-status-badge {
+                min-width: 0;
+                text-align: left;
+            }
+        }
+
+        @@media (max-width: 390px) {
+            .vaccine-lookup-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .vaccine-search-field {
+                grid-column: auto;
+            }
+        }
+    </style>
+
+    <main class="vaccine-lookup-page">
+        <header class="vaccine-lookup-header">
+            <span class="vaccine-lookup-heading-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
+            <div>
+                <h1>Tra cứu vaccine</h1>
+                <p>@Model.Count vaccine trong danh sách</p>
+            </div>
+        </header>
+
+        <form asp-action="TraCuu" method="get" class="vaccine-lookup-toolbar" role="search">
+            <div class="vaccine-search-field">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="tuKhoa"
+                       name="tuKhoa"
+                       value="@tuKhoa"
+                       class="vaccine-search-input"
+                       placeholder="Tìm tên hoặc nhóm vaccine"
+                       aria-label="Tìm tên hoặc nhóm vaccine" />
+            </div>
+            <button type="submit" class="vaccine-lookup-button vaccine-lookup-submit">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                Tìm
+            </button>
+            <a asp-action="TraCuu" class="vaccine-lookup-button vaccine-lookup-reset">
+                <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                Làm mới
+            </a>
+        </form>
+
+        <section class="vaccine-lookup-card" aria-label="Danh sách vaccine">
+            @if (Model.Count == 0)
+            {
+                <div class="vaccine-lookup-empty">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <strong>Chưa có vaccine phù hợp</strong>
+                    <span>Thử nhập từ khóa khác hoặc làm mới danh sách vaccine.</span>
+                    <a asp-action="TraCuu" class="vaccine-lookup-button vaccine-lookup-reset">
+                        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                        Làm mới
+                    </a>
+                </div>
+            }
+            else
+            {
+                <table class="vaccine-lookup-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Vaccine</th>
+                            <th scope="col">Nhóm</th>
+                            <th scope="col">Độ tuổi</th>
+                            <th scope="col">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var iconVaccine = GetVaccineIcon(item.TenVaccine, item.NhomVaccine);
+                            <tr>
+                                <td data-label="Vaccine">
+                                    <div class="vaccine-identity">
+                                        <span class="vaccine-row-icon"><i class="bi @iconVaccine" aria-hidden="true"></i></span>
+                                        <div class="vaccine-identity-copy">
+                                            <a asp-action="Details" asp-route-id="@item.MaVaccine" class="vaccine-name-link">@item.TenVaccine</a>
+                                            <span class="vaccine-code">Mã vaccine #@item.MaVaccine</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td data-label="Nhóm">
+                                    <span class="vaccine-group-badge">@(string.IsNullOrWhiteSpace(item.NhomVaccine) ? "Chưa phân nhóm" : item.NhomVaccine)</span>
+                                </td>
+                                <td data-label="Độ tuổi">
+                                    <span class="vaccine-age"><i class="bi bi-calendar3" aria-hidden="true"></i>@HienThiDoTuoi(item)</span>
+                                </td>
+                                <td data-label="Trạng thái">
+                                    <span class="vaccine-status-badge @(item.TrangThai ? "active" : "inactive")">
+                                        <i class="bi @(item.TrangThai ? "bi-check-circle-fill" : "bi-dash-circle")" aria-hidden="true"></i>
+                                        @(item.TrangThai ? "Đang dùng" : "Đã ẩn")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+    </main>
+}
+else
+{
+    @* Giữ nguyên giao diện và chức năng quản lý vaccine của admin. *@
+    <div class="list-page-head">
+        <div>
+            <h2>@ViewData["Title"]</h2>
+            <p>@Model.Count vaccine trong danh sách</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">Thêm vaccine</a>
+    </div>
+
+    <form method="get" class="list-toolbar">
+        <input id="tuKhoa" name="tuKhoa" value="@tuKhoa" class="form-control" placeholder="Tìm tên hoặc nhóm vaccine" />
+        <button type="submit" class="btn btn-primary">Tìm</button>
+        <a asp-action="@actionLamMoi" class="btn btn-outline-secondary">Làm mới</a>
+    </form>
+
+    <section class="list-card">
+        @if (Model.Count == 0)
+        {
+            <div class="empty-state empty-action">
+                <div>
+                    <strong>Chưa có vaccine phù hợp</strong>
+                    <span>Thử nhập từ khóa khác hoặc làm mới danh sách vaccine.</span>
+                </div>
+                <a asp-action="@actionLamMoi" class="btn btn-primary">Làm mới</a>
+            </div>
+        }
+        else
+        {
+            <table class="table list-table">
+                <thead>
+                    <tr>
+                        <th>Vaccine</th>
+                        <th>Nhóm</th>
+                        <th>Độ tuổi</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="item-title">@item.TenVaccine</div>
+                                <div class="item-meta">Mã #@item.MaVaccine</div>
+                            </td>
+                            <td><span class="soft-badge">@item.NhomVaccine</span></td>
+                            <td>@HienThiDoTuoi(item)</td>
+                            <td>
+                                <span class="status-badge @(item.TrangThai ? "status-ok" : "status-muted")">
+                                    @(item.TrangThai ? "Đang dùng" : "Đã ẩn")
+                                </span>
+                            </td>
+                            <td class="table-actions">
+                                <a asp-action="Details" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-light">Chi tiết</a>
+                                <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Mũi</a>
+                                <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.MaVaccine" class="btn btn-sm btn-outline-danger">Xóa</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+}

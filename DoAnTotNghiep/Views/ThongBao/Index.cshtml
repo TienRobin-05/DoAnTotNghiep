@@ -1,169 +1,491 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model List<ThongBao>
+@* Trang thông báo có lọc, tìm kiếm và phân trang từ database. *@
+@model ThongBaoIndexViewModel
 @{
     ViewData["Title"] = "Thông báo của tôi";
+    var soChuaDocTaiKhoan = ViewBag.SoThongBaoChuaDoc is int soChuaDoc ? soChuaDoc : 0;
 
-    string RutGon(string noiDung, int doDai = 90)
+    string LayNhomThongBao(ThongBao thongBao)
     {
-        if (string.IsNullOrWhiteSpace(noiDung))
+        var tieuDe = thongBao.TieuDe ?? string.Empty;
+        if (tieuDe.Contains("Quá hạn", StringComparison.OrdinalIgnoreCase)) return "qua-han";
+        if (tieuDe.Contains("đến lịch", StringComparison.OrdinalIgnoreCase)
+            || (tieuDe.Contains("Hôm nay", StringComparison.OrdinalIgnoreCase)
+                && tieuDe.Contains("lịch tiêm", StringComparison.OrdinalIgnoreCase)))
         {
-            return string.Empty;
+            return "den-lich";
         }
 
-        var giaTri = noiDung.Trim()
-            .Replace("Hồ sơ ", "")
-            .Replace("vaccine ", "")
-            .Replace("Vui lòng ", "")
-            .Replace("Ngoài ra, hồ sơ này còn có các mũi tiêm khác đang đến hạn. Vui lòng kiểm tra trong mục Lịch tiêm.", "");
-
-        var viTriChiTiet = giaTri.IndexOf("Khoảng cách", StringComparison.OrdinalIgnoreCase);
-        if (viTriChiTiet >= 0)
-        {
-            giaTri = giaTri[..viTriChiTiet].Trim();
-        }
-
-        viTriChiTiet = giaTri.IndexOf("nhóm Vaccine", StringComparison.OrdinalIgnoreCase);
-        if (viTriChiTiet >= 0)
-        {
-            var dauChamSauNhom = giaTri.IndexOf(". ", viTriChiTiet, StringComparison.OrdinalIgnoreCase);
-            if (dauChamSauNhom > viTriChiTiet)
-            {
-                giaTri = giaTri.Remove(viTriChiTiet, dauChamSauNhom - viTriChiTiet + 2).Trim();
-            }
-        }
-
-        return giaTri.Length <= doDai ? giaTri : giaTri[..doDai].TrimEnd() + "...";
+        return "da-cap-nhat";
     }
+
+    var thongBaoQuaHan = Model.DanhSach.Where(item => LayNhomThongBao(item) == "qua-han").ToList();
+    var thongBaoDenLich = Model.DanhSach.Where(item => LayNhomThongBao(item) == "den-lich").ToList();
+    var thongBaoDaCapNhat = Model.DanhSach.Where(item => LayNhomThongBao(item) == "da-cap-nhat").ToList();
+    var viTriDau = Model.TongKetQua == 0 ? 0 : (Model.TrangHienTai - 1) * Model.SoDongMoiTrang + 1;
+    var viTriCuoi = Math.Min(Model.TrangHienTai * Model.SoDongMoiTrang, Model.TongKetQua);
+    var trangBatDau = Math.Max(1, Model.TrangHienTai - 2);
+    var trangKetThuc = Math.Min(Model.TongSoTrang, trangBatDau + 4);
+    trangBatDau = Math.Max(1, trangKetThuc - 4);
 }
 
 <style>
-    .notification-page {
-        max-width: 980px;
+    .my-notifications-page {
+        width: 100%;
+        max-width: 1320px;
         margin: 0 auto;
-    }
-
-    .notification-list {
-        display: grid;
-        gap: 10px;
-    }
-
-    .notification-card {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 16px;
-        align-items: center;
-        padding: 14px 16px;
-        border: 1px solid #e5e7eb;
-        border-left: 4px solid #0b63ce;
+        padding: 18px;
         border-radius: 8px;
-        background: #ffffff;
-        box-shadow: 0 4px 12px rgba(15, 42, 77, 0.05);
+        color: #1d2b40;
+        background: #f3f7fa;
     }
 
-    .notification-card.unread {
-        border-left-color: #f59e0b;
-        background: #fffdf7;
-    }
+    .my-notifications-page * { box-sizing: border-box; }
 
-    .notification-main {
-        min-width: 0;
-    }
-
-    .notification-title-row {
+    .my-notifications-top {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 6px;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
     }
 
-    .notification-title-row a {
-        color: #111827;
-        font-size: 17px;
-        font-weight: 800;
+    .my-notifications-heading h1 {
+        margin: 0 0 5px;
+        color: #17243a;
+        font-size: 28px;
+        font-weight: 780;
+        line-height: 1.2;
     }
 
-    .notification-summary {
+    .my-notifications-heading p {
         margin: 0;
-        color: #475569;
-        line-height: 1.45;
+        color: #718096;
+        font-size: 14px;
+        font-weight: 600;
     }
 
-    .notification-meta {
+    .my-notifications-tools {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
         align-items: center;
         justify-content: flex-end;
-        min-width: 170px;
-        color: #64748b;
-        font-size: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+        min-width: min(100%, 540px);
     }
 
-    .notification-badge {
+    .notification-search {
+        position: relative;
+        flex: 1 1 270px;
+        min-width: 220px;
+    }
+
+    .notification-search .bi-search {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        color: #8292a6;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .notification-search input {
+        width: 100%;
+        height: 42px;
+        padding: 9px 38px;
+        border: 1px solid #cad8e3;
+        border-radius: 6px;
+        outline: none;
+        color: #25364b;
+        background: #fff;
+    }
+
+    .notification-search input:focus {
+        border-color: #3d96d5;
+        box-shadow: 0 0 0 3px rgba(8, 120, 209, .1);
+    }
+
+    .notification-search button {
+        position: absolute;
+        top: 50%;
+        right: 6px;
         display: inline-flex;
         align-items: center;
-        padding: 4px 9px;
-        border-radius: 999px;
-        color: #475569;
-        background: #e2e8f0;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border: 0;
+        border-radius: 6px;
+        color: #0878d1;
+        background: transparent;
+        transform: translateY(-50%);
+    }
+
+    .mark-all-read-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 9px 14px;
+        border: 1px solid #0878d1;
+        border-radius: 6px;
+        color: #0878d1;
+        background: #fff;
         font-size: 13px;
-        font-weight: 800;
+        font-weight: 700;
         white-space: nowrap;
     }
 
-    .notification-badge.unread {
-        color: #92400e;
-        background: #fef3c7;
+    .mark-all-read-button:not(:disabled):hover { color: #0568b3; background: #eef8ff; }
+    .mark-all-read-button:disabled { border-color: #cbd5df; color: #93a1b1; background: #eef2f5; cursor: not-allowed; }
+
+    .notification-filter-tabs {
+        display: flex;
+        align-items: flex-end;
+        gap: 28px;
+        margin-bottom: 18px;
+        padding: 0 4px;
+        border-bottom: 1px solid #d9e4ec;
+        overflow-x: auto;
     }
 
-    @@media (max-width: 760px) {
-        .notification-card {
-            grid-template-columns: 1fr;
-        }
+    .notification-filter-tab {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 44px;
+        flex: 0 0 auto;
+        color: #66778a;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+    }
 
-        .notification-meta {
-            justify-content: flex-start;
-            min-width: 0;
-        }
+    .notification-filter-tab::after {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 2px;
+        background: transparent;
+        content: "";
+    }
+
+    .notification-filter-tab.active { color: #0878d1; }
+    .notification-filter-tab.active::after { background: #0878d1; }
+
+    .notification-tab-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 6px;
+        color: #53657a;
+        background: #e7eef4;
+        font-size: 11px;
+    }
+
+    .notification-filter-tab.active .notification-tab-count { color: #0878d1; background: #e1f2ff; }
+
+    .notification-columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        align-items: start;
+    }
+
+    .notification-column {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #dbe5ed;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 6px 18px rgba(34, 67, 93, .06);
+    }
+
+    .notification-column-head {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 52px;
+        padding: 13px 15px;
+        border-bottom: 1px solid #e4ebf1;
+        font-size: 15px;
+        font-weight: 780;
+    }
+
+    .notification-column-head .bi { font-size: 18px; }
+    .notification-column.overdue .notification-column-head { color: #c43c43; background: #fff7f7; }
+    .notification-column.due .notification-column-head { color: #d77b16; background: #fffaf2; }
+    .notification-column.updated .notification-column-head { color: #168c81; background: #f1fbfa; }
+
+    .notification-column-list { display: grid; }
+
+    .notification-item-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 11px;
+        padding: 15px;
+        border-bottom: 1px solid #e8eef3;
+        background: #fff;
+    }
+
+    .notification-item-card:last-child { border-bottom: 0; }
+    .notification-item-card.is-read { background: #fbfcfd; opacity: .82; }
+
+    .notification-item-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 16px;
+    }
+
+    .overdue .notification-item-icon { color: #c93f46; background: #fde8e9; }
+    .due .notification-item-icon { color: #d77b16; background: #fff0d8; }
+    .updated .notification-item-icon { color: #168c81; background: #ddf5f1; }
+
+    .notification-item-body { min-width: 0; padding-right: 7px; }
+
+    .notification-item-title {
+        display: block;
+        margin: 0 15px 6px 0;
+        overflow-wrap: anywhere;
+        color: #1d2b40;
+        font-size: 14px;
+        font-weight: 780;
+        line-height: 1.35;
+        text-decoration: none;
+    }
+
+    .notification-item-title:hover { color: #0878d1; }
+
+    .notification-item-content {
+        display: -webkit-box;
+        margin: 0 0 10px;
+        overflow: hidden;
+        color: #5e6e81;
+        font-size: 13px;
+        line-height: 1.48;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+
+    .notification-person-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        max-width: 100%;
+        margin-bottom: 10px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        color: #17699f;
+        background: #e5f3fc;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .notification-person-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .notification-item-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .notification-item-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #8996a6;
+        font-size: 11px;
+    }
+
+    .notification-action-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 30px;
+        padding: 5px 9px;
+        border: 1px solid #b8d9ef;
+        border-radius: 6px;
+        color: #0878d1;
+        background: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .notification-unread-dot {
+        position: absolute;
+        top: 17px;
+        right: 14px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #0878d1;
+        box-shadow: 0 0 0 3px #e1f2ff;
+    }
+
+    .notification-column-empty {
+        padding: 34px 18px;
+        color: #8593a3;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .notification-column-empty .bi { display: block; margin-bottom: 8px; font-size: 25px; }
+
+    .notification-pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 18px;
+        padding: 14px 16px;
+        border: 1px solid #dbe5ed;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .notification-pagination-info { color: #718096; font-size: 13px; }
+    .notification-pagination { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+    .notification-page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        min-height: 34px;
+        padding: 6px 10px;
+        border: 1px solid #d1dee8;
+        border-radius: 6px;
+        color: #52657a;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .notification-page-link.active { border-color: #0878d1; color: #fff; background: #0878d1; }
+    .notification-page-link.disabled { color: #a5b0bd; background: #f1f4f6; pointer-events: none; }
+
+    @@media (max-width: 991.98px) {
+        .my-notifications-top { flex-direction: column; }
+        .my-notifications-tools { width: 100%; justify-content: flex-start; }
+        .notification-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @@media (max-width: 640px) {
+        .my-notifications-page { padding: 10px; }
+        .my-notifications-heading h1 { font-size: 24px; }
+        .my-notifications-tools, .notification-search { min-width: 0; }
+        .notification-search { flex-basis: 100%; }
+        .mark-all-read-button { width: 100%; }
+        .notification-filter-tabs { gap: 20px; }
+        .notification-columns { grid-template-columns: 1fr; }
+        .notification-pagination-wrap { align-items: flex-start; flex-direction: column; }
     }
 </style>
 
-<section class="notification-page">
-    <div class="list-page-head">
-        <div>
-            <h2>Thông báo của tôi</h2>
-            <p>@Model.Count thông báo trong tài khoản của bạn</p>
+<main class="my-notifications-page">
+    <header class="my-notifications-top">
+        <div class="my-notifications-heading">
+            <h1>Thông báo của tôi</h1>
+            <p>@Model.TongThongBaoTaiKhoan thông báo trong tài khoản</p>
         </div>
-    </div>
 
-    @* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-    @if (Model.Count == 0)
-    {
-        @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-        <div class="alert alert-info">Bạn chưa có thông báo nào.</div>
-    }
-    else
-    {
-        <div class="notification-list">
-            @foreach (var item in Model)
-            {
-                var lopChuaDoc = item.DaDoc ? string.Empty : "unread";
-                <article class="notification-card @lopChuaDoc">
-                    <div class="notification-main">
-                        <div class="notification-title-row">
-                            <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao">@item.TieuDe</a>
-                            <span class="notification-badge @lopChuaDoc">@item.TrangThaiDoc</span>
-                        </div>
-                        <p class="notification-summary">@RutGon(item.NoiDung)</p>
-                    </div>
-                    <div class="notification-meta">
-                        <span>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</span>
-                        <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="btn btn-sm btn-primary">Xem</a>
-                    </div>
-                </article>
-            }
+        <div class="my-notifications-tools">
+            <form asp-action="Index" method="get" class="notification-search" role="search">
+                <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input name="tuKhoa" value="@Model.TuKhoa" placeholder="Tìm nội dung thông báo..." aria-label="Tìm nội dung thông báo" />
+                <button type="submit" aria-label="Tìm kiếm"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </form>
+
+            <form asp-action="DanhDauTatCaDaDoc" method="post">
+                <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                <input type="hidden" name="trang" value="@Model.TrangHienTai" />
+                <button type="submit" class="mark-all-read-button" disabled="@(soChuaDocTaiKhoan == 0 ? "disabled" : null)">
+                    <i class="bi bi-check2-all" aria-hidden="true"></i>
+                    Đánh dấu tất cả đã đọc
+                </button>
+            </form>
         </div>
-    }
-</section>
+    </header>
+
+    <nav class="notification-filter-tabs" aria-label="Lọc thông báo theo trạng thái">
+        <a asp-action="Index" asp-route-trangThai="tat-ca" asp-route-tuKhoa="@Model.TuKhoa"
+           class="notification-filter-tab @(Model.TrangThai == "tat-ca" ? "active" : string.Empty)">
+            Tất cả thông báo <span class="notification-tab-count">@Model.TongTatCa</span>
+        </a>
+        <a asp-action="Index" asp-route-trangThai="chua-doc" asp-route-tuKhoa="@Model.TuKhoa"
+           class="notification-filter-tab @(Model.TrangThai == "chua-doc" ? "active" : string.Empty)">
+            Chưa đọc <span class="notification-tab-count">@Model.TongChuaDoc</span>
+        </a>
+        <a asp-action="Index" asp-route-trangThai="da-doc" asp-route-tuKhoa="@Model.TuKhoa"
+           class="notification-filter-tab @(Model.TrangThai == "da-doc" ? "active" : string.Empty)">
+            Đã đọc <span class="notification-tab-count">@Model.TongDaDoc</span>
+        </a>
+    </nav>
+
+    <section class="notification-columns" aria-label="Danh sách thông báo">
+        @await Html.PartialAsync("_NotificationColumn", new ViewDataDictionary(ViewData)
+        {
+            ["CssClass"] = "overdue",
+            ["Icon"] = "bi-calendar-x",
+            ["Title"] = "Quá hạn",
+            ["Count"] = Model.TongQuaHan,
+            ["Items"] = thongBaoQuaHan,
+            ["ActionText"] = "Xem lịch tiêm",
+            ["RedirectSchedule"] = true
+        })
+        @await Html.PartialAsync("_NotificationColumn", new ViewDataDictionary(ViewData)
+        {
+            ["CssClass"] = "due",
+            ["Icon"] = "bi-bell",
+            ["Title"] = "Đến lịch",
+            ["Count"] = Model.TongDenLich,
+            ["Items"] = thongBaoDenLich,
+            ["ActionText"] = "Xem lịch tiêm",
+            ["RedirectSchedule"] = true
+        })
+        @await Html.PartialAsync("_NotificationColumn", new ViewDataDictionary(ViewData)
+        {
+            ["CssClass"] = "updated",
+            ["Icon"] = "bi-check-circle",
+            ["Title"] = "Đã cập nhật",
+            ["Count"] = Model.TongDaCapNhat,
+            ["Items"] = thongBaoDaCapNhat,
+            ["ActionText"] = "Xem chi tiết",
+            ["RedirectSchedule"] = false
+        })
+    </section>
+
+    <footer class="notification-pagination-wrap">
+        <span class="notification-pagination-info">Hiển thị @viTriDau–@viTriCuoi của @Model.TongKetQua thông báo</span>
+        @if (Model.TongSoTrang > 1)
+        {
+            <nav class="notification-pagination" aria-label="Phân trang thông báo">
+                <a asp-action="Index" asp-route-trangThai="@Model.TrangThai" asp-route-tuKhoa="@Model.TuKhoa" asp-route-trang="@(Model.TrangHienTai - 1)"
+                   class="notification-page-link @(Model.TrangHienTai <= 1 ? "disabled" : string.Empty)">Trước</a>
+                @for (var soTrang = trangBatDau; soTrang <= trangKetThuc; soTrang++)
+                {
+                    <a asp-action="Index" asp-route-trangThai="@Model.TrangThai" asp-route-tuKhoa="@Model.TuKhoa" asp-route-trang="@soTrang"
+                       class="notification-page-link @(soTrang == Model.TrangHienTai ? "active" : string.Empty)">@soTrang</a>
+                }
+                <a asp-action="Index" asp-route-trangThai="@Model.TrangThai" asp-route-tuKhoa="@Model.TuKhoa" asp-route-trang="@(Model.TrangHienTai + 1)"
+                   class="notification-page-link @(Model.TrangHienTai >= Model.TongSoTrang ? "disabled" : string.Empty)">Sau</a>
+            </nav>
+        }
+    </footer>
+</main>

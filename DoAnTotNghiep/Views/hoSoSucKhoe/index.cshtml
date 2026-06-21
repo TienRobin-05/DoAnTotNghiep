@@ -3,65 +3,569 @@
 @{
     Layout = "_UserLayout";
     ViewData["Title"] = "Hồ sơ sức khỏe";
+    var ngayHienTai = DateTime.Today;
+
+    string LayChuCai(string hoTen)
+    {
+        if (string.IsNullOrWhiteSpace(hoTen)) return "HS";
+        var cacTu = hoTen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (cacTu.Length == 1)
+        {
+            return cacTu[0].Length >= 2 ? cacTu[0][..2].ToUpperInvariant() : cacTu[0].ToUpperInvariant();
+        }
+
+        return $"{cacTu[^2][0]}{cacTu[^1][0]}".ToUpperInvariant();
+    }
+
+    int TinhTuoi(DateTime ngaySinh)
+    {
+        var tuoi = ngayHienTai.Year - ngaySinh.Year;
+        if (ngaySinh.Date > ngayHienTai.AddYears(-tuoi)) tuoi--;
+        return Math.Max(0, tuoi);
+    }
+
+    string HienThiSo(double? giaTri, string donVi)
+    {
+        return giaTri.HasValue ? $"{giaTri.Value:0.##} {donVi}" : "—";
+    }
+
+    string HienThiNgay(DateTime ngay)
+    {
+        return ngay == default ? "—" : ngay.ToString("dd-MM-yyyy");
+    }
 }
 
-<div class="list-page-head">
-    <div>
-        <h2>Hồ sơ sức khỏe</h2>
-        <p>@Model.Count hồ sơ trong tài khoản của bạn</p>
-    </div>
-    <a asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-</div>
+<style>
+    .health-records-page {
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto;
+        color: #1E293B;
+    }
 
-@if (Model.Count == 0)
-{
-    <div class="empty-state empty-action">
-        <div>
-            <strong>Bạn chưa có hồ sơ sức khỏe nào</strong>
-            <span>Tạo hồ sơ đầu tiên để hệ thống tự lập lịch tiêm và theo dõi nhắc lịch.</span>
+    .health-records-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 18px;
+    }
+
+    .health-records-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .health-records-heading-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 auto;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        color: #2563EB;
+        background: #EFF6FF;
+        font-size: 22px;
+    }
+
+    .health-records-title-line {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .health-records-title-line h1 {
+        margin: 0;
+        color: #163A67;
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1.25;
+        letter-spacing: 0;
+    }
+
+    .health-records-count {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 4px 10px;
+        border: 1px solid #D7E7FA;
+        border-radius: 8px;
+        color: #2563EB;
+        background: #F3F8FF;
+        font-size: 13px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .health-records-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 42px;
+        flex: 0 0 auto;
+        padding: 9px 16px;
+        border: 1px solid #2563EB;
+        border-radius: 8px;
+        color: #FFFFFF;
+        background: #2563EB;
+        font-weight: 750;
+        text-decoration: none;
+        transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .health-records-add:hover {
+        color: #FFFFFF;
+        border-color: #1D4ED8;
+        background: #1D4ED8;
+    }
+
+    .health-records-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 16px;
+        padding: 14px;
+        border: 1px solid #DDE7F2;
+        border-radius: 8px;
+        background: #FFFFFF;
+    }
+
+    .health-records-search {
+        position: relative;
+        width: min(100%, 420px);
+    }
+
+    .health-records-search i {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        color: #64748B;
+        font-size: 16px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .health-records-search input {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 14px 9px 40px;
+        border: 1px solid #CBD9E8;
+        border-radius: 8px;
+        outline: 0;
+        color: #1E293B;
+        background: #FFFFFF;
+        font: inherit;
+    }
+
+    .health-records-search input:focus {
+        border-color: #60A5FA;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .11);
+    }
+
+    .health-records-filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+    }
+
+    .health-records-filter {
+        min-height: 38px;
+        padding: 7px 15px;
+        border: 1px solid #CBD9E8;
+        border-radius: 8px;
+        color: #264766;
+        background: #FFFFFF;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 750;
+        cursor: pointer;
+        transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+    }
+
+    .health-records-filter:hover {
+        border-color: #93C5FD;
+        background: #F3F8FF;
+    }
+
+    .health-records-filter.is-active {
+        border-color: #2563EB;
+        color: #FFFFFF;
+        background: #2563EB;
+    }
+
+    .health-records-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #DDE7F2;
+        border-radius: 8px;
+        background: #FFFFFF;
+    }
+
+    .health-records-table {
+        width: 100%;
+        min-width: 1050px;
+        margin: 0;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .health-records-table th,
+    .health-records-table td {
+        padding: 14px 16px;
+        border: 0;
+        border-bottom: 1px solid #E7EEF6;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .health-records-table th {
+        color: #52677E !important;
+        background: #F7FAFD !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        line-height: 1.3;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .health-records-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .health-records-table tbody tr:hover {
+        background: #F8FBFF;
+    }
+
+    .health-records-table th:nth-child(1) { width: 25%; }
+    .health-records-table th:nth-child(2) { width: 12%; }
+    .health-records-table th:nth-child(3) { width: 11%; }
+    .health-records-table th:nth-child(4) { width: 10%; }
+    .health-records-table th:nth-child(5) { width: 10%; }
+    .health-records-table th:nth-child(6) { width: 12%; }
+    .health-records-table th:nth-child(7) { width: 20%; }
+
+    .health-record-identity {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        gap: 11px;
+        align-items: center;
+    }
+
+    .health-record-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        color: #047857;
+        background: #D1FAE5;
+        font-size: 13px;
+        font-weight: 850;
+    }
+
+    .health-record-row:nth-child(2n) .health-record-avatar {
+        color: #6D28D9;
+        background: #EDE9FE;
+    }
+
+    .health-record-row:nth-child(3n) .health-record-avatar {
+        color: #C2410C;
+        background: #FFEDD5;
+    }
+
+    .health-record-row:nth-child(4n) .health-record-avatar {
+        color: #1D4ED8;
+        background: #DBEAFE;
+    }
+
+    .health-record-name {
+        overflow: hidden;
+        color: #1E293B;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.4;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .health-record-code {
+        margin-top: 2px;
+        color: #718096;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .health-record-gender {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #334E68;
+        white-space: nowrap;
+    }
+
+    .health-record-gender i {
+        color: #2563EB;
+        font-size: 16px;
+    }
+
+    .health-record-actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+    }
+
+    .health-record-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border: 1px solid #D7E2EE;
+        border-radius: 7px;
+        color: #52677E;
+        background: #FFFFFF;
+        font-size: 16px;
+        text-decoration: none;
+        transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+    }
+
+    .health-record-action:hover {
+        color: #1E40AF;
+        border-color: #BFDBFE;
+        background: #EFF6FF;
+    }
+
+    .health-record-action.edit {
+        color: #2563EB;
+    }
+
+    .health-record-action.delete {
+        color: #DC2626;
+        border-color: #FECACA;
+    }
+
+    .health-record-action.delete:hover {
+        color: #B91C1C;
+        border-color: #FCA5A5;
+        background: #FEF2F2;
+    }
+
+    .health-records-no-result td {
+        padding: 42px 20px;
+        color: #64748B;
+        text-align: center;
+    }
+
+    .health-records-empty {
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+        padding: 46px 24px;
+        border: 1px solid #DDE7F2;
+        border-radius: 8px;
+        background: #FFFFFF;
+        text-align: center;
+    }
+
+    .health-records-empty > i {
+        color: #60A5FA;
+        font-size: 34px;
+    }
+
+    .health-records-empty strong {
+        color: #163A67;
+        font-size: 17px;
+    }
+
+    .health-records-empty p {
+        margin: 0 0 4px;
+        color: #64748B;
+    }
+
+    @@media (max-width: 760px) {
+        .health-records-header,
+        .health-records-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .health-records-header {
+            gap: 14px;
+        }
+
+        .health-records-title-line {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .health-records-title-line h1 {
+            font-size: 24px;
+        }
+
+        .health-records-add,
+        .health-records-search {
+            width: 100%;
+        }
+
+        .health-records-filters {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            width: 100%;
+        }
+
+        .health-records-filter {
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+    }
+</style>
+
+<section class="health-records-page">
+    <header class="health-records-header">
+        <div class="health-records-heading">
+            <span class="health-records-heading-icon" aria-hidden="true"><i class="bi bi-person-vcard"></i></span>
+            <div class="health-records-title-line">
+                <h1>Hồ sơ sức khỏe</h1>
+                <span class="health-records-count">@Model.Count hồ sơ</span>
+            </div>
         </div>
-        <a asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-    </div>
-}
-else
+        <a asp-action="Create" class="health-records-add"><i class="bi bi-plus-lg"></i> Thêm hồ sơ</a>
+    </header>
+
+    @if (Model.Count == 0)
+    {
+        <div class="health-records-empty">
+            <i class="bi bi-folder2-open" aria-hidden="true"></i>
+            <strong>Bạn chưa có hồ sơ sức khỏe nào</strong>
+            <p>Tạo hồ sơ đầu tiên để bắt đầu theo dõi sức khỏe và lịch tiêm chủng.</p>
+            <a asp-action="Create" class="health-records-add"><i class="bi bi-plus-lg"></i> Thêm hồ sơ</a>
+        </div>
+    }
+    else
+    {
+        <div class="health-records-toolbar">
+            <label class="health-records-search" for="healthRecordSearch">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="healthRecordSearch" type="search" placeholder="Tìm kiếm hồ sơ..." autocomplete="off" />
+            </label>
+            <div class="health-records-filters" aria-label="Phân loại hồ sơ">
+                <button type="button" class="health-records-filter is-active" data-filter="all" aria-pressed="true">Tất cả</button>
+                <button type="button" class="health-records-filter" data-filter="child" aria-pressed="false">Trẻ em</button>
+                <button type="button" class="health-records-filter" data-filter="adult" aria-pressed="false">Người lớn</button>
+            </div>
+        </div>
+
+        <div class="health-records-table-wrap">
+            <table class="health-records-table">
+                <thead>
+                    <tr>
+                        <th>Hồ sơ</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Chiều cao</th>
+                        <th>Cân nặng</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var nhomTuoi = TinhTuoi(item.NgaySinh) < 18 ? "child" : "adult";
+                        var gioiTinhTrong = string.IsNullOrWhiteSpace(item.GioiTinh);
+                        var laNu = string.Equals(item.GioiTinh, "Nữ", StringComparison.OrdinalIgnoreCase);
+                        var laNam = string.Equals(item.GioiTinh, "Nam", StringComparison.OrdinalIgnoreCase);
+                        var iconGioiTinh = gioiTinhTrong ? "bi-dash" : (laNu ? "bi-gender-female" : (laNam ? "bi-gender-male" : "bi-gender-ambiguous"));
+                        var gioiTinh = gioiTinhTrong ? "—" : item.GioiTinh;
+                        <tr class="health-record-row" data-search="@item.HoTen @item.MaHoSo #@item.MaHoSo" data-age-group="@nhomTuoi">
+                            <td>
+                                <div class="health-record-identity">
+                                    <span class="health-record-avatar">@LayChuCai(item.HoTen)</span>
+                                    <div>
+                                        <div class="health-record-name">@item.HoTen</div>
+                                        <div class="health-record-code">Mã hồ sơ #@item.MaHoSo</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@HienThiNgay(item.NgaySinh)</td>
+                            <td><span class="health-record-gender"><i class="bi @iconGioiTinh" aria-hidden="true"></i>@gioiTinh</span></td>
+                            <td>@HienThiSo(item.ChieuCao, "cm")</td>
+                            <td>@HienThiSo(item.CanNang, "kg")</td>
+                            <td>@HienThiNgay(item.NgayTao)</td>
+                            <td>
+                                <div class="health-record-actions">
+                                    <a asp-action="Details" asp-route-id="@item.MaHoSo" class="health-record-action" title="Xem hồ sơ" aria-label="Xem hồ sơ"><i class="bi bi-eye" aria-hidden="true"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="health-record-action edit" title="Sửa hồ sơ" aria-label="Sửa hồ sơ"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="health-record-action delete" title="Xóa hồ sơ" aria-label="Xóa hồ sơ"><i class="bi bi-trash3" aria-hidden="true"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    <tr id="healthRecordsNoResult" class="health-records-no-result" hidden>
+                        <td colspan="7">Không tìm thấy hồ sơ phù hợp</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.Count > 0)
 {
-    <section class="list-card">
-        <table class="table list-table">
-            <thead>
-                <tr>
-                    <th>Hồ sơ</th>
-                    <th>Ngày sinh</th>
-                    <th>Giới tính</th>
-                    <th>Thể trạng</th>
-                    <th>Ngày tạo</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in Model)
-            {
-                var chieuCao = item.ChieuCao.HasValue ? $"{item.ChieuCao.Value} cm" : "Chưa nhập";
-                var canNang = item.CanNang.HasValue ? $"{item.CanNang.Value} kg" : "Chưa nhập";
-                <tr>
-                    <td>
-                        <div class="item-title">@item.HoTen</div>
-                        <div class="item-meta">Mã hồ sơ #@item.MaHoSo</div>
-                    </td>
-                    <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
-                    <td><span class="soft-badge">@item.GioiTinh</span></td>
-                    <td>
-                        <div>@chieuCao</div>
-                        <div class="item-meta">@canNang</div>
-                    </td>
-                    <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
-                    <td class="table-actions">
-                        <a asp-action="Details" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                        <a asp-action="Edit" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-primary">Sửa</a>
-                        <a asp-action="Delete" asp-route-id="@item.MaHoSo" class="btn btn-sm btn-outline-danger">Xóa</a>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </section>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("healthRecordSearch");
+            const filterButtons = Array.from(document.querySelectorAll(".health-records-filter"));
+            const rows = Array.from(document.querySelectorAll(".health-record-row"));
+            const noResultRow = document.getElementById("healthRecordsNoResult");
+            let activeFilter = "all";
+
+            const normalizeText = function (value) {
+                return (value || "")
+                    .toLocaleLowerCase("vi-VN")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/đ/g, "d")
+                    .trim();
+            };
+
+            const applyFilters = function () {
+                const keyword = normalizeText(searchInput.value);
+                let visibleCount = 0;
+
+                rows.forEach(function (row) {
+                    const matchesSearch = normalizeText(row.dataset.search).includes(keyword);
+                    const matchesAge = activeFilter === "all" || row.dataset.ageGroup === activeFilter;
+                    const visible = matchesSearch && matchesAge;
+                    row.hidden = !visible;
+                    if (visible) visibleCount++;
+                });
+
+                noResultRow.hidden = visibleCount !== 0;
+            };
+
+            searchInput.addEventListener("input", applyFilters);
+            filterButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    activeFilter = button.dataset.filter;
+                    filterButtons.forEach(function (item) {
+                        const selected = item === button;
+                        item.classList.toggle("is-active", selected);
+                        item.setAttribute("aria-pressed", selected ? "true" : "false");
+                    });
+                    applyFilters();
+                });
+            });
+        });
+    </script>
 }

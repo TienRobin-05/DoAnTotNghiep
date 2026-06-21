@@ -1,0 +1,42 @@
+@* Footer dùng chung cho toàn bộ website. *@
+<style>
+    html,
+    body.site-page-shell {
+        min-height: 100%;
+    }
+
+    body.site-page-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.site-page-shell > main,
+    body.site-page-shell > .auth-page {
+        flex: 1 0 auto;
+    }
+
+    .site-footer {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 60px;
+        margin: 0;
+        padding: 10px 24px;
+        border: 0;
+        color: #FFFFFF;
+        background: linear-gradient(135deg, #63B7F6 0%, #2F91E8 100%);
+        box-shadow: none;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.5;
+        text-align: center;
+    }
+</style>
+
+<footer class="site-footer">
+    © 2026 Pharmacy - Quản lý sức khỏe và lịch tiêm chủng
+</footer>

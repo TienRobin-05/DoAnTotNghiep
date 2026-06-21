@@ -1055,7 +1055,7 @@
     </style>
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
 </head>
-<body>
+<body class="site-page-shell">
     <header class="top-header">
         <a class="brand-area" href="/Admin/Index" aria-label="Pharmacy City">
             <img src="/images/logo/pharmacy-logo.png" alt="Pharmacy City" />
@@ -1084,9 +1084,7 @@
         @RenderBody()
     </main>
 
-    <footer class="footer">
-        © 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng
-    </footer>
+    <partial name="_Footer" />
     <script>
         (() => {
             const accountMenus = document.querySelectorAll(".account-menu");

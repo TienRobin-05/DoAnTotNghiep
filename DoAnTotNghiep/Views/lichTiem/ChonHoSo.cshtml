@@ -1,66 +1,563 @@
-﻿@* Khu vực giao diện của view ChonHoSo.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang chọn hồ sơ để xem lịch tiêm. *@
 @model List<HoSoSucKhoe>
 @{
     ViewData["Title"] = "Chọn hồ sơ xem lịch tiêm";
-}
+    var ngayHienTai = DateTime.Today;
 
-<div class="list-page-head">
-    <div>
-        <h2>Chọn hồ sơ xem lịch tiêm</h2>
-        <p>Chọn một hồ sơ để xem các mũi cần tiêm.</p>
-    </div>
-    <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-</div>
-
-@if (TempData["ThongBao"] != null)
-{
-    var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
-    <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
-}
-
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (Model.Count == 0)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="empty-state empty-action">
-        <div>
-            <strong>Bạn chưa có hồ sơ sức khỏe</strong>
-            <span>Tạo hồ sơ trước, sau đó hệ thống sẽ tự lập lịch tiêm theo ngày sinh.</span>
-        </div>
-        <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-    </div>
-}
-else
-{
-    <section class="list-card">
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table list-table">
-        <thead>
-            <tr>
-                <th>Hồ sơ</th>
-                <th>Ngày sinh</th>
-                <th>Giới tính</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-        @foreach (var item in Model)
+    string LayChuCai(string hoTen)
+    {
+        if (string.IsNullOrWhiteSpace(hoTen)) return "HS";
+        var cacTu = hoTen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (cacTu.Length == 1)
         {
-            <tr>
-                <td>
-                    <div class="item-title">@item.HoTen</div>
-                    <div class="item-meta">Mã hồ sơ #@item.MaHoSo</div>
-                </td>
-                <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
-                <td><span class="soft-badge">@item.GioiTinh</span></td>
-                <td class="table-actions">
-                    <a asp-action="Index" asp-route-maHoSo="@item.MaHoSo" class="btn btn-sm btn-primary">Xem lịch tiêm</a>
-                </td>
-            </tr>
+            return cacTu[0].Length >= 2 ? cacTu[0][..2].ToUpperInvariant() : cacTu[0].ToUpperInvariant();
         }
-        </tbody>
-    </table>
-    </section>
+
+        return $"{cacTu[0][0]}{cacTu[^1][0]}".ToUpperInvariant();
+    }
+
+    int TinhTuoi(DateTime ngaySinh)
+    {
+        var tuoi = ngayHienTai.Year - ngaySinh.Year;
+        if (ngaySinh.Date > ngayHienTai.AddYears(-tuoi)) tuoi--;
+        return Math.Max(0, tuoi);
+    }
+
+    string HienThiNgay(DateTime ngay)
+    {
+        return ngay == default ? "—" : ngay.ToString("dd-MM-yyyy");
+    }
+}
+
+<style>
+    .schedule-profile-page {
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto;
+        color: #1E293B;
+    }
+
+    .schedule-profile-banner {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(300px, 380px) auto;
+        align-items: center;
+        gap: 26px;
+        min-height: 190px;
+        margin-bottom: 18px;
+        padding: 26px 30px;
+        border: 1px solid #DCE8F5;
+        border-radius: 8px;
+        background: #F8FBFF;
+        box-shadow: 0 6px 18px rgba(30, 64, 110, .06);
+        overflow: hidden;
+    }
+
+    .schedule-profile-banner-copy h1 {
+        margin: 0 0 9px;
+        color: #123B73;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1.25;
+        letter-spacing: 0;
+    }
+
+    .schedule-profile-banner-copy p {
+        margin: 0;
+        color: #64748B;
+        font-size: 16px;
+        line-height: 1.55;
+    }
+
+    .schedule-profile-banner-visual {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .schedule-profile-banner-visual img {
+        display: block;
+        width: min(100%, 377px);
+        height: auto;
+        max-height: 140px;
+        object-fit: contain;
+    }
+
+    .schedule-profile-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 42px;
+        padding: 9px 16px;
+        border: 1px solid #2563EB;
+        border-radius: 8px;
+        color: #FFFFFF;
+        background: #2563EB;
+        font-weight: 750;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .schedule-profile-add:hover {
+        color: #FFFFFF;
+        border-color: #1D4ED8;
+        background: #1D4ED8;
+    }
+
+    .schedule-profile-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+        padding: 13px 14px;
+        border: 1px solid #DCE6F0;
+        border-radius: 8px;
+        background: #FFFFFF;
+    }
+
+    .schedule-profile-search {
+        position: relative;
+        width: min(100%, 420px);
+    }
+
+    .schedule-profile-search i {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        color: #64748B;
+        font-size: 16px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .schedule-profile-search input {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 14px 9px 40px;
+        border: 1px solid #CBD9E8;
+        border-radius: 8px;
+        outline: 0;
+        color: #1E293B;
+        background: #FFFFFF;
+        font: inherit;
+    }
+
+    .schedule-profile-search input:focus {
+        border-color: #60A5FA;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+    }
+
+    .schedule-profile-filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+    }
+
+    .schedule-profile-filter {
+        min-height: 38px;
+        padding: 7px 15px;
+        border: 1px solid #D4DEE9;
+        border-radius: 8px;
+        color: #334E68;
+        background: #FFFFFF;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 750;
+        cursor: pointer;
+        transition: color .2s ease, border-color .2s ease, background-color .2s ease;
+    }
+
+    .schedule-profile-filter:hover {
+        border-color: #93C5FD;
+        color: #2563EB;
+        background: #F8FBFF;
+    }
+
+    .schedule-profile-filter.is-active {
+        border-color: #2563EB;
+        color: #2563EB;
+        background: #EFF6FF;
+    }
+
+    .schedule-profile-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .schedule-profile-card {
+        display: flex;
+        min-width: 0;
+        min-height: 250px;
+        flex-direction: column;
+        padding: 20px;
+        border: 1px solid #DDE7F1;
+        border-radius: 8px;
+        background: #FFFFFF;
+        box-shadow: 0 5px 16px rgba(30, 64, 110, .05);
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .schedule-profile-card:hover {
+        border-color: #93C5FD;
+        box-shadow: 0 8px 20px rgba(30, 90, 160, .08);
+        transform: translateY(-2px);
+    }
+
+    .schedule-profile-card-head {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .schedule-profile-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        color: #047857;
+        background: #D1FAE5;
+        font-size: 15px;
+        font-weight: 850;
+    }
+
+    .schedule-profile-card:nth-child(2n) .schedule-profile-avatar {
+        color: #1D4ED8;
+        background: #DBEAFE;
+    }
+
+    .schedule-profile-card:nth-child(3n) .schedule-profile-avatar {
+        color: #C2410C;
+        background: #FFEDD5;
+    }
+
+    .schedule-profile-card:nth-child(4n) .schedule-profile-avatar {
+        color: #0F766E;
+        background: #CCFBF1;
+    }
+
+    .schedule-profile-name {
+        overflow: hidden;
+        margin: 0 0 3px;
+        color: #1E293B;
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.35;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .schedule-profile-code {
+        color: #718096;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .schedule-profile-details {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .schedule-profile-birth {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #52677E;
+        font-size: 14px;
+    }
+
+    .schedule-profile-birth i {
+        color: #2563EB;
+        font-size: 16px;
+    }
+
+    .schedule-profile-gender {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        justify-self: start;
+        min-height: 28px;
+        padding: 4px 10px;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        color: #1D4ED8;
+        background: #EFF6FF;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .schedule-profile-gender.female {
+        border-color: #FBCFE8;
+        color: #BE185D;
+        background: #FDF2F8;
+    }
+
+    .schedule-profile-gender.unknown {
+        border-color: #D9E2EC;
+        color: #64748B;
+        background: #F8FAFC;
+    }
+
+    .schedule-profile-view {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        min-height: 40px;
+        margin-top: auto;
+        padding: 8px 12px;
+        border: 1px solid #2563EB;
+        border-radius: 8px;
+        color: #FFFFFF;
+        background: #2563EB;
+        font-size: 14px;
+        font-weight: 750;
+        text-decoration: none;
+        transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .schedule-profile-view:hover {
+        color: #FFFFFF;
+        border-color: #1D4ED8;
+        background: #1D4ED8;
+    }
+
+    .schedule-profile-no-result,
+    .schedule-profile-empty {
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+        padding: 44px 24px;
+        border: 1px solid #DDE7F1;
+        border-radius: 8px;
+        background: #FFFFFF;
+        text-align: center;
+    }
+
+    .schedule-profile-no-result {
+        grid-column: 1 / -1;
+        color: #64748B;
+    }
+
+    .schedule-profile-card[hidden],
+    .schedule-profile-no-result[hidden] {
+        display: none;
+    }
+
+    .schedule-profile-empty > i {
+        color: #60A5FA;
+        font-size: 34px;
+    }
+
+    .schedule-profile-empty strong {
+        color: #123B73;
+        font-size: 17px;
+    }
+
+    .schedule-profile-empty p {
+        margin: 0 0 4px;
+        color: #64748B;
+    }
+
+    @@media (max-width: 1200px) {
+        .schedule-profile-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .schedule-profile-banner {
+            grid-template-columns: minmax(260px, 1fr) minmax(260px, 330px) auto;
+            gap: 18px;
+            padding: 24px;
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .schedule-profile-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .schedule-profile-banner {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .schedule-profile-banner-visual {
+            grid-column: 1 / -1;
+            grid-row: 2;
+        }
+
+        .schedule-profile-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .schedule-profile-search {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .schedule-profile-banner {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 22px 18px;
+        }
+
+        .schedule-profile-banner-copy h1 {
+            font-size: 25px;
+        }
+
+        .schedule-profile-banner-visual {
+            grid-column: auto;
+            grid-row: auto;
+        }
+
+        .schedule-profile-add {
+            width: 100%;
+        }
+
+        .schedule-profile-filters {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            width: 100%;
+        }
+
+        .schedule-profile-filter {
+            padding-right: 7px;
+            padding-left: 7px;
+        }
+
+        .schedule-profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<section class="schedule-profile-page">
+    <header class="schedule-profile-banner">
+        <div class="schedule-profile-banner-copy">
+            <h1>Lịch tiêm chủng</h1>
+            <p>Chọn hồ sơ để xem lịch tiêm phù hợp</p>
+        </div>
+        <div class="schedule-profile-banner-visual">
+            <img src="/images/hero/lich-tiem-banner.png" alt="Minh họa lịch tiêm, khiên y tế và vaccine" />
+        </div>
+        <a asp-controller="HoSoSucKhoe" asp-action="Create" class="schedule-profile-add"><i class="bi bi-plus-lg"></i> Thêm hồ sơ</a>
+    </header>
+
+    @if (TempData["ThongBao"] != null)
+    {
+        var loaiThongBao = TempData["LoaiThongBao"]?.ToString() ?? "success";
+        <div class="alert alert-@loaiThongBao">@TempData["ThongBao"]</div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="schedule-profile-empty">
+            <i class="bi bi-folder2-open" aria-hidden="true"></i>
+            <strong>Bạn chưa có hồ sơ sức khỏe</strong>
+            <p>Tạo hồ sơ trước, sau đó hệ thống sẽ tự lập lịch tiêm theo ngày sinh.</p>
+            <a asp-controller="HoSoSucKhoe" asp-action="Create" class="schedule-profile-add"><i class="bi bi-plus-lg"></i> Thêm hồ sơ</a>
+        </div>
+    }
+    else
+    {
+        <div class="schedule-profile-toolbar">
+            <label class="schedule-profile-search" for="scheduleProfileSearch">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="scheduleProfileSearch" type="search" placeholder="Tìm kiếm hồ sơ..." autocomplete="off" />
+            </label>
+            <div class="schedule-profile-filters" aria-label="Phân loại hồ sơ">
+                <button type="button" class="schedule-profile-filter is-active" data-filter="all" aria-pressed="true">Tất cả</button>
+                <button type="button" class="schedule-profile-filter" data-filter="child" aria-pressed="false">Trẻ em</button>
+                <button type="button" class="schedule-profile-filter" data-filter="adult" aria-pressed="false">Người lớn</button>
+            </div>
+        </div>
+
+        <div class="schedule-profile-grid">
+            @foreach (var item in Model)
+            {
+                var nhomTuoi = TinhTuoi(item.NgaySinh) < 18 ? "child" : "adult";
+                var gioiTinhTrong = string.IsNullOrWhiteSpace(item.GioiTinh);
+                var laNu = string.Equals(item.GioiTinh, "Nữ", StringComparison.OrdinalIgnoreCase);
+                var lopGioiTinh = gioiTinhTrong ? "unknown" : (laNu ? "female" : "male");
+                var gioiTinh = gioiTinhTrong ? "—" : item.GioiTinh;
+                <article class="schedule-profile-card" data-search="@item.HoTen @item.MaHoSo #@item.MaHoSo" data-age-group="@nhomTuoi">
+                    <div class="schedule-profile-card-head">
+                        <span class="schedule-profile-avatar">@LayChuCai(item.HoTen)</span>
+                        <div>
+                            <h2 class="schedule-profile-name">@item.HoTen</h2>
+                            <div class="schedule-profile-code">Mã hồ sơ #@item.MaHoSo</div>
+                        </div>
+                    </div>
+                    <div class="schedule-profile-details">
+                        <div class="schedule-profile-birth"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@HienThiNgay(item.NgaySinh)</span></div>
+                        <span class="schedule-profile-gender @lopGioiTinh">@gioiTinh</span>
+                    </div>
+                    <a asp-action="Index" asp-route-maHoSo="@item.MaHoSo" class="schedule-profile-view"><i class="bi bi-calendar2-check" aria-hidden="true"></i> Xem lịch tiêm</a>
+                </article>
+            }
+            <div id="scheduleProfileNoResult" class="schedule-profile-no-result" hidden>Không tìm thấy hồ sơ phù hợp</div>
+        </div>
+    }
+</section>
+
+@if (Model.Count > 0)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("scheduleProfileSearch");
+            const filterButtons = Array.from(document.querySelectorAll(".schedule-profile-filter"));
+            const cards = Array.from(document.querySelectorAll(".schedule-profile-card"));
+            const noResult = document.getElementById("scheduleProfileNoResult");
+            let activeFilter = "all";
+
+            const normalizeText = function (value) {
+                return (value || "")
+                    .toLocaleLowerCase("vi-VN")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/đ/g, "d")
+                    .trim();
+            };
+
+            const applyFilters = function () {
+                const keyword = normalizeText(searchInput.value);
+                let visibleCount = 0;
+
+                cards.forEach(function (card) {
+                    const matchesSearch = normalizeText(card.dataset.search).includes(keyword);
+                    const matchesAge = activeFilter === "all" || card.dataset.ageGroup === activeFilter;
+                    const visible = matchesSearch && matchesAge;
+                    card.hidden = !visible;
+                    if (visible) visibleCount++;
+                });
+
+                noResult.hidden = visibleCount !== 0;
+            };
+
+            searchInput.addEventListener("input", applyFilters);
+            filterButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    activeFilter = button.dataset.filter;
+                    filterButtons.forEach(function (item) {
+                        const selected = item === button;
+                        item.classList.toggle("is-active", selected);
+                        item.setAttribute("aria-pressed", selected ? "true" : "false");
+                    });
+                    applyFilters();
+                });
+            });
+        });
+    </script>
 }

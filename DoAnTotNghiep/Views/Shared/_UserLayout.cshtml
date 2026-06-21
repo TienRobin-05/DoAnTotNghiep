@@ -1658,7 +1658,7 @@
     </style>
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
 </head>
-<body>
+<body class="site-page-shell">
     <header class="dashboard-topbar">
         <div class="dashboard-topbar-inner">
             <a class="dashboard-brand" href="/NguoiDung/Index" aria-label="Pharmacy City">
@@ -1699,9 +1699,7 @@
         @RenderBody()
     </main>
 
-    <footer class="footer">
-        <div class="footer-bottom">© 2026 Pharmacy City – Hệ thống quản lý sức khỏe và lịch tiêm chủng</div>
-    </footer>
+    <partial name="_Footer" />
     <script>
         (() => {
             const accountMenus = document.querySelectorAll(".account-menu");

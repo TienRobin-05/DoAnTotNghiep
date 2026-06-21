@@ -336,10 +336,11 @@
     .dashboard-hero {
         position: relative;
         display: grid;
-        grid-template-columns: minmax(0, .95fr) minmax(520px, 1.35fr);
-        min-height: 310px;
-        gap: 28px;
-        padding: 28px 48px;
+        grid-template-columns: minmax(0, 37fr) minmax(0, 40fr) minmax(240px, 23fr);
+        min-height: 380px;
+        gap: 24px;
+        align-items: center;
+        padding: 34px 40px;
         border: 1px solid #D9E8FF;
         border-radius: 28px;
         background:
@@ -376,120 +377,112 @@
     }
 
     .hero-copy,
-    .hero-media {
+    .hero-visual,
+    .reminder-card {
         position: relative;
         z-index: 1;
     }
 
     .hero-copy h1 {
-        max-width: 610px;
-        margin-bottom: 14px;
+        margin: 0 0 20px;
         color: #123B73;
-        font-size: clamp(34px, 3.2vw, 52px);
+        font-size: 38px;
         font-weight: 900;
-        line-height: 1.12;
+        line-height: 1.25;
+        letter-spacing: 0;
+    }
+
+    .hero-copy h1 span {
+        display: block;
+        color: inherit;
+        white-space: nowrap;
     }
 
     .hero-copy p {
-        max-width: 620px;
+        max-width: 500px;
+        margin: 0;
         color: var(--pc-muted);
         font-size: 17px;
+        line-height: 1.65;
     }
 
     .hero-eyebrow {
-        padding: 9px 14px;
+        margin-bottom: 20px;
+        padding: 7px 12px;
+        border: 1px solid #D7E7FF;
+        border-radius: 999px;
         color: var(--pc-primary);
-        background: #EAF2FF;
-        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .08);
-    }
-
-    .hero-feature-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-        max-width: 720px;
-        margin-top: 26px;
-    }
-
-    .hero-feature {
-        display: grid;
-        grid-template-columns: 42px minmax(0, 1fr);
-        column-gap: 10px;
-        align-items: center;
-        min-height: 62px;
-        padding: 10px 14px;
-        border: 1px solid rgba(226, 232, 240, .86);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, .9);
-        box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
-    }
-
-    .hero-feature i {
-        grid-row: span 2;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-        font-size: 20px;
-        transition: transform .25s ease;
-    }
-
-    .hero-feature:hover i {
-        transform: scale(1.08);
-    }
-
-    .hero-feature b {
-        overflow: hidden;
-        color: var(--pc-text);
+        background: rgba(255, 255, 255, .76);
+        box-shadow: none;
         font-size: 13px;
-        font-weight: 900;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .hero-feature small {
-        overflow: hidden;
-        color: var(--pc-muted);
-        font-size: 11px;
-        font-weight: 700;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .hero-feature.blue i { color: var(--pc-primary); background: var(--pc-blue-soft); }
-    .hero-feature.green i { color: var(--pc-success); background: var(--pc-green-soft); }
-    .hero-feature.orange i { color: var(--pc-warning); background: var(--pc-orange-soft); }
-    .hero-feature.purple i { color: var(--pc-purple); background: var(--pc-purple-soft); }
-
-    .hero-media {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 260px;
-        align-items: center;
-        gap: 22px;
     }
 
     .hero-visual {
-        min-height: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        min-height: 300px;
     }
 
     .hero-visual img {
         display: block;
         width: 100%;
-        max-height: 270px;
+        height: 100%;
+        max-height: 320px;
         object-fit: contain;
         filter: drop-shadow(0 18px 26px rgba(37, 99, 235, .16));
     }
 
     .reminder-card {
         display: grid;
-        gap: 18px;
-        padding: 24px;
+        align-self: center;
+        justify-self: end;
+        width: 100%;
+        max-width: 300px;
+        gap: 16px;
+        padding: 20px;
         border: 1px solid rgba(226, 232, 240, .9);
-        border-radius: 22px;
-        background: rgba(255, 255, 255, .96);
-        box-shadow: 0 18px 38px rgba(15, 23, 42, .10);
+        border-radius: 20px;
+        background: #FFFFFF;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, .08);
+    }
+
+    .reminder-card-link {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+    }
+
+    .reminder-head,
+    .reminder-date {
+        position: relative;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .reminder-card .switch {
+        z-index: 2;
+        pointer-events: auto;
+    }
+
+    .reminder-date {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 9px;
+        color: var(--pc-muted);
+        font-weight: 700;
+        line-height: 1.45;
+    }
+
+    .reminder-date:hover {
+        color: var(--pc-primary);
+    }
+
+    .reminder-arrow {
+        color: var(--pc-primary);
+        font-size: 20px;
     }
 
     .dashboard-stats {
@@ -910,18 +903,38 @@
             padding: 20px;
         }
 
-        .dashboard-hero,
-        .hero-media {
-            grid-template-columns: 1fr;
+        .dashboard-hero {
+            grid-template-columns: minmax(0, 37fr) minmax(0, 36fr) minmax(210px, 27fr);
+            min-height: 360px;
+            gap: 16px;
+            padding: 28px 24px;
         }
 
-        .hero-feature-grid,
+        .hero-copy h1 {
+            font-size: 34px;
+        }
+
+        .hero-copy p {
+            font-size: 16px;
+        }
+
+        .hero-visual {
+            min-height: 260px;
+        }
+
+        .hero-visual img {
+            max-height: 280px;
+        }
+
         .dashboard-stats {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .reminder-card {
-            max-width: none;
+            grid-column: auto;
+            grid-template-columns: 1fr;
+            align-items: stretch;
+            padding: 18px;
         }
 
         .dashboard-main-grid {
@@ -943,11 +956,34 @@
             border-radius: 22px;
         }
 
-        .hero-feature-grid,
         .dashboard-stats,
         .state-content li,
         .featured-news-slide {
             grid-template-columns: 1fr;
+        }
+
+        .dashboard-hero {
+            grid-template-columns: 1fr;
+            min-height: 0;
+            gap: 18px;
+            padding: 24px 20px;
+        }
+
+        .hero-copy h1 {
+            font-size: 30px;
+            line-height: 1.25;
+        }
+
+        .hero-copy h1 span {
+            white-space: normal;
+        }
+
+        .hero-copy p {
+            font-size: 17px;
+        }
+
+        .hero-visual {
+            min-height: 220px;
         }
 
         .stat-card,
@@ -957,7 +993,12 @@
         }
 
         .hero-visual img {
-            max-height: 220px;
+            max-height: 240px;
+        }
+
+        .reminder-card {
+            justify-self: stretch;
+            max-width: none;
         }
 
         .health-news-slider {
@@ -984,23 +1025,16 @@
     <section class="dashboard-hero">
         <div class="hero-copy">
             <div class="hero-eyebrow"><i class="bi bi-heart-pulse"></i> Pharmacy City</div>
-            <h1>Chủ động sức khỏe – Đúng hẹn tiêm chủng</h1>
-            <p>Cùng theo dõi hồ sơ, lịch tiêm và nhắc lịch thông minh cho bạn và gia đình trong một dashboard y tế hiện đại.</p>
-            <div class="hero-feature-grid">
-                <span class="hero-feature blue"><i class="bi bi-person-vcard-fill"></i><b>Quản lý hồ sơ</b><small>Lưu trữ thông tin</small></span>
-                <span class="hero-feature orange"><i class="bi bi-bell-fill"></i><b>Nhắc lịch tự động</b><small>Không bỏ lỡ</small></span>
-                <span class="hero-feature green"><i class="bi bi-calendar2-check-fill"></i><b>Theo dõi tiêm</b><small>Dễ dàng, tiện lợi</small></span>
-                <span class="hero-feature purple"><i class="bi bi-shield-fill-check"></i><b>An toàn bảo mật</b><small>Thông tin được bảo vệ</small></span>
-            </div>
+            <h1><span>Chủ động sức khỏe -</span><span>Đúng hẹn tiêm chủng</span></h1>
+            <p>Cùng theo dõi hồ sơ, lịch tiêm và nhắc lịch thông minh<br />cho bạn và gia đình trong một dashboard y tế hiện đại.</p>
         </div>
-        <div class="hero-media">
-            <div class="hero-visual" aria-hidden="true">
-                <img src="/images/hero/health-hero.png" alt="" />
-            </div>
-            <div class="reminder-card">
-                <div class="reminder-head"><div class="reminder-title"><i class="bi bi-bell-fill"></i><span>Tự động nhắc lịch</span></div><label class="switch" for="tuDongNhacLichSwitch" aria-label="Tự động nhắc lịch"><input type="checkbox" id="tuDongNhacLichSwitch" checked /><span aria-hidden="true"></span></label></div>
-                <div class="reminder-date"><i class="bi bi-calendar-event"></i> @ngayHienTai <i class="bi bi-arrow-right-short"></i></div>
-            </div>
+        <div class="hero-visual">
+            <img src="/images/hero/health-hero.png" alt="Minh họa hồ sơ sức khỏe, vaccine và lịch tiêm chủng" />
+        </div>
+        <div class="reminder-card">
+            <a class="reminder-card-link" href="/LichTiem/ChonHoSo" aria-label="Xem lịch tiêm"></a>
+            <div class="reminder-head"><div class="reminder-title"><i class="bi bi-bell-fill"></i><span>Tự động nhắc lịch</span></div><label class="switch" for="tuDongNhacLichSwitch" aria-label="Tự động nhắc lịch"><input type="checkbox" id="tuDongNhacLichSwitch" checked /><span aria-hidden="true"></span></label></div>
+            <div class="reminder-date"><i class="bi bi-calendar-event"></i><span>@ngayHienTai</span><i class="reminder-arrow bi bi-arrow-right-short"></i></div>
         </div>
     </section>
 
@@ -1084,7 +1118,7 @@
 
             <article class="dashboard-panel health-profile-card">
                 <div class="panel-head"><div class="panel-title"><i class="bi bi-clipboard2-pulse"></i><div><h2>Hồ sơ sức khỏe</h2></div></div><a class="head-link" href="/HoSoSucKhoe/Index">Xem tất cả</a></div>
-                @if (danhSachHoSo.Count == 0){<div class="empty-visual green"><i class="bi bi-journal-medical"></i><strong>Bạn chưa có hồ sơ sức khỏe.</strong><p>Tạo hồ sơ để bắt đầu theo dõi và quản lý sức khỏe.</p><a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}else{<div class="soft-list">@foreach (var hoSo in danhSachHoSo.Take(5)){<div class="profile-item"><span class="avatar">@LayChuCai(hoSo.HoTen)</span><span class="profile-info"><strong>@hoSo.HoTen</strong><span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span></span><a class="secondary-action" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem hồ sơ</a></div>}<a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}
+                @if (danhSachHoSo.Count == 0){<div class="empty-visual green"><i class="bi bi-journal-medical"></i><strong>Bạn chưa có hồ sơ sức khỏe.</strong><p>Tạo hồ sơ để bắt đầu theo dõi và quản lý sức khỏe.</p><a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}else{<div class="soft-list">@foreach (var hoSo in danhSachHoSo.Take(7)){<div class="profile-item"><span class="avatar">@LayChuCai(hoSo.HoTen)</span><span class="profile-info"><strong>@hoSo.HoTen</strong><span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span></span><a class="secondary-action" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem hồ sơ</a></div>}<a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}
             </article>
         </div>
     </section>

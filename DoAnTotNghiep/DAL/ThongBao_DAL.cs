@@ -68,6 +68,108 @@ ORDER BY ngayGui DESC";
             return danhSach;
         }
 
+        // Lấy đúng một trang thông báo sau khi lọc/tìm kiếm; không tải toàn bộ dữ liệu về View.
+        public List<ThongBao> LayTrangTheoTaiKhoan(int maTaiKhoan, bool? daDoc, string? tuKhoa, int trang, int soDongMoiTrang)
+        {
+            var dieuKienDaDoc = daDoc.HasValue ? "AND tb.daDoc = @DaDoc" : string.Empty;
+            var sql = $@"SELECT
+    tb.maThongBao, tb.maTaiKhoan, tb.maLichTiem, tb.tieuDe, tb.noiDung, tb.ngayGui, tb.daDoc,
+    lt.maHoSo, hs.hoTen AS hoTenHoSo
+FROM ThongBao tb
+LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
+WHERE tb.maTaiKhoan = @MaTaiKhoan
+{dieuKienDaDoc}
+AND (
+    @TuKhoa = N''
+    OR tb.tieuDe COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+    OR tb.noiDung COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+    OR ISNULL(hs.hoTen, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+)
+ORDER BY tb.ngayGui DESC, tb.maThongBao DESC
+OFFSET @SoDongBoQua ROWS FETCH NEXT @SoDongMoiTrang ROWS ONLY";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            GanThamSoBoLoc(lenh, maTaiKhoan, daDoc, tuKhoa);
+            lenh.Parameters.AddWithValue("@SoDongBoQua", (Math.Max(1, trang) - 1) * soDongMoiTrang);
+            lenh.Parameters.AddWithValue("@SoDongMoiTrang", soDongMoiTrang);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            var danhSach = new List<ThongBao>();
+            while (doc.Read()) danhSach.Add(DocThongBao(doc));
+            return danhSach;
+        }
+
+        // Đếm ba tab theo từ khóa hiện tại nhưng không phụ thuộc tab đang chọn.
+        public (int TatCa, int ChuaDoc, int DaDoc) DemTheoTrangThai(int maTaiKhoan, string? tuKhoa)
+        {
+            const string sql = @"SELECT
+    COUNT(*) AS tatCa,
+    COALESCE(SUM(CASE WHEN tb.daDoc = 0 THEN 1 ELSE 0 END), 0) AS chuaDoc,
+    COALESCE(SUM(CASE WHEN tb.daDoc = 1 THEN 1 ELSE 0 END), 0) AS daDoc
+FROM ThongBao tb
+LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
+WHERE tb.maTaiKhoan = @MaTaiKhoan
+AND (
+    @TuKhoa = N''
+    OR tb.tieuDe COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+    OR tb.noiDung COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+    OR ISNULL(hs.hoTen, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            GanThamSoBoLoc(lenh, maTaiKhoan, null, tuKhoa);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            if (!doc.Read()) return (0, 0, 0);
+            return (Convert.ToInt32(doc["tatCa"]), Convert.ToInt32(doc["chuaDoc"]), Convert.ToInt32(doc["daDoc"]));
+        }
+
+        // Đếm ba nhóm nội dung theo cả trạng thái và từ khóa đang chọn.
+        public (int QuaHan, int DenLich, int DaCapNhat) DemTheoNhom(int maTaiKhoan, bool? daDoc, string? tuKhoa)
+        {
+            var dieuKienDaDoc = daDoc.HasValue ? "AND tb.daDoc = @DaDoc" : string.Empty;
+            var sql = $@"SELECT
+    COALESCE(SUM(CASE WHEN ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN 1 ELSE 0 END), 0) AS quaHan,
+    COALESCE(SUM(CASE WHEN ISNULL(tb.tieuDe, N'') NOT LIKE N'%Quá hạn%'
+        AND (ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%' OR ISNULL(tb.tieuDe, N'') LIKE N'%Hôm nay%lịch tiêm%') THEN 1 ELSE 0 END), 0) AS denLich,
+    COALESCE(SUM(CASE WHEN ISNULL(tb.tieuDe, N'') NOT LIKE N'%Quá hạn%'
+        AND ISNULL(tb.tieuDe, N'') NOT LIKE N'%đến lịch%'
+        AND ISNULL(tb.tieuDe, N'') NOT LIKE N'%Hôm nay%lịch tiêm%' THEN 1 ELSE 0 END), 0) AS daCapNhat
+FROM ThongBao tb
+LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
+WHERE tb.maTaiKhoan = @MaTaiKhoan
+{dieuKienDaDoc}
+AND (
+    @TuKhoa = N''
+    OR tb.tieuDe COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+    OR tb.noiDung COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+    OR ISNULL(hs.hoTen, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @TuKhoa + N'%'
+)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            GanThamSoBoLoc(lenh, maTaiKhoan, daDoc, tuKhoa);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            if (!doc.Read()) return (0, 0, 0);
+            return (Convert.ToInt32(doc["quaHan"]), Convert.ToInt32(doc["denLich"]), Convert.ToInt32(doc["daCapNhat"]));
+        }
+
+        public int DemTongThongBao(int maTaiKhoan)
+        {
+            const string sql = "SELECT COUNT(*) FROM ThongBao WHERE maTaiKhoan = @MaTaiKhoan";
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
         // Mục đích: phương thức DemThongBaoChuaDoc thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -206,16 +308,13 @@ ORDER BY ngayGui DESC";
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
-    maThongBao,
-    maTaiKhoan,
-    maLichTiem,
-    tieuDe,
-    noiDung,
-    ngayGui,
-    daDoc
-FROM ThongBao
-WHERE maThongBao = @MaThongBao
-AND maTaiKhoan = @MaTaiKhoan";
+    tb.maThongBao, tb.maTaiKhoan, tb.maLichTiem, tb.tieuDe, tb.noiDung, tb.ngayGui, tb.daDoc,
+    lt.maHoSo, hs.hoTen AS hoTenHoSo
+FROM ThongBao tb
+LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
+WHERE tb.maThongBao = @MaThongBao
+AND tb.maTaiKhoan = @MaTaiKhoan";
 
             // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -257,6 +356,21 @@ VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDe, @NoiDung, @NgayGui, @DaDoc)";
             ketNoi.Open();
             // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
             return lenh.ExecuteNonQuery() > 0;
+        }
+
+        // Chỉ cập nhật thông báo chưa đọc thuộc đúng tài khoản hiện tại.
+        public int DanhDauTatCaDaDoc(int maTaiKhoan)
+        {
+            const string sql = @"UPDATE ThongBao
+SET daDoc = 1
+WHERE maTaiKhoan = @MaTaiKhoan
+AND daDoc = 0";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery();
         }
 
         // Tạo thông báo cho các lịch tiêm đã đến hạn hoặc quá hạn, không tạo trùng khi người dùng mở trang nhiều lần.
@@ -505,8 +619,22 @@ AND maTaiKhoan = @MaTaiKhoan";
                 TieuDe = doc["tieuDe"] == DBNull.Value ? string.Empty : doc["tieuDe"].ToString() ?? string.Empty,
                 NoiDung = doc["noiDung"] == DBNull.Value ? string.Empty : doc["noiDung"].ToString() ?? string.Empty,
                 NgayGui = Convert.ToDateTime(doc["ngayGui"]),
-                DaDoc = Convert.ToBoolean(doc["daDoc"])
+                DaDoc = Convert.ToBoolean(doc["daDoc"]),
+                MaHoSo = CoCot(doc, "maHoSo") && doc["maHoSo"] != DBNull.Value ? Convert.ToInt32(doc["maHoSo"]) : null,
+                HoTenHoSo = CoCot(doc, "hoTenHoSo") && doc["hoTenHoSo"] != DBNull.Value
+                    ? doc["hoTenHoSo"].ToString() ?? string.Empty
+                    : string.Empty
             };
+        }
+
+        private static void GanThamSoBoLoc(SqlCommand lenh, int maTaiKhoan, bool? daDoc, string? tuKhoa)
+        {
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? string.Empty : tuKhoa.Trim());
+            if (daDoc.HasValue)
+            {
+                lenh.Parameters.AddWithValue("@DaDoc", daDoc.Value);
+            }
         }
 
         // Kiểm tra an toàn một cột có tồn tại trong SqlDataReader hay không trước khi đọc dữ liệu.

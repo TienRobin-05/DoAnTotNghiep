@@ -1,60 +1,851 @@
-﻿@* Khu vực giao diện của view ChonHoSo.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang tổng quan lịch sử tiêm theo hồ sơ của tài khoản đang đăng nhập. *@
 @model List<HoSoSucKhoe>
 @{
-    ViewData["Title"] = "Chọn hồ sơ xem lịch sử tiêm";
-}
+    ViewData["Title"] = "Lịch sử tiêm";
+    var lichSuTheoHoSo = ViewBag.LichSuTheoHoSo as Dictionary<int, List<LichSuTiem>>
+        ?? new Dictionary<int, List<LichSuTiem>>();
+    var maHoSoDuocChon = ViewBag.MaHoSoDuocChon as int? ?? Model.FirstOrDefault()?.MaHoSo;
 
-<div class="list-page-head">
-    <div>
-        <h2>Chọn hồ sơ xem lịch sử tiêm</h2>
-        <p>Chọn một hồ sơ để xem các mũi đã hoàn thành.</p>
-    </div>
-    <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-</div>
-
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (Model.Count == 0)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    <div class="empty-state empty-action">
-        <div>
-            <strong>Bạn chưa có hồ sơ sức khỏe</strong>
-            <span>Tạo hồ sơ trước khi xem lịch sử tiêm của bản thân hoặc người thân.</span>
-        </div>
-        <a asp-controller="HoSoSucKhoe" asp-action="Create" class="btn btn-primary">Thêm hồ sơ</a>
-    </div>
-}
-else
-{
-    <section class="list-card">
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-    <table class="table list-table">
-        <thead>
-            <tr>
-                <th>Hồ sơ</th>
-                <th>Ngày sinh</th>
-                <th>Giới tính</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
-        @foreach (var item in Model)
+    string LayChuVietTat(string hoTen)
+    {
+        if (string.IsNullOrWhiteSpace(hoTen)) return "HS";
+        var cacTu = hoTen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (cacTu.Length == 1)
         {
-            <tr>
-                <td>
-                    <div class="item-title">@item.HoTen</div>
-                    <div class="item-meta">Mã hồ sơ #@item.MaHoSo</div>
-                </td>
-                <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
-                <td><span class="soft-badge">@item.GioiTinh</span></td>
-                <td class="table-actions">
-                    <a asp-action="Index" asp-route-maHoSo="@item.MaHoSo" class="btn btn-sm btn-primary">Xem lịch sử tiêm</a>
-                </td>
-            </tr>
+            return cacTu[0].Length >= 2
+                ? cacTu[0][..2].ToUpperInvariant()
+                : cacTu[0].ToUpperInvariant();
         }
-        </tbody>
-    </table>
-    </section>
+
+        return $"{cacTu[0][0]}{cacTu[^1][0]}".ToUpperInvariant();
+    }
+
+    string HienThiNgay(DateTime ngay)
+    {
+        return ngay == default ? "Chưa cập nhật" : ngay.ToString("dd-MM-yyyy");
+    }
+}
+
+<style>
+    .vaccination-history-page {
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 18px;
+        border-radius: 8px;
+        color: #18263d;
+        background: #f3f7fa;
+    }
+
+    .vaccination-history-page * {
+        box-sizing: border-box;
+    }
+
+    .vaccination-history-layout {
+        display: grid;
+        grid-template-columns: minmax(280px, 30%) minmax(0, 70%);
+        gap: 24px;
+        align-items: start;
+    }
+
+    .vaccination-history-card {
+        overflow: hidden;
+        border: 1px solid #dce6ee;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(36, 67, 91, .07);
+    }
+
+    .vaccination-profile-sidebar {
+        position: sticky;
+        top: 16px;
+    }
+
+    .vaccination-profile-sidebar-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 20px 20px 14px;
+    }
+
+    .vaccination-profile-sidebar-head h1 {
+        margin: 0;
+        color: #17243a;
+        font-size: 20px;
+        font-weight: 750;
+    }
+
+    .vaccination-add-profile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid #0878d1;
+        border-radius: 6px;
+        color: #fff;
+        background: #0878d1;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .vaccination-add-profile:hover {
+        border-color: #0668b7;
+        color: #fff;
+        background: #0668b7;
+    }
+
+    .vaccination-profile-search-wrap {
+        position: relative;
+        margin: 0 20px 14px;
+    }
+
+    .vaccination-profile-search-wrap .bi {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        color: #8292a6;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .vaccination-profile-search {
+        width: 100%;
+        height: 42px;
+        padding: 9px 12px 9px 39px;
+        border: 1px solid #cfdae4;
+        border-radius: 6px;
+        outline: none;
+        color: #24334a;
+        background: #fbfdff;
+    }
+
+    .vaccination-profile-search:focus {
+        border-color: #4299d8;
+        box-shadow: 0 0 0 3px rgba(8, 120, 209, .1);
+    }
+
+    .vaccination-profile-list {
+        max-height: 640px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        border-top: 1px solid #e8eef3;
+    }
+
+    .vaccination-profile-item {
+        position: relative;
+        display: grid;
+        grid-template-columns: 46px minmax(0, 1fr) 20px;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 16px 18px;
+        border: 0;
+        border-bottom: 1px solid #e8eef3;
+        color: #1f2d42;
+        background: #fff;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .vaccination-profile-item:last-child {
+        border-bottom: 0;
+    }
+
+    .vaccination-profile-item:hover {
+        background: #f7fbfe;
+    }
+
+    .vaccination-profile-item.is-active {
+        color: #075f9f;
+        background: #edf7ff;
+    }
+
+    .vaccination-profile-item.is-active::before {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 4px;
+        background: #0878d1;
+        content: "";
+    }
+
+    .vaccination-profile-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        border-radius: 50%;
+        font-size: 15px;
+        font-weight: 750;
+        letter-spacing: .4px;
+    }
+
+    .vaccination-avatar-blue { color: #1769aa; background: #dcefff; }
+    .vaccination-avatar-purple { color: #7351a8; background: #eee5fb; }
+    .vaccination-avatar-yellow { color: #8a6816; background: #fff2c9; }
+    .vaccination-avatar-orange { color: #a95425; background: #ffe5d5; }
+
+    .vaccination-profile-copy {
+        min-width: 0;
+    }
+
+    .vaccination-profile-name {
+        display: block;
+        margin-bottom: 4px;
+        overflow: hidden;
+        font-size: 15px;
+        font-weight: 750;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vaccination-profile-code {
+        display: block;
+        color: #718096;
+        font-size: 13px;
+    }
+
+    .vaccination-profile-item .bi-chevron-right {
+        color: #9aa8b8;
+    }
+
+    .vaccination-profile-no-result {
+        display: none;
+        padding: 24px 18px;
+        color: #718096;
+        text-align: center;
+    }
+
+    .vaccination-profile-no-result.is-visible {
+        display: block;
+    }
+
+    .vaccination-history-detail {
+        padding: 28px 30px 30px;
+    }
+
+    .vaccination-history-heading {
+        margin-bottom: 24px;
+    }
+
+    .vaccination-history-heading h2 {
+        margin: 0 0 6px;
+        color: #17243a;
+        font-size: 24px;
+        font-weight: 750;
+    }
+
+    .vaccination-history-heading p {
+        margin: 0;
+        color: #718096;
+        font-size: 14px;
+    }
+
+    .vaccination-history-panel {
+        display: none;
+    }
+
+    .vaccination-history-panel.is-active {
+        display: block;
+    }
+
+    .vaccination-selected-profile {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border: 1px solid #e0e9f0;
+        border-radius: 8px;
+        background: #fbfdff;
+    }
+
+    .vaccination-selected-profile .vaccination-profile-avatar {
+        width: 64px;
+        height: 64px;
+        flex-basis: 64px;
+        font-size: 20px;
+    }
+
+    .vaccination-selected-copy {
+        min-width: 0;
+    }
+
+    .vaccination-selected-name {
+        margin: 0 0 5px;
+        overflow-wrap: anywhere;
+        color: #18263d;
+        font-size: 20px;
+        font-weight: 750;
+    }
+
+    .vaccination-selected-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        color: #6c7c90;
+        font-size: 13px;
+    }
+
+    .vaccination-gender-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 25px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        color: #17669e;
+        background: #e5f3fc;
+        font-weight: 700;
+    }
+
+    .vaccination-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin: 20px 0 28px;
+    }
+
+    .vaccination-stat {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-width: 0;
+        padding: 17px;
+        border: 1px solid #e0e9f0;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .vaccination-stat-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border-radius: 50%;
+        font-size: 20px;
+    }
+
+    .vaccination-stat-icon.blue { color: #0878d1; background: #e5f3ff; }
+    .vaccination-stat-icon.green { color: #219268; background: #e2f6ed; }
+    .vaccination-stat-icon.purple { color: #7554b7; background: #eee8fb; }
+
+    .vaccination-stat-copy {
+        min-width: 0;
+    }
+
+    .vaccination-stat-copy span {
+        display: block;
+        margin-bottom: 3px;
+        overflow: hidden;
+        color: #718096;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vaccination-stat-copy strong {
+        display: block;
+        overflow-wrap: anywhere;
+        color: #1b2a40;
+        font-size: 21px;
+        line-height: 1.2;
+    }
+
+    .vaccination-recent-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    .vaccination-recent-head h3 {
+        margin: 0;
+        color: #1b2a40;
+        font-size: 18px;
+        font-weight: 750;
+    }
+
+    .vaccination-recent-head span {
+        color: #0878d1;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .vaccination-timeline {
+        position: relative;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .vaccination-timeline::before {
+        position: absolute;
+        top: 28px;
+        bottom: 28px;
+        left: 16px;
+        width: 2px;
+        background: #79c7a3;
+        content: "";
+    }
+
+    .vaccination-timeline-item {
+        position: relative;
+        display: grid;
+        grid-template-columns: 34px 104px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+        min-height: 76px;
+        border-bottom: 1px solid #e8eef3;
+    }
+
+    .vaccination-timeline-item:last-child {
+        border-bottom: 0;
+    }
+
+    .vaccination-timeline-check {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-left: 5px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        color: #fff;
+        background: #28a875;
+        box-shadow: 0 0 0 1px #78c8a3;
+        font-size: 12px;
+    }
+
+    .vaccination-timeline-date {
+        color: #5f7085;
+        font-size: 13px;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    .vaccination-timeline-vaccine {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: #1c2b41;
+        font-size: 15px;
+        font-weight: 750;
+    }
+
+    .vaccination-dose-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        color: #17699f;
+        background: #e4f3fd;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .vaccination-history-empty {
+        padding: 44px 20px;
+        border: 1px dashed #cddae5;
+        border-radius: 8px;
+        color: #718096;
+        background: #fbfdff;
+        text-align: center;
+    }
+
+    .vaccination-history-empty .bi {
+        display: block;
+        margin-bottom: 10px;
+        color: #9aabb9;
+        font-size: 32px;
+    }
+
+    .vaccination-full-history {
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+    }
+
+    .vaccination-full-history-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 10px 18px;
+        border: 1px solid #0878d1;
+        border-radius: 6px;
+        color: #fff;
+        background: #0878d1;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .vaccination-full-history-link:hover {
+        border-color: #0668b7;
+        color: #fff;
+        background: #0668b7;
+    }
+
+    .vaccination-page-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 360px;
+        padding: 32px;
+        text-align: center;
+    }
+
+    .vaccination-page-empty .bi-journal-medical {
+        display: block;
+        margin-bottom: 14px;
+        color: #8ea4b6;
+        font-size: 48px;
+    }
+
+    .vaccination-page-empty strong,
+    .vaccination-page-empty span {
+        display: block;
+    }
+
+    .vaccination-page-empty strong {
+        margin-bottom: 7px;
+        color: #203047;
+        font-size: 19px;
+    }
+
+    .vaccination-page-empty span {
+        margin-bottom: 18px;
+        color: #718096;
+    }
+
+    @@media (max-width: 991.98px) {
+        .vaccination-history-layout {
+            grid-template-columns: minmax(250px, 35%) minmax(0, 65%);
+            gap: 18px;
+        }
+
+        .vaccination-history-detail {
+            padding: 24px 22px;
+        }
+
+        .vaccination-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .vaccination-timeline-item {
+            grid-template-columns: 34px 92px minmax(0, 1fr);
+            gap: 10px;
+            padding: 12px 0;
+        }
+
+        .vaccination-dose-badge {
+            grid-column: 3;
+            justify-self: start;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .vaccination-history-page {
+            padding: 10px;
+        }
+
+        .vaccination-history-layout {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .vaccination-profile-sidebar {
+            position: static;
+        }
+
+        .vaccination-profile-list {
+            max-height: 330px;
+        }
+
+        .vaccination-selected-profile {
+            align-items: flex-start;
+        }
+
+        .vaccination-timeline-item {
+            grid-template-columns: 34px minmax(0, 1fr);
+        }
+
+        .vaccination-timeline-date,
+        .vaccination-timeline-vaccine,
+        .vaccination-dose-badge {
+            grid-column: 2;
+        }
+
+        .vaccination-timeline-date {
+            align-self: end;
+        }
+    }
+
+    @@media (max-width: 430px) {
+        .vaccination-profile-sidebar-head {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .vaccination-add-profile {
+            width: 100%;
+        }
+
+        .vaccination-history-detail {
+            padding: 22px 16px;
+        }
+
+        .vaccination-selected-profile {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<main class="vaccination-history-page">
+    @if (Model.Count == 0)
+    {
+        <section class="vaccination-history-card vaccination-page-empty">
+            <div>
+                <i class="bi bi-journal-medical" aria-hidden="true"></i>
+                <strong>Bạn chưa có hồ sơ sức khỏe</strong>
+                <span>Hãy thêm hồ sơ để bắt đầu theo dõi lịch sử tiêm chủng.</span>
+                <a asp-controller="HoSoSucKhoe" asp-action="Create" class="vaccination-add-profile">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    Thêm hồ sơ
+                </a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <div class="vaccination-history-layout">
+            <aside class="vaccination-history-card vaccination-profile-sidebar" aria-label="Danh sách hồ sơ">
+                <div class="vaccination-profile-sidebar-head">
+                    <h1>Hồ sơ của bạn</h1>
+                    <a asp-controller="HoSoSucKhoe" asp-action="Create" class="vaccination-add-profile">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                        Thêm hồ sơ
+                    </a>
+                </div>
+
+                <div class="vaccination-profile-search-wrap">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input id="vaccinationProfileSearch"
+                           class="vaccination-profile-search"
+                           type="search"
+                           placeholder="Tìm kiếm hồ sơ..."
+                           autocomplete="off"
+                           aria-label="Tìm kiếm hồ sơ" />
+                </div>
+
+                <div id="vaccinationProfileList" class="vaccination-profile-list">
+                    @for (var index = 0; index < Model.Count; index++)
+                    {
+                        var hoSo = Model[index];
+                        var dangChon = hoSo.MaHoSo == maHoSoDuocChon;
+                        var mauAvatar = (index % 4) switch
+                        {
+                            1 => "vaccination-avatar-purple",
+                            2 => "vaccination-avatar-yellow",
+                            3 => "vaccination-avatar-orange",
+                            _ => "vaccination-avatar-blue"
+                        };
+
+                        <button type="button"
+                                class="vaccination-profile-item @(dangChon ? "is-active" : string.Empty)"
+                                data-profile-id="@hoSo.MaHoSo"
+                                data-search="@hoSo.HoTen #@hoSo.MaHoSo @hoSo.MaHoSo"
+                                aria-pressed="@(dangChon ? "true" : "false")">
+                            <span class="vaccination-profile-avatar @mauAvatar">@LayChuVietTat(hoSo.HoTen)</span>
+                            <span class="vaccination-profile-copy">
+                                <span class="vaccination-profile-name">@(string.IsNullOrWhiteSpace(hoSo.HoTen) ? "Chưa cập nhật họ tên" : hoSo.HoTen)</span>
+                                <span class="vaccination-profile-code">Mã hồ sơ #@hoSo.MaHoSo</span>
+                            </span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    }
+                    <div id="vaccinationProfileNoResult" class="vaccination-profile-no-result">Không tìm thấy hồ sơ phù hợp.</div>
+                </div>
+            </aside>
+
+            <section class="vaccination-history-card vaccination-history-detail" aria-live="polite">
+                <header class="vaccination-history-heading">
+                    <h2>Lịch sử tiêm chủng</h2>
+                    <p>Xem nhanh tổng quan lịch sử tiêm chủng của bạn.</p>
+                </header>
+
+                @for (var index = 0; index < Model.Count; index++)
+                {
+                    var hoSo = Model[index];
+                    var dangChon = hoSo.MaHoSo == maHoSoDuocChon;
+                    var lichSu = lichSuTheoHoSo.TryGetValue(hoSo.MaHoSo, out var danhSach)
+                        ? danhSach.OrderByDescending(item => item.NgayTiemThucTe).ToList()
+                        : new List<LichSuTiem>();
+                    var lichSuGanDay = lichSu.Take(4).ToList();
+                    var soLoaiVaccine = lichSu
+                        .Where(item => !string.IsNullOrWhiteSpace(item.TenVaccine))
+                        .Select(item => item.TenVaccine.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Count();
+                    var mauAvatar = (index % 4) switch
+                    {
+                        1 => "vaccination-avatar-purple",
+                        2 => "vaccination-avatar-yellow",
+                        3 => "vaccination-avatar-orange",
+                        _ => "vaccination-avatar-blue"
+                    };
+                    var gioiTinh = string.IsNullOrWhiteSpace(hoSo.GioiTinh) ? "Chưa cập nhật" : hoSo.GioiTinh.Trim();
+
+                    <div id="vaccination-history-panel-@hoSo.MaHoSo"
+                         class="vaccination-history-panel @(dangChon ? "is-active" : string.Empty)"
+                         data-profile-panel="@hoSo.MaHoSo">
+                        <div class="vaccination-selected-profile">
+                            <span class="vaccination-profile-avatar @mauAvatar">@LayChuVietTat(hoSo.HoTen)</span>
+                            <div class="vaccination-selected-copy">
+                                <h3 class="vaccination-selected-name">@(string.IsNullOrWhiteSpace(hoSo.HoTen) ? "Chưa cập nhật họ tên" : hoSo.HoTen)</h3>
+                                <div class="vaccination-selected-meta">
+                                    <span>Mã hồ sơ #@hoSo.MaHoSo</span>
+                                    <span>Ngày sinh: @HienThiNgay(hoSo.NgaySinh)</span>
+                                    <span class="vaccination-gender-badge">@gioiTinh</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vaccination-stats">
+                            <article class="vaccination-stat">
+                                <span class="vaccination-stat-icon blue"><i class="bi bi-eyedropper" aria-hidden="true"></i></span>
+                                <div class="vaccination-stat-copy">
+                                    <span>Mũi đã tiêm</span>
+                                    <strong>@lichSu.Count</strong>
+                                </div>
+                            </article>
+                            <article class="vaccination-stat">
+                                <span class="vaccination-stat-icon green"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
+                                <div class="vaccination-stat-copy">
+                                    <span>Vaccine</span>
+                                    <strong>@soLoaiVaccine</strong>
+                                </div>
+                            </article>
+                            <article class="vaccination-stat">
+                                <span class="vaccination-stat-icon purple"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                                <div class="vaccination-stat-copy">
+                                    <span>Mũi gần nhất</span>
+                                    <strong>@(lichSu.Count > 0 ? lichSu[0].NgayTiemThucTe.ToString("dd-MM-yyyy") : "Chưa có")</strong>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="vaccination-recent-head">
+                            <h3>Lịch sử tiêm gần đây</h3>
+                            @if (lichSuGanDay.Count > 0)
+                            {
+                                <span>Xem 4 mũi gần nhất</span>
+                            }
+                        </div>
+
+                        @if (lichSuGanDay.Count == 0)
+                        {
+                            <div class="vaccination-history-empty">
+                                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                                <strong>Chưa có lịch sử tiêm chủng</strong>
+                            </div>
+                        }
+                        else
+                        {
+                            <ol class="vaccination-timeline">
+                                @foreach (var item in lichSuGanDay)
+                                {
+                                    <li class="vaccination-timeline-item">
+                                        <span class="vaccination-timeline-check"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+                                        <time class="vaccination-timeline-date" datetime="@item.NgayTiemThucTe.ToString("yyyy-MM-dd")">@item.NgayTiemThucTe.ToString("dd-MM-yyyy")</time>
+                                        <span class="vaccination-timeline-vaccine">@(string.IsNullOrWhiteSpace(item.TenVaccine) ? "Chưa cập nhật vaccine" : item.TenVaccine)</span>
+                                        <span class="vaccination-dose-badge">Mũi @item.SoMui</span>
+                                    </li>
+                                }
+                            </ol>
+
+                            <div class="vaccination-full-history">
+                                <a asp-action="Index"
+                                   asp-route-maHoSo="@hoSo.MaHoSo"
+                                   class="vaccination-full-history-link">
+                                    Xem đầy đủ lịch sử tiêm
+                                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+    }
+</main>
+
+@if (Model.Count > 0)
+{
+    <script>
+        (() => {
+            const searchInput = document.getElementById('vaccinationProfileSearch');
+            const profileList = document.getElementById('vaccinationProfileList');
+            const noResult = document.getElementById('vaccinationProfileNoResult');
+            const profileButtons = Array.from(profileList.querySelectorAll('[data-profile-id]'));
+            const profilePanels = Array.from(document.querySelectorAll('[data-profile-panel]'));
+
+            const normalizeText = (value) => (value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D')
+                .toLowerCase()
+                .trim();
+
+            const selectProfile = (profileId) => {
+                profileButtons.forEach((button) => {
+                    const isActive = button.dataset.profileId === profileId;
+                    button.classList.toggle('is-active', isActive);
+                    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                });
+
+                profilePanels.forEach((panel) => {
+                    panel.classList.toggle('is-active', panel.dataset.profilePanel === profileId);
+                });
+
+                const url = new URL(window.location.href);
+                url.searchParams.set('maHoSo', profileId);
+                window.history.replaceState({}, '', url);
+            };
+
+            profileButtons.forEach((button) => {
+                button.addEventListener('click', () => selectProfile(button.dataset.profileId));
+            });
+
+            searchInput.addEventListener('input', () => {
+                const keyword = normalizeText(searchInput.value);
+                let visibleCount = 0;
+
+                profileButtons.forEach((button) => {
+                    const isMatch = normalizeText(button.dataset.search).includes(keyword);
+                    button.hidden = !isMatch;
+                    if (isMatch) visibleCount++;
+                });
+
+                noResult.classList.toggle('is-visible', visibleCount === 0);
+            });
+        })();
+    </script>
 }

@@ -1,0 +1,59 @@
+@model object
+@{
+    var cssClass = ViewData["CssClass"]?.ToString() ?? "updated";
+    var icon = ViewData["Icon"]?.ToString() ?? "bi-bell";
+    var title = ViewData["Title"]?.ToString() ?? "Thông báo";
+    var count = ViewData["Count"] is int soLuong ? soLuong : 0;
+    var items = ViewData["Items"] as List<ThongBao> ?? new List<ThongBao>();
+    var actionText = ViewData["ActionText"]?.ToString() ?? "Xem chi tiết";
+    var redirectSchedule = ViewData["RedirectSchedule"] is bool chuyenHuong && chuyenHuong;
+}
+
+<section class="notification-column @cssClass">
+    <header class="notification-column-head">
+        <i class="bi @icon" aria-hidden="true"></i>
+        <span>@title (@count)</span>
+    </header>
+
+    @if (items.Count == 0)
+    {
+        <div class="notification-column-empty">
+            <i class="bi bi-inbox" aria-hidden="true"></i>
+            Không có thông báo phù hợp
+        </div>
+    }
+    else
+    {
+        <div class="notification-column-list">
+            @foreach (var item in items)
+            {
+                <article class="notification-item-card @(item.DaDoc ? "is-read" : "is-unread")">
+                    <span class="notification-item-icon"><i class="bi @icon" aria-hidden="true"></i></span>
+                    <div class="notification-item-body">
+                        <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="notification-item-title">@item.TieuDe</a>
+                        <p class="notification-item-content">@item.NoiDung</p>
+                        @if (!string.IsNullOrWhiteSpace(item.HoTenHoSo))
+                        {
+                            <span class="notification-person-tag"><i class="bi bi-person" aria-hidden="true"></i><span>@item.HoTenHoSo</span></span>
+                        }
+                        <div class="notification-item-footer">
+                            <time class="notification-item-time" datetime="@item.NgayGui.ToString("yyyy-MM-ddTHH:mm:ss")">
+                                <i class="bi bi-clock" aria-hidden="true"></i>@item.NgayGui.ToString("dd-MM-yyyy HH:mm")
+                            </time>
+                            <a asp-action="Details"
+                               asp-route-maThongBao="@item.MaThongBao"
+                               asp-route-chuyenHuongLichTiem="@(redirectSchedule && item.MaHoSo.HasValue)"
+                               class="notification-action-link">
+                                @actionText <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    @if (!item.DaDoc)
+                    {
+                        <span class="notification-unread-dot" title="Chưa đọc" aria-label="Chưa đọc"></span>
+                    }
+                </article>
+            }
+        </div>
+    }
+</section>

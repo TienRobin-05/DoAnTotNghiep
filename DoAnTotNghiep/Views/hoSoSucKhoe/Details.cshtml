@@ -1,26 +1,493 @@
-﻿@* Khu vực giao diện của view Details.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+@* Trang chi tiết hồ sơ sức khỏe. Chỉ trình bày dữ liệu của hồ sơ do Controller cung cấp. *@
 @model HoSoSucKhoe
 @{
-    ViewData["Title"] = "Chi tiết hồ sơ";
+    ViewData["Title"] = "Chi tiết hồ sơ sức khỏe";
+
+    var hoTen = string.IsNullOrWhiteSpace(Model.HoTen) ? string.Empty : Model.HoTen.Trim();
+    var gioiTinh = string.IsNullOrWhiteSpace(Model.GioiTinh) ? "Chưa cập nhật" : Model.GioiTinh.Trim();
+    var tienSuBenh = string.IsNullOrWhiteSpace(Model.TienSuBenh) ? "Chưa ghi nhận" : Model.TienSuBenh.Trim();
+    var diUng = string.IsNullOrWhiteSpace(Model.DiUng) ? "Chưa ghi nhận" : Model.DiUng.Trim();
+
+    string LayChuVietTat(string ten)
+    {
+        if (string.IsNullOrWhiteSpace(ten)) return string.Empty;
+
+        var cacTu = ten.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return string.Concat(cacTu.Select(tu => char.ToUpperInvariant(tu[0])));
+    }
+
+    string HienThiSo(double? giaTri, string donVi)
+    {
+        return giaTri.HasValue ? $"{giaTri.Value:0.##} {donVi}" : "Chưa cập nhật";
+    }
+
+    string HienThiNgay(DateTime ngay, string dinhDang)
+    {
+        return ngay == default ? "Chưa cập nhật" : ngay.ToString(dinhDang);
+    }
+
+    var chuVietTat = LayChuVietTat(hoTen);
 }
 
-<h2>Chi tiết hồ sơ sức khỏe</h2>
+<style>
+    .health-profile-details {
+        width: 100%;
+        max-width: 1260px;
+        margin: 0 auto;
+        color: #172033;
+    }
 
-@* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
-<section class="card">
-<table class="table table-bordered col-md-8">
-    <tr><th>Mã hồ sơ</th><td>@Model.MaHoSo</td></tr>
-    <tr><th>Họ tên</th><td>@Model.HoTen</td></tr>
-    <tr><th>Ngày sinh</th><td>@Model.NgaySinh.ToString("dd/MM/yyyy")</td></tr>
-    <tr><th>Giới tính</th><td>@Model.GioiTinh</td></tr>
-    <tr><th>Chiều cao</th><td>@Model.ChieuCao</td></tr>
-    <tr><th>Cân nặng</th><td>@Model.CanNang</td></tr>
-    <tr><th>Tiền sử bệnh</th><td>@Model.TienSuBenh</td></tr>
-    <tr><th>Dị ứng</th><td>@Model.DiUng</td></tr>
-    <tr><th>Ngày tạo</th><td>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</td></tr>
-</table>
-</section>
+    .health-profile-details * {
+        box-sizing: border-box;
+    }
 
-<a asp-action="Edit" asp-route-id="@Model.MaHoSo" class="btn btn-primary">Sửa</a>
-<a asp-action="Index" class="btn btn-link">Quay lại</a>
+    .health-profile-back-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        color: #0875d1;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color .2s ease, transform .2s ease;
+    }
+
+    .health-profile-back-top:hover {
+        color: #055ca7;
+        transform: translateX(-2px);
+    }
+
+    .health-profile-title {
+        margin: 0 0 24px;
+        color: #14213a;
+        font-size: clamp(28px, 3vw, 34px);
+        font-weight: 750;
+        line-height: 1.2;
+        letter-spacing: -.5px;
+    }
+
+    .health-profile-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 226px;
+        padding: 38px 46px;
+        overflow: hidden;
+        border-radius: 8px 8px 0 0;
+        color: #fff;
+        background: linear-gradient(110deg, #0866d8 0%, #0799dd 55%, #12c7c5 100%);
+    }
+
+    .health-profile-hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        min-width: 0;
+    }
+
+    .health-profile-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 124px;
+        height: 124px;
+        flex: 0 0 124px;
+        border: 4px solid rgba(255, 255, 255, .35);
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(4, 71, 139, .18);
+        color: #0879d3;
+        font-size: 34px;
+        font-weight: 750;
+        letter-spacing: 1px;
+    }
+
+    .health-profile-avatar .bi {
+        font-size: 47px;
+    }
+
+    .health-profile-summary {
+        min-width: 0;
+    }
+
+    .health-profile-name {
+        margin: 0 0 11px;
+        overflow-wrap: anywhere;
+        font-size: clamp(25px, 3vw, 32px);
+        font-weight: 750;
+        line-height: 1.2;
+    }
+
+    .health-profile-code,
+    .health-profile-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: rgba(255, 255, 255, .94);
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .health-profile-code {
+        margin-bottom: 14px;
+        font-weight: 600;
+    }
+
+    .health-profile-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px 18px;
+    }
+
+    .health-profile-meta-divider {
+        width: 1px;
+        height: 22px;
+        background: rgba(255, 255, 255, .48);
+    }
+
+    .health-profile-decoration {
+        position: absolute;
+        z-index: 1;
+        color: rgba(255, 255, 255, .12);
+        pointer-events: none;
+    }
+
+    .health-profile-decoration-cross {
+        top: 25px;
+        right: 190px;
+        font-size: 92px;
+        transform: rotate(8deg);
+    }
+
+    .health-profile-decoration-shield {
+        right: 38px;
+        bottom: -28px;
+        font-size: 168px;
+        transform: rotate(-8deg);
+    }
+
+    .health-profile-body {
+        border: 1px solid #dce7f1;
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(30, 75, 112, .08);
+    }
+
+    .health-profile-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+        padding: 34px 38px 12px;
+    }
+
+    .health-profile-column:first-child {
+        padding-right: 42px;
+    }
+
+    .health-profile-column:last-child {
+        padding-left: 42px;
+        border-left: 1px solid #dfe8f0;
+    }
+
+    .health-profile-row {
+        display: grid;
+        grid-template-columns: minmax(160px, auto) minmax(0, 1fr);
+        align-items: start;
+        gap: 20px;
+        min-height: 64px;
+        padding: 18px 2px;
+        border-bottom: 1px solid #e8eef4;
+    }
+
+    .health-profile-row:first-child {
+        padding-top: 8px;
+    }
+
+    .health-profile-row:last-child {
+        border-bottom: 0;
+    }
+
+    .health-profile-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: #22304a;
+        font-weight: 700;
+    }
+
+    .health-profile-label-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        color: #087bd3;
+        font-size: 18px;
+    }
+
+    .health-profile-value {
+        min-width: 0;
+        color: #526177;
+        font-weight: 500;
+        line-height: 1.55;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .health-profile-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 20px 38px 30px;
+        border-top: 1px solid #edf2f6;
+    }
+
+    .health-profile-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-width: 112px;
+        min-height: 44px;
+        padding: 10px 20px;
+        border: 1px solid #cbd9e6;
+        border-radius: 6px;
+        font-weight: 650;
+        line-height: 1;
+        text-decoration: none;
+        transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .health-profile-button:hover {
+        transform: translateY(-1px);
+    }
+
+    .health-profile-button-back {
+        color: #0875cf;
+        background: #fff;
+    }
+
+    .health-profile-button-back:hover {
+        border-color: #8bbfe5;
+        color: #065fa9;
+        background: #f5fbff;
+    }
+
+    .health-profile-button-edit {
+        border-color: #0878d1;
+        color: #fff;
+        background: #0878d1;
+        box-shadow: 0 5px 14px rgba(8, 120, 209, .2);
+    }
+
+    .health-profile-button-edit:hover {
+        border-color: #0568b9;
+        color: #fff;
+        background: #0568b9;
+    }
+
+    @@media (max-width: 767.98px) {
+        .health-profile-title {
+            margin-bottom: 18px;
+        }
+
+        .health-profile-hero {
+            min-height: 0;
+            padding: 30px 22px;
+        }
+
+        .health-profile-hero-content {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .health-profile-avatar {
+            width: 100px;
+            height: 100px;
+            flex-basis: 100px;
+            font-size: 28px;
+        }
+
+        .health-profile-avatar .bi {
+            font-size: 40px;
+        }
+
+        .health-profile-meta {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .health-profile-meta-divider {
+            display: none;
+        }
+
+        .health-profile-decoration-cross {
+            right: 22px;
+            font-size: 70px;
+        }
+
+        .health-profile-decoration-shield {
+            right: -18px;
+            font-size: 130px;
+        }
+
+        .health-profile-grid {
+            grid-template-columns: minmax(0, 1fr);
+            padding: 24px 22px 8px;
+        }
+
+        .health-profile-column:first-child,
+        .health-profile-column:last-child {
+            padding: 0;
+        }
+
+        .health-profile-column:last-child {
+            border-left: 0;
+            border-top: 1px solid #dfe8f0;
+        }
+
+        .health-profile-column:last-child .health-profile-row:first-child {
+            padding-top: 22px;
+        }
+
+        .health-profile-row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 8px;
+        }
+
+        .health-profile-value {
+            padding-left: 42px;
+            text-align: left;
+        }
+
+        .health-profile-actions {
+            flex-wrap: wrap;
+            padding: 18px 22px 24px;
+        }
+    }
+
+    @@media (max-width: 420px) {
+        .health-profile-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .health-profile-button {
+            min-width: 0;
+            padding-right: 12px;
+            padding-left: 12px;
+        }
+    }
+</style>
+
+<main class="health-profile-details">
+    <a asp-action="Index" class="health-profile-back-top">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        <span>Quay lại</span>
+    </a>
+
+    <h1 class="health-profile-title">Chi tiết hồ sơ sức khỏe</h1>
+
+    <section aria-label="Thông tin hồ sơ sức khỏe">
+        <div class="health-profile-hero">
+            <div class="health-profile-hero-content">
+                <div class="health-profile-avatar" aria-label="Ảnh đại diện của @(hoTen.Length > 0 ? hoTen : "chủ hồ sơ")">
+                    @if (chuVietTat.Length > 0)
+                    {
+                        <span>@chuVietTat</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-fill" aria-hidden="true"></i>
+                    }
+                </div>
+
+                <div class="health-profile-summary">
+                    <h2 class="health-profile-name">@(hoTen.Length > 0 ? hoTen : "Chưa cập nhật họ tên")</h2>
+                    <div class="health-profile-code">
+                        <i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>
+                        <span>Mã hồ sơ @Model.MaHoSo</span>
+                    </div>
+                    <div class="health-profile-meta">
+                        <div class="health-profile-meta-item">
+                            <i class="bi bi-calendar3" aria-hidden="true"></i>
+                            <span>Ngày sinh: @HienThiNgay(Model.NgaySinh, "dd-MM-yyyy")</span>
+                        </div>
+                        <span class="health-profile-meta-divider" aria-hidden="true"></span>
+                        <div class="health-profile-meta-item">
+                            <i class="bi bi-person" aria-hidden="true"></i>
+                            <span>Giới tính: @gioiTinh</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <i class="bi bi-plus-lg health-profile-decoration health-profile-decoration-cross" aria-hidden="true"></i>
+            <i class="bi bi-shield-plus health-profile-decoration health-profile-decoration-shield" aria-hidden="true"></i>
+        </div>
+
+        <div class="health-profile-body">
+            <div class="health-profile-grid">
+                <div class="health-profile-column">
+                    <div class="health-profile-row">
+                        <div class="health-profile-label">
+                            <span class="health-profile-label-icon"><i class="bi bi-rulers" aria-hidden="true"></i></span>
+                            <span>Chiều cao</span>
+                        </div>
+                        <div class="health-profile-value">@HienThiSo(Model.ChieuCao, "cm")</div>
+                    </div>
+                    <div class="health-profile-row">
+                        <div class="health-profile-label">
+                            <span class="health-profile-label-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
+                            <span>Cân nặng</span>
+                        </div>
+                        <div class="health-profile-value">@HienThiSo(Model.CanNang, "kg")</div>
+                    </div>
+                    <div class="health-profile-row">
+                        <div class="health-profile-label">
+                            <span class="health-profile-label-icon"><i class="bi bi-clipboard2-heart" aria-hidden="true"></i></span>
+                            <span>Tiền sử bệnh</span>
+                        </div>
+                        <div class="health-profile-value">@tienSuBenh</div>
+                    </div>
+                    <div class="health-profile-row">
+                        <div class="health-profile-label">
+                            <span class="health-profile-label-icon"><i class="bi bi-bandaid" aria-hidden="true"></i></span>
+                            <span>Dị ứng</span>
+                        </div>
+                        <div class="health-profile-value">@diUng</div>
+                    </div>
+                </div>
+
+                <div class="health-profile-column">
+                    <div class="health-profile-row">
+                        <div class="health-profile-label">
+                            <span class="health-profile-label-icon"><i class="bi bi-calendar2-check" aria-hidden="true"></i></span>
+                            <span>Ngày tạo</span>
+                        </div>
+                        <div class="health-profile-value">@HienThiNgay(Model.NgayTao, "dd-MM-yyyy HH:mm")</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="health-profile-actions">
+                <a asp-action="Index" class="health-profile-button health-profile-button-back">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span>Quay lại</span>
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.MaHoSo" class="health-profile-button health-profile-button-edit">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                    <span>Sửa</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>

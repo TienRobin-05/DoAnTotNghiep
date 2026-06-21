@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
 </head>
-<body>
+<body class="site-page-shell">
     @{
         var hoTen = Context.Session.GetString("HoTen");
         var soDienThoai = Context.Session.GetString("SoDienThoai");
@@ -93,6 +93,8 @@
         <partial name="_ThongBao" />
         @RenderBody()
     </main>
+
+    <partial name="_Footer" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
