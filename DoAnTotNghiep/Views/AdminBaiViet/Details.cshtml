@@ -14,9 +14,13 @@
 }
 <section class="detail-card">
     <p><strong>Loại bài viết:</strong> <span class="article-type-pill">@Model.LoaiBaiViet</span></p>
+    <p><strong>Slug:</strong> @Model.Slug</p>
+    <p><strong>Mô tả ngắn:</strong> @Model.MoTaNgan</p>
     <p><strong>Tác giả:</strong> @Model.TenTacGia</p>
     <p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
-    <p><strong>Trạng thái:</strong> @(Model.TrangThai ? "Đang hiển thị" : "Đang ẩn")</p>
+    <p><strong>Trạng thái:</strong> @(Model.TrangThai ? "Đã xuất bản" : "Đã ẩn")</p>
+    <p><strong>Nổi bật:</strong> @(Model.NoiBat ? "Có" : "Không")</p>
+    <p><strong>Lượt xem:</strong> @Model.LuotXem.ToString("N0")</p>
     <div class="article-content border p-3 mb-3">@Model.NoiDung</div>
 </section>
 <a asp-action="Edit" asp-route-maBaiViet="@Model.MaBaiViet" class="btn btn-primary">Sửa</a>

@@ -11,6 +11,7 @@
         public int MaNguoiGui { get; set; }
         // Thuộc tính MaNguoiTraLoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public int? MaNguoiTraLoi { get; set; }
+        public int? MaVaccine { get; set; }
         // Thuộc tính CauHoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string CauHoi { get; set; } = string.Empty;
         // Thuộc tính CauTraLoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
@@ -26,5 +27,8 @@
         public string TenNguoiGui { get; set; } = string.Empty;
         // Thuộc tính TenNguoiTraLoi lưu thông tin tương ứng của đối tượng model. Controller dùng dữ liệu này để truyền sang View, còn DAL dùng để đọc hoặc ghi đúng cột dữ liệu trong database.
         public string TenNguoiTraLoi { get; set; } = string.Empty;
+        public string TenVaccine { get; set; } = string.Empty;
+        public string NhomVaccine { get; set; } = string.Empty;
+        public string DoTuoiVaccine { get; set; } = string.Empty;
     }
 }

@@ -12,14 +12,22 @@
     @Html.AntiForgeryToken()
     <div class="mb-3">
         <label class="form-label">Tiêu đề</label>
-        <input asp-for="TieuDe" class="form-control" />
+        <input asp-for="TieuDe" class="form-control" placeholder="Nhập tiêu đề bài viết..." />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Slug</label>
+        <input asp-for="Slug" class="form-control" placeholder="Tự tạo nếu để trống" />
     </div>
     <div class="mb-3">
         <label class="form-label">Loại bài viết</label>
         <select asp-for="LoaiBaiViet" class="form-select">
-            <option value="Cẩm nang">Cẩm nang</option>
             <option value="Tin tức">Tin tức</option>
+            <option value="Cẩm nang sức khỏe">Cẩm nang sức khỏe</option>
         </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mô tả ngắn</label>
+        <textarea asp-for="MoTaNgan" rows="3" class="form-control" placeholder="Nhập mô tả ngắn hiển thị ngoài danh sách..."></textarea>
     </div>
     <div class="mb-3">
         <label class="form-label">Ảnh đại diện</label>
@@ -32,7 +40,11 @@
     </div>
     <div class="form-check mb-3">
         <input asp-for="TrangThai" class="form-check-input" />
-        <label class="form-check-label">Hiển thị</label>
+        <label class="form-check-label">Xuất bản</label>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="NoiBat" class="form-check-input" />
+        <label class="form-check-label">Đánh dấu là bài viết nổi bật</label>
     </div>
     <button type="submit" class="btn btn-primary">Lưu</button>
     <a asp-action="Index" class="btn btn-secondary">Quay lại</a>

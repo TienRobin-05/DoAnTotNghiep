@@ -8,14 +8,6 @@
     var tienSuBenh = string.IsNullOrWhiteSpace(Model.TienSuBenh) ? "Chưa ghi nhận" : Model.TienSuBenh.Trim();
     var diUng = string.IsNullOrWhiteSpace(Model.DiUng) ? "Chưa ghi nhận" : Model.DiUng.Trim();
 
-    string LayChuVietTat(string ten)
-    {
-        if (string.IsNullOrWhiteSpace(ten)) return string.Empty;
-
-        var cacTu = ten.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return string.Concat(cacTu.Select(tu => char.ToUpperInvariant(tu[0])));
-    }
-
     string HienThiSo(double? giaTri, string donVi)
     {
         return giaTri.HasValue ? $"{giaTri.Value:0.##} {donVi}" : "Chưa cập nhật";
@@ -25,8 +17,6 @@
     {
         return ngay == default ? "Chưa cập nhật" : ngay.ToString(dinhDang);
     }
-
-    var chuVietTat = LayChuVietTat(hoTen);
 }
 
 <style>
@@ -400,14 +390,7 @@
         <div class="health-profile-hero">
             <div class="health-profile-hero-content">
                 <div class="health-profile-avatar" aria-label="Ảnh đại diện của @(hoTen.Length > 0 ? hoTen : "chủ hồ sơ")">
-                    @if (chuVietTat.Length > 0)
-                    {
-                        <span>@chuVietTat</span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-person-fill" aria-hidden="true"></i>
-                    }
+                    <i class="bi bi-person-fill" aria-hidden="true"></i>
                 </div>
 
                 <div class="health-profile-summary">

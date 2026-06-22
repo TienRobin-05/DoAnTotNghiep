@@ -1,20 +1,1444 @@
-﻿@* Khu vực giao diện của view Create.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
 @model CauHoiTuVan
 @{
     ViewData["Title"] = "Gửi câu hỏi tư vấn";
 }
 
-<h2>Gửi câu hỏi tư vấn</h2>
-
-@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-<form asp-action="Create" method="post" class="col-md-8">
-    @Html.AntiForgeryToken()
-
-    <div class="mb-3">
-        <label class="form-label">Nội dung câu hỏi</label>
-        <textarea name="CauHoi" rows="6" class="form-control">@Model.CauHoi</textarea>
+<div class="create-consult-page">
+    <div class="success-toast" data-toast hidden>
+        <span class="toast-icon"><i class="bi bi-check-lg"></i></span>
+        <span data-toast-message>Đã gửi câu hỏi nhanh thành công</span>
+        <button type="button" data-close-toast aria-label="Đóng thông báo"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <button type="submit" class="btn btn-primary">Gửi câu hỏi</button>
-</form>
+    <div class="create-content">
+        <a asp-action="Index" class="back-link">
+            <i class="bi bi-arrow-left"></i>
+            <span>Quay lại</span>
+        </a>
+
+        <header class="create-header">
+            <h1>Gửi câu hỏi tư vấn</h1>
+            <p>Mô tả rõ vấn đề để được tư vấn nhanh và chính xác hơn.</p>
+        </header>
+
+        <div class="create-layout">
+            <main class="form-column">
+                <form asp-action="Create" method="post" class="consult-form-card" data-consult-form novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="CauHoi" value="@Model.CauHoi" data-cau-hoi-hidden />
+                    <input type="hidden" name="MaVaccine" value="@Model.MaVaccine" data-vaccine-id />
+
+                    @if (ViewBag.ThongBao != null)
+                    {
+                        <div class="server-alert">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span>@ViewBag.ThongBao</span>
+                        </div>
+                    }
+
+                    <div class="form-field vaccine-field" data-vaccine-picker data-vaccine-url="@Url.Action("DanhSachDangSuDungJson", "Vaccine", new { limit = 1000 })">
+                        <label>Vaccine liên quan</label>
+                        <button type="button" class="vaccine-picker-button" data-open-vaccine-picker>
+                            <span class="field-icon"><i class="bi bi-capsule"></i></span>
+                            <span class="vaccine-picker-copy">
+                                <strong data-selected-vaccine-name>Chọn vaccine cần tư vấn</strong>
+                                <small data-selected-vaccine-meta>Danh sách lấy từ vaccine đang dùng trong hệ thống</small>
+                            </span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+
+                        <div class="vaccine-picker-popover" data-vaccine-popover hidden>
+                            <label class="vaccine-picker-search" aria-label="Tìm vaccine">
+                                <i class="bi bi-search"></i>
+                                <input type="search" placeholder="Tìm tên hoặc nhóm vaccine..." data-vaccine-search />
+                            </label>
+
+                            <div class="vaccine-picker-state" data-vaccine-loading>
+                                <span></span><span></span><span></span>
+                            </div>
+
+                            <div class="vaccine-picker-list" data-vaccine-list></div>
+
+                            <p class="vaccine-picker-empty" data-vaccine-empty hidden>Hiện chưa có vaccine đang dùng.</p>
+                            <p class="vaccine-picker-empty" data-vaccine-search-empty hidden>Không tìm thấy vaccine phù hợp.</p>
+                            <p class="vaccine-picker-error" data-vaccine-error hidden>Không thể tải danh sách vaccine. Vui lòng thử lại.</p>
+                        </div>
+
+                        <p class="field-error" data-vaccine-error-message hidden>Vui lòng chọn vaccine cần tư vấn.</p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="questionTitle">Tiêu đề câu hỏi</label>
+                        <input id="questionTitle" type="text" data-title
+                               value="Sau khi tiêm vaccine cúm có sốt nhẹ có sao không?"
+                               placeholder="Nhập tiêu đề câu hỏi của bạn..." />
+                        <p class="field-error" data-title-error hidden>Vui lòng nhập tiêu đề câu hỏi.</p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="questionContent">Nội dung câu hỏi</label>
+                        <textarea id="questionContent" data-content placeholder="Mô tả rõ tình trạng, thời điểm xuất hiện triệu chứng và thông tin liên quan...">Chào dược sĩ,
+Tôi vừa tiêm vaccine cúm hôm qua, tối hôm đó tôi bị sốt nhẹ 37.8°C, nhức đầu và mệt mỏi. Sáng nay sốt giảm còn 37.2°C nhưng vẫn hơi ê người. Đây có phải phản ứng bình thường sau tiêm không và tôi cần lưu ý điều gì thêm không ạ?</textarea>
+                        <p class="field-error" data-content-error hidden>Vui lòng nhập nội dung câu hỏi.</p>
+                        <p class="privacy-note">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Vui lòng không chia sẻ thông tin nhạy cảm không cần thiết.</span>
+                        </p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary-action" data-save-draft>
+                            <i class="bi bi-clipboard-check"></i>
+                            <span>Lưu nháp</span>
+                        </button>
+                        <button type="submit" class="btn-primary-action" data-submit-question>
+                            <i class="bi bi-send"></i>
+                            <span>Gửi câu hỏi</span>
+                        </button>
+                    </div>
+                </form>
+            </main>
+
+            <aside class="create-sidebar">
+                <section class="side-card quick-card">
+                    <h2>Câu hỏi nhanh</h2>
+                    <p>Chọn câu hỏi có sẵn do quản trị viên cung cấp để gửi nhanh các thắc mắc phổ biến.</p>
+                    <button type="button" class="quick-open-button" data-open-quick>
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        <span>Chọn câu hỏi nhanh</span>
+                    </button>
+                    <div class="quick-preview-list" data-quick-preview-list>
+                        <p class="quick-inline-state" data-quick-preview-loading>Đang tải câu hỏi nhanh...</p>
+                        <p class="quick-inline-state" data-quick-preview-empty hidden>Hiện chưa có câu hỏi nhanh.</p>
+                    </div>
+                </section>
+
+                <section class="side-card tip-card">
+                    <h2>Lưu ý trước khi gửi</h2>
+                    <div class="tip-list">
+                        <div class="tip-item">
+                            <span><i class="bi bi-shield-check"></i></span>
+                            <p>Cung cấp đầy đủ thông tin để dược sĩ hiểu rõ tình trạng của bạn.</p>
+                        </div>
+                        <div class="tip-item">
+                            <span><i class="bi bi-clock"></i></span>
+                            <p>Thời gian phản hồi dự kiến từ 1-24 giờ làm việc.</p>
+                        </div>
+                        <div class="tip-item">
+                            <span><i class="bi bi-lock"></i></span>
+                            <p>Thông tin của bạn được bảo mật và chỉ dùng cho mục đích tư vấn.</p>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<div class="quick-modal" data-quick-modal hidden>
+    <div class="quick-dialog" role="dialog" aria-modal="true" aria-labelledby="quickModalTitle">
+        <button type="button" class="modal-close" data-close-quick aria-label="Đóng">
+            <i class="bi bi-x-lg"></i>
+        </button>
+
+        <header class="modal-head">
+            <h2 id="quickModalTitle">Câu hỏi nhanh</h2>
+            <p>Danh sách câu hỏi phổ biến do quản trị viên cung cấp</p>
+        </header>
+
+        <label class="modal-search" aria-label="Tìm kiếm câu hỏi nhanh">
+            <i class="bi bi-search"></i>
+            <input type="search" placeholder="Tìm kiếm câu hỏi nhanh..." data-quick-search />
+        </label>
+
+        <div class="quick-state quick-loading" data-quick-loading hidden>
+            <span></span><span></span><span></span>
+        </div>
+
+        <div class="quick-list" data-quick-list></div>
+
+        <p class="quick-empty" data-quick-empty hidden>Không tìm thấy câu hỏi phù hợp.</p>
+        <p class="quick-error" data-quick-error hidden>Không thể tải danh sách câu hỏi nhanh. Vui lòng thử lại.</p>
+
+        <div class="quick-info-strip">
+            <i class="bi bi-info-circle"></i>
+            <span>Khi bạn chọn, câu hỏi sẽ được gửi ngay đến dược sĩ tư vấn.</span>
+        </div>
+
+        <footer class="modal-actions">
+            <button type="button" class="btn-primary-action" data-send-quick disabled>
+                <i class="bi bi-send"></i>
+                <span>Chọn và gửi câu hỏi</span>
+            </button>
+        </footer>
+    </div>
+</div>
+
+<style>
+    .create-consult-page {
+        position: relative;
+        min-height: calc(100vh - 72px);
+        background: #f3f7fb;
+        color: #123047;
+    }
+
+    .create-content {
+        max-width: 1520px;
+        margin: 0 auto;
+        padding: 32px 60px 48px;
+    }
+
+    .back-link {
+        width: fit-content;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 15px;
+        border: 1px solid #cfe0ff;
+        border-radius: 10px;
+        color: #1d4ed8;
+        background: #ffffff;
+        font-weight: 750;
+        text-decoration: none;
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .back-link:hover {
+        color: #1d4ed8;
+        border-color: #93c5fd;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .create-header {
+        margin: 18px 0 24px;
+    }
+
+    .create-header h1 {
+        margin: 0;
+        color: #0f2438;
+        font-size: 2.1rem;
+        line-height: 1.2;
+        font-weight: 800;
+    }
+
+    .create-header p {
+        margin: 8px 0 0;
+        color: #64798b;
+        font-size: 1rem;
+    }
+
+    .create-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .consult-form-card,
+    .side-card,
+    .quick-dialog {
+        background: #ffffff;
+        border: 1px solid #dbe6f3;
+        border-radius: 18px;
+        box-shadow: 0 18px 42px rgba(30, 70, 110, 0.08);
+    }
+
+    .consult-form-card,
+    .side-card {
+        padding: 24px;
+    }
+
+    .consult-form-card {
+        display: grid;
+        gap: 20px;
+    }
+
+    .server-alert {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 14px;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        color: #b91c1c;
+        background: #fff7f7;
+        font-weight: 700;
+    }
+
+    .form-field {
+        display: grid;
+        gap: 9px;
+    }
+
+    .form-field label {
+        color: #102a43;
+        font-weight: 800;
+        font-size: .95rem;
+    }
+
+    .form-field input,
+    .form-field textarea,
+    .select-shell {
+        width: 100%;
+        border: 1px solid #d7e3f0;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #17324a;
+        font-size: .95rem;
+        transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .form-field input {
+        height: 46px;
+        padding: 0 14px;
+    }
+
+    .form-field textarea {
+        min-height: 166px;
+        padding: 14px;
+        line-height: 1.55;
+        resize: vertical;
+    }
+
+    .form-field input:focus,
+    .form-field textarea:focus,
+    .select-shell:focus-within {
+        outline: 0;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .select-shell {
+        height: 48px;
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) 18px;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+    }
+
+    .field-icon,
+    .toast-icon,
+    .quick-option-icon,
+    .tip-item span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .field-icon {
+        width: 34px;
+        height: 34px;
+        color: #2563eb;
+        background: #eaf3ff;
+    }
+
+    .select-shell select {
+        min-width: 0;
+        width: 100%;
+        border: 0;
+        outline: 0;
+        appearance: none;
+        background: transparent;
+        color: #17324a;
+        font-weight: 700;
+    }
+
+    .vaccine-field {
+        position: relative;
+    }
+
+    .vaccine-picker-button {
+        width: 100%;
+        min-height: 58px;
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) 18px;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border: 1px solid #d7e3f0;
+        border-radius: 12px;
+        color: #17324a;
+        background: #ffffff;
+        text-align: left;
+        transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .vaccine-picker-button:focus,
+    .vaccine-picker-button.is-open {
+        outline: 0;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .vaccine-picker-copy {
+        display: grid;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .vaccine-picker-copy strong {
+        color: #102a43;
+        font-size: .95rem;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .vaccine-picker-copy small {
+        color: #667b8d;
+        font-size: .84rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .vaccine-picker-popover {
+        position: absolute;
+        z-index: 50;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        padding: 12px;
+        border: 1px solid #d6e6f2;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 22px 54px rgba(30, 70, 110, 0.16);
+    }
+
+    .vaccine-picker-popover[hidden] {
+        display: none;
+    }
+
+    .vaccine-picker-search {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 12px;
+        border: 1px solid #d7e3f0;
+        border-radius: 12px;
+        color: #6a7f91;
+        background: #f8fbfd;
+        margin-bottom: 10px;
+    }
+
+    .vaccine-picker-search input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        color: #17324a;
+        background: transparent;
+    }
+
+    .vaccine-picker-list {
+        display: grid;
+        gap: 8px;
+        max-height: 360px;
+        overflow: auto;
+        padding-right: 2px;
+    }
+
+    .vaccine-picker-option {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 40px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #e0ebf4;
+        border-radius: 12px;
+        color: #17324a;
+        background: #ffffff;
+        text-align: left;
+        transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .vaccine-picker-option:hover,
+    .vaccine-picker-option.is-selected {
+        border-color: #93c5fd;
+        background: #f4f9ff;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.09);
+    }
+
+    .vaccine-picker-option-icon {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #2563eb;
+        background: #eaf3ff;
+    }
+
+    .vaccine-picker-option-body {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+    }
+
+    .vaccine-picker-option-body strong {
+        color: #102a43;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .vaccine-picker-option-body small {
+        color: #6a7f91;
+        font-size: .82rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .vaccine-picker-status {
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 9px;
+        border-radius: 999px;
+        color: #047857;
+        background: #dcfce7;
+        font-size: .74rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .vaccine-picker-empty,
+    .vaccine-picker-error {
+        margin: 8px 0 0;
+        padding: 12px;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: 700;
+        font-size: .9rem;
+    }
+
+    .vaccine-picker-empty {
+        color: #64798b;
+        background: #f8fbfd;
+    }
+
+    .vaccine-picker-error {
+        color: #b91c1c;
+        background: #fff7f7;
+    }
+
+    .vaccine-picker-state {
+        display: grid;
+        gap: 8px;
+    }
+
+    .vaccine-picker-state[hidden] {
+        display: none;
+    }
+
+    .vaccine-picker-state span {
+        height: 58px;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #eef5fb, #f8fbfd, #eef5fb);
+    }
+
+    .privacy-note {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 0;
+        color: #667b8d;
+        font-size: .84rem;
+    }
+
+    .privacy-note i {
+        color: #60a5fa;
+    }
+
+    .field-error {
+        margin: 0;
+        color: #dc2626;
+        font-size: .84rem;
+        font-weight: 650;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+        padding-top: 4px;
+    }
+
+    .btn-secondary-action,
+    .btn-primary-action {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border-radius: 12px;
+        padding: 0 18px;
+        font-weight: 800;
+        transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .btn-secondary-action {
+        border: 1px solid #cfe0ff;
+        color: #1d4ed8;
+        background: #ffffff;
+    }
+
+    .btn-primary-action {
+        border: 1px solid #2563eb;
+        color: #ffffff;
+        background: #2563eb;
+        min-width: 174px;
+        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-secondary-action:hover,
+    .btn-primary-action:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-primary-action:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-primary-action:disabled {
+        cursor: not-allowed;
+        opacity: .58;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .create-sidebar {
+        display: grid;
+        gap: 18px;
+        position: sticky;
+        top: 18px;
+    }
+
+    .side-card h2 {
+        margin: 0;
+        color: #102a43;
+        font-size: 1.12rem;
+        font-weight: 800;
+    }
+
+    .side-card > p {
+        margin: 8px 0 16px;
+        color: #64798b;
+        line-height: 1.55;
+        font-size: .93rem;
+    }
+
+    .quick-open-button {
+        width: 100%;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border: 0;
+        border-radius: 12px;
+        color: #ffffff;
+        background: #2563eb;
+        font-weight: 800;
+    }
+
+    .quick-preview-list {
+        display: grid;
+        gap: 9px;
+        margin-top: 16px;
+    }
+
+    .quick-inline-state {
+        margin: 0;
+        padding: 12px;
+        border-radius: 10px;
+        color: #64798b;
+        background: #f8fbfd;
+        font-size: .9rem;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .quick-preview {
+        width: 100%;
+        min-height: 48px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 16px;
+        gap: 10px;
+        align-items: center;
+        padding: 11px 12px;
+        border: 1px solid #d7e8fb;
+        border-radius: 10px;
+        color: #1d4ed8;
+        background: #ffffff;
+        text-align: left;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .tip-list {
+        display: grid;
+        gap: 15px;
+    }
+
+    .tip-item {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 11px;
+        align-items: start;
+    }
+
+    .tip-item span {
+        width: 38px;
+        height: 38px;
+        color: #2563eb;
+        background: #eaf3ff;
+    }
+
+    .tip-item p {
+        margin: 0;
+        color: #435f75;
+        line-height: 1.5;
+        font-size: .92rem;
+    }
+
+    .quick-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(9, 24, 38, .42);
+    }
+
+    .quick-modal[hidden] {
+        display: none;
+    }
+
+    .quick-dialog {
+        position: relative;
+        width: min(700px, 100%);
+        max-height: 85vh;
+        overflow: auto;
+        padding: 30px;
+        box-shadow: 0 28px 80px rgba(7, 25, 42, 0.28);
+        animation: modalIn .18s ease-out;
+    }
+
+    @@keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px) scale(.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 38px;
+        height: 38px;
+        border: 1px solid #dce8f2;
+        border-radius: 50%;
+        color: #274761;
+        background: #ffffff;
+    }
+
+    .modal-head h2 {
+        margin: 0;
+        color: #102a43;
+        font-size: 1.45rem;
+        font-weight: 800;
+    }
+
+    .modal-head p {
+        margin: 7px 48px 18px 0;
+        color: #6a7f91;
+    }
+
+    .modal-search {
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 14px;
+        border: 1px solid #d7e3f0;
+        border-radius: 12px;
+        color: #6a7f91;
+        background: #f8fbfd;
+        margin-bottom: 14px;
+    }
+
+    .modal-search input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        color: #17324a;
+        background: transparent;
+    }
+
+    .quick-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .quick-option {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) auto 16px;
+        align-items: center;
+        gap: 11px;
+        padding: 12px;
+        border: 1px solid #dce9f3;
+        border-radius: 14px;
+        color: #17324a;
+        background: #ffffff;
+        text-align: left;
+        transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .quick-option:hover,
+    .quick-option.is-selected {
+        border-color: #93c5fd;
+        background: #f4f9ff;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.1);
+    }
+
+    .quick-option-icon {
+        width: 42px;
+        height: 42px;
+        color: #2563eb;
+        background: #eaf3ff;
+    }
+
+    .quick-option-body {
+        display: grid;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .quick-option-body strong {
+        color: #102a43;
+        line-height: 1.35;
+    }
+
+    .quick-option-body small {
+        color: #6a7f91;
+        line-height: 1.35;
+    }
+
+    .quick-badge {
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        color: #1d4ed8;
+        background: #eaf2ff;
+        font-size: .75rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .quick-info-strip {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        color: #0f4a78;
+        background: #e8f6ff;
+        font-size: .9rem;
+        line-height: 1.45;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 18px;
+    }
+
+    .quick-empty,
+    .quick-error {
+        margin: 14px 0 0;
+        padding: 14px;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .quick-empty {
+        color: #607789;
+        background: #f8fbfd;
+    }
+
+    .quick-error {
+        color: #b91c1c;
+        background: #fff7f7;
+    }
+
+    .quick-loading {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .quick-loading span {
+        height: 62px;
+        border-radius: 14px;
+        background: linear-gradient(90deg, #eef5fb, #f8fbfd, #eef5fb);
+    }
+
+    .success-toast {
+        position: fixed;
+        top: 88px;
+        right: 28px;
+        z-index: 2100;
+        min-height: 48px;
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr) 28px;
+        align-items: center;
+        gap: 10px;
+        max-width: min(420px, calc(100vw - 32px));
+        padding: 10px 12px;
+        border: 1px solid #86efac;
+        border-radius: 12px;
+        color: #14532d;
+        background: #f0fdf4;
+        box-shadow: 0 18px 42px rgba(22, 101, 52, 0.16);
+        font-weight: 800;
+    }
+
+    .success-toast[hidden] {
+        display: none;
+    }
+
+    .toast-icon {
+        width: 32px;
+        height: 32px;
+        color: #ffffff;
+        background: #16a34a;
+    }
+
+    .success-toast button {
+        width: 28px;
+        height: 28px;
+        border: 0;
+        border-radius: 50%;
+        color: #166534;
+        background: transparent;
+    }
+
+    @@media (max-width: 1080px) {
+        .create-content {
+            padding-inline: 28px;
+        }
+
+        .create-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .create-sidebar {
+            position: static;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 760px) {
+        .create-content {
+            padding: 22px 16px 36px;
+        }
+
+        .create-header h1 {
+            font-size: 1.7rem;
+        }
+
+        .create-sidebar,
+        .form-actions {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .form-actions {
+            gap: 10px;
+        }
+
+        .btn-secondary-action,
+        .btn-primary-action {
+            width: 100%;
+        }
+
+        .quick-dialog {
+            width: calc(100vw - 32px);
+            max-height: 85vh;
+            padding: 24px 18px;
+        }
+
+        .quick-option {
+            grid-template-columns: 38px minmax(0, 1fr) 16px;
+        }
+
+        .quick-badge {
+            grid-column: 2 / 3;
+            justify-self: start;
+        }
+
+    }
+</style>
+
+<script>
+    (() => {
+        const form = document.querySelector('[data-consult-form]');
+        const hiddenQuestion = document.querySelector('[data-cau-hoi-hidden]');
+        const vaccinePicker = document.querySelector('[data-vaccine-picker]');
+        const vaccineUrl = vaccinePicker?.dataset.vaccineUrl;
+        const vaccineIdInput = document.querySelector('[data-vaccine-id]');
+        const vaccineButton = document.querySelector('[data-open-vaccine-picker]');
+        const vaccinePopover = document.querySelector('[data-vaccine-popover]');
+        const vaccineSearch = document.querySelector('[data-vaccine-search]');
+        const vaccineList = document.querySelector('[data-vaccine-list]');
+        const vaccineLoading = document.querySelector('[data-vaccine-loading]');
+        const vaccineEmpty = document.querySelector('[data-vaccine-empty]');
+        const vaccineSearchEmpty = document.querySelector('[data-vaccine-search-empty]');
+        const vaccineLoadError = document.querySelector('[data-vaccine-error]');
+        const selectedVaccineName = document.querySelector('[data-selected-vaccine-name]');
+        const selectedVaccineMeta = document.querySelector('[data-selected-vaccine-meta]');
+        const titleInput = document.querySelector('[data-title]');
+        const contentInput = document.querySelector('[data-content]');
+        const draftButton = document.querySelector('[data-save-draft]');
+
+        const modal = document.querySelector('[data-quick-modal]');
+        const openButtons = document.querySelectorAll('[data-open-quick]');
+        const closeButton = document.querySelector('[data-close-quick]');
+        const searchInput = document.querySelector('[data-quick-search]');
+        const quickList = document.querySelector('[data-quick-list]');
+        const quickPreviewList = document.querySelector('[data-quick-preview-list]');
+        const quickPreviewLoading = document.querySelector('[data-quick-preview-loading]');
+        const quickPreviewEmpty = document.querySelector('[data-quick-preview-empty]');
+        const quickLoading = document.querySelector('[data-quick-loading]');
+        const quickError = document.querySelector('[data-quick-error]');
+        const quickEmpty = document.querySelector('[data-quick-empty]');
+        const sendQuickButton = document.querySelector('[data-send-quick]');
+        const quickOptions = [];
+        const toast = document.querySelector('[data-toast]');
+        const toastMessage = document.querySelector('[data-toast-message]');
+        const closeToastButton = document.querySelector('[data-close-toast]');
+
+        let selectedQuick = null;
+        let quickQuestions = [];
+        let quickLoaded = false;
+        let quickSending = false;
+        let vaccines = [];
+        let selectedVaccine = null;
+        let toastTimer = null;
+
+        const errors = {
+            vaccine: document.querySelector('[data-vaccine-error-message]'),
+            title: document.querySelector('[data-title-error]'),
+            content: document.querySelector('[data-content-error]')
+        };
+
+        const escapeHtml = (value) => String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+
+        const normalize = (value) => String(value ?? '').toLowerCase();
+
+        const setVaccineState = ({ loading = false, error = false } = {}) => {
+            if (vaccineLoading) vaccineLoading.hidden = !loading;
+            if (vaccineLoadError) vaccineLoadError.hidden = !error;
+            if (vaccineList) vaccineList.hidden = loading || error;
+        };
+
+        const renderVaccines = () => {
+            if (!vaccineList) return;
+
+            const keyword = normalize(vaccineSearch?.value.trim());
+            const filtered = vaccines.filter((vaccine) => {
+                const haystack = [
+                    vaccine.name,
+                    vaccine.group,
+                    vaccine.age_range,
+                    vaccine.status_label,
+                    `#${vaccine.id}`
+                ].map(normalize).join(' ');
+                return haystack.includes(keyword);
+            });
+
+            vaccineList.innerHTML = filtered.map((vaccine) => {
+                const selected = selectedVaccine?.id === vaccine.id ? ' is-selected' : '';
+                const meta = [vaccine.group || 'Chưa phân nhóm', vaccine.age_range || 'Chưa cấu hình']
+                    .filter(Boolean)
+                    .join(' • ');
+                return `
+                    <button type="button" class="vaccine-picker-option${selected}" data-vaccine-option="${escapeHtml(vaccine.id)}">
+                        <span class="vaccine-picker-option-icon"><i class="bi bi-capsule"></i></span>
+                        <span class="vaccine-picker-option-body">
+                            <strong>${escapeHtml(vaccine.name)}</strong>
+                            <small>Mã vaccine #${escapeHtml(vaccine.id)}</small>
+                            <small>${escapeHtml(meta)}</small>
+                        </span>
+                        <span class="vaccine-picker-status">${escapeHtml(vaccine.status_label || 'Đang dùng')}</span>
+                    </button>`;
+            }).join('');
+
+            if (vaccineEmpty) vaccineEmpty.hidden = vaccines.length !== 0;
+            if (vaccineSearchEmpty) vaccineSearchEmpty.hidden = vaccines.length === 0 || filtered.length !== 0;
+
+            vaccineList.querySelectorAll('[data-vaccine-option]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const id = Number(button.dataset.vaccineOption);
+                    const vaccine = vaccines.find((item) => Number(item.id) === id);
+                    if (!vaccine) return;
+
+                    selectedVaccine = vaccine;
+                    if (vaccineIdInput) vaccineIdInput.value = vaccine.id;
+                    if (selectedVaccineName) selectedVaccineName.textContent = vaccine.name;
+                    if (selectedVaccineMeta) {
+                        selectedVaccineMeta.textContent = [
+                            vaccine.group || 'Chưa phân nhóm',
+                            vaccine.age_range || 'Chưa cấu hình'
+                        ].join(' • ');
+                    }
+                    if (errors.vaccine) errors.vaccine.hidden = true;
+                    closeVaccinePicker();
+                    renderVaccines();
+                });
+            });
+        };
+
+        const fetchVaccines = async () => {
+            if (!vaccineUrl) return;
+            setVaccineState({ loading: true });
+            try {
+                const response = await fetch(vaccineUrl, { headers: { 'Accept': 'application/json' } });
+                if (!response.ok) throw new Error('Cannot load vaccines');
+                const payload = await response.json();
+                vaccines = Array.isArray(payload.data) ? payload.data : [];
+                setVaccineState({ loading: false });
+                renderVaccines();
+            } catch {
+                vaccines = [];
+                setVaccineState({ loading: false, error: true });
+            }
+        };
+
+        const openVaccinePicker = () => {
+            if (!vaccinePopover || !vaccineButton) return;
+            vaccinePopover.hidden = false;
+            vaccineButton.classList.add('is-open');
+            vaccineSearch?.focus();
+            if (vaccines.length === 0 && !vaccineLoadError?.hidden) return;
+            renderVaccines();
+        };
+
+        const closeVaccinePicker = () => {
+            if (!vaccinePopover || !vaccineButton) return;
+            vaccinePopover.hidden = true;
+            vaccineButton.classList.remove('is-open');
+        };
+
+        const showToast = (message) => {
+            if (!toast || !toastMessage) return;
+            toastMessage.textContent = message;
+            toast.hidden = false;
+            window.clearTimeout(toastTimer);
+            toastTimer = window.setTimeout(() => {
+                toast.hidden = true;
+            }, 4200);
+        };
+
+        closeToastButton?.addEventListener('click', () => {
+            if (toast) toast.hidden = true;
+            window.clearTimeout(toastTimer);
+        });
+
+        draftButton?.addEventListener('click', () => {
+            const draft = {
+                vaccineId: selectedVaccine?.id ?? vaccineIdInput?.value ?? '',
+                vaccineName: selectedVaccine?.name ?? selectedVaccineName?.textContent ?? '',
+                title: titleInput?.value ?? '',
+                content: contentInput?.value ?? '',
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('consultationDraft', JSON.stringify(draft));
+            showToast('Đã lưu nháp câu hỏi tư vấn');
+        });
+
+        form?.addEventListener('submit', (event) => {
+            const vaccineId = vaccineIdInput?.value.trim() ?? '';
+            const vaccineName = selectedVaccine?.name ?? selectedVaccineName?.textContent?.trim() ?? '';
+            const title = titleInput?.value.trim() ?? '';
+            const content = contentInput?.value.trim() ?? '';
+
+            if (errors.vaccine) errors.vaccine.hidden = Boolean(vaccineId);
+            if (errors.title) errors.title.hidden = Boolean(title);
+            if (errors.content) errors.content.hidden = Boolean(content);
+
+            if (!vaccineId || !title || !content) {
+                event.preventDefault();
+                return;
+            }
+
+            if (hiddenQuestion) {
+                hiddenQuestion.value = `Vaccine liên quan: ${vaccineName} (#${vaccineId})\nTiêu đề: ${title}\n\n${content}`;
+            }
+        });
+
+        vaccineButton?.addEventListener('click', () => {
+            if (vaccinePopover?.hidden) {
+                openVaccinePicker();
+            } else {
+                closeVaccinePicker();
+            }
+        });
+
+        vaccineSearch?.addEventListener('input', renderVaccines);
+
+        document.addEventListener('click', (event) => {
+            if (vaccinePicker && !vaccinePicker.contains(event.target)) {
+                closeVaccinePicker();
+            }
+        });
+
+        fetchVaccines();
+
+        const setQuickState = ({ loading = false, error = false } = {}) => {
+            if (quickLoading) quickLoading.hidden = !loading;
+            if (quickError) quickError.hidden = !error;
+            if (quickList) quickList.hidden = loading || error;
+            if (quickPreviewLoading) quickPreviewLoading.hidden = quickLoaded || error;
+        };
+
+        const quickIcon = (topic) => {
+            const text = normalize(topic);
+            if (text.includes('lịch')) return 'bi-calendar2-week';
+            if (text.includes('hpv')) return 'bi-shield-plus';
+            if (text.includes('thai')) return 'bi-heart-pulse';
+            if (text.includes('phản ứng') || text.includes('sốt')) return 'bi-thermometer-half';
+            return 'bi-chat-dots';
+        };
+
+        const filteredQuickQuestions = () => {
+            const keyword = normalize(searchInput?.value.trim());
+            return quickQuestions.filter((question) => {
+                const haystack = [
+                    question.question,
+                    question.content,
+                    question.topic,
+                    question.badge_label
+                ].map(normalize).join(' ');
+                return haystack.includes(keyword);
+            });
+        };
+
+        const renderQuickPreview = () => {
+            if (!quickPreviewList) return;
+            quickPreviewList.querySelectorAll('[data-quick-preview-item]').forEach((item) => item.remove());
+
+            const preview = quickQuestions.slice(0, 3);
+            if (quickPreviewEmpty) quickPreviewEmpty.hidden = preview.length !== 0 || !quickLoaded;
+
+            preview.forEach((question) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'quick-preview';
+                button.dataset.quickPreviewItem = 'true';
+                button.dataset.focusQuick = question.id;
+                button.innerHTML = `<span>${escapeHtml(question.question)}</span><i class="bi bi-chevron-right"></i>`;
+                button.addEventListener('click', () => openModal(question.id));
+                quickPreviewList.appendChild(button);
+            });
+        };
+
+        const renderQuickQuestions = () => {
+            if (!quickList) return;
+            const filtered = filteredQuickQuestions();
+            quickList.innerHTML = filtered.map((question) => {
+                const selected = Number(selectedQuick?.id) === Number(question.id) ? ' is-selected' : '';
+                return `
+                    <button type="button" class="quick-option${selected}" data-quick-id="${escapeHtml(question.id)}">
+                        <span class="quick-option-icon"><i class="bi ${quickIcon(question.topic)}"></i></span>
+                        <span class="quick-option-body">
+                            <strong>${escapeHtml(question.question)}</strong>
+                            <small>${escapeHtml(question.content)}</small>
+                        </span>
+                        <span class="quick-badge">${escapeHtml(question.badge_label || question.topic)}</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>`;
+            }).join('');
+
+            if (quickEmpty) {
+                quickEmpty.textContent = quickQuestions.length === 0
+                    ? 'Hiện chưa có câu hỏi nhanh.'
+                    : 'Không tìm thấy câu hỏi phù hợp.';
+                quickEmpty.hidden = quickQuestions.length !== 0 && filtered.length !== 0;
+            }
+
+            quickList.querySelectorAll('[data-quick-id]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const id = Number(button.dataset.quickId);
+                    const question = quickQuestions.find((item) => Number(item.id) === id);
+                    if (!question || quickSending) return;
+                    selectedQuick = question;
+                    if (sendQuickButton) sendQuickButton.disabled = false;
+                    renderQuickQuestions();
+                });
+            });
+        };
+
+        const loadQuickQuestions = async () => {
+            setQuickState({ loading: true });
+            try {
+                const response = await fetch('/api/quick-questions?is_active=true', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) throw new Error('Cannot load quick questions');
+                const payload = await response.json();
+                quickQuestions = Array.isArray(payload.data) ? payload.data : [];
+                quickLoaded = true;
+                setQuickState({ loading: false });
+                renderQuickPreview();
+                renderQuickQuestions();
+            } catch {
+                quickQuestions = [];
+                quickLoaded = true;
+                setQuickState({ loading: false, error: true });
+                renderQuickPreview();
+            }
+        };
+
+        const openModal = async (focusId) => {
+            if (!modal) return;
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            searchInput?.focus();
+
+            if (!quickLoaded) {
+                await loadQuickQuestions();
+            } else {
+                renderQuickQuestions();
+            }
+
+            if (focusId) {
+                const question = quickQuestions.find((item) => Number(item.id) === Number(focusId));
+                if (question) {
+                    selectedQuick = question;
+                    if (sendQuickButton) sendQuickButton.disabled = false;
+                    renderQuickQuestions();
+                    quickList?.querySelector(`[data-quick-id="${CSS.escape(String(focusId))}"]`)?.scrollIntoView({ block: 'center' });
+                }
+            }
+        };
+
+        const closeModal = () => {
+            if (!modal) return;
+            modal.hidden = true;
+            document.body.style.overflow = '';
+        };
+
+        const sendQuick = async () => {
+            if (!selectedQuick || !sendQuickButton) return;
+            if (quickSending) return;
+            quickSending = true;
+            sendQuickButton.disabled = true;
+            const label = sendQuickButton.querySelector('span');
+            const oldText = label?.textContent ?? '';
+            if (label) label.textContent = 'Đang gửi...';
+
+            window.setTimeout(() => {
+                closeModal();
+                showToast('Đã gửi câu hỏi nhanh thành công');
+                if (label) label.textContent = oldText;
+                selectedQuick?.classList.remove('is-selected');
+                selectedQuick = null;
+                sendQuickButton.disabled = true;
+            }, 450);
+        };
+
+        const sendQuickApi = async () => {
+            if (!selectedQuick || !sendQuickButton || quickSending) return;
+            quickSending = true;
+            sendQuickButton.disabled = true;
+            const label = sendQuickButton.querySelector('span');
+            const oldText = label?.textContent ?? '';
+            if (label) label.textContent = 'Đang gửi...';
+
+            try {
+                const response = await fetch('/api/consultations/quick', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ quick_question_id: selectedQuick.id })
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(payload.message || 'Không thể gửi câu hỏi nhanh');
+                closeModal();
+                showToast(payload.message || 'Đã gửi câu hỏi nhanh thành công');
+                selectedQuick = null;
+            } catch (error) {
+                showToast(error.message || 'Không thể gửi câu hỏi nhanh. Vui lòng thử lại.');
+            } finally {
+                quickSending = false;
+                if (label) label.textContent = oldText;
+                sendQuickButton.disabled = !selectedQuick;
+                renderQuickQuestions();
+            }
+        };
+
+        openButtons.forEach((button) => {
+            button.addEventListener('click', () => openModal(button.dataset.focusQuick));
+        });
+
+        closeButton?.addEventListener('click', closeModal);
+        modal?.addEventListener('click', (event) => {
+            if (event.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal && !modal.hidden) closeModal();
+        });
+
+        quickOptions.forEach((option) => {
+            option.addEventListener('click', () => selectQuick(option));
+        });
+
+        sendQuickButton?.addEventListener('click', sendQuickApi);
+
+        searchInput?.addEventListener('input', () => {
+            const keyword = searchInput.value.trim().toLowerCase();
+            let visible = 0;
+
+            quickOptions.forEach((option) => {
+                const text = option.textContent?.toLowerCase() ?? '';
+                const matched = text.includes(keyword);
+                option.hidden = !matched;
+                if (matched) visible++;
+            });
+
+            if (quickEmpty) quickEmpty.hidden = visible !== 0;
+        });
+
+        searchInput?.addEventListener('input', renderQuickQuestions);
+        loadQuickQuestions();
+    })();
+</script>

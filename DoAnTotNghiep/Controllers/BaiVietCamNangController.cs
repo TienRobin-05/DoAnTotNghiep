@@ -21,9 +21,7 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Index(string? loai)
         {
-            var loaiDaChuanHoa = BaiVietCamNang_DAL.ChuanHoaLoaiBaiViet(loai);
-            ViewBag.LoaiDangChon = loaiDaChuanHoa ?? "Tất cả";
-            return View(baiVietDAL.LayDanhSachHienThiChoUser(loaiDaChuanHoa));
+            return View();
         }
 
         // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -38,7 +36,59 @@ namespace DoAnTotNghiep.Controllers
                 return NotFound();
             }
 
+            baiVietDAL.TangLuotXem(baiViet.MaBaiViet);
+            baiViet.LuotXem += 1;
             return View(baiViet);
+        }
+
+        [HttpGet("/api/knowledge/articles")]
+        public IActionResult GetArticles(string? type, string? keyword, string? sort, int page = 1, int limit = 6, bool? featured = null)
+        {
+            page = Math.Max(1, page);
+            limit = Math.Clamp(limit, 1, 24);
+            var articles = baiVietDAL.LayDanhSachChoUser(type, keyword, sort, page, limit, featured);
+            var total = baiVietDAL.DemDanhSachChoUser(type, keyword, featured);
+            var totalPages = (int)Math.Ceiling(total / (double)limit);
+
+            if (featured == true && articles.Count == 0)
+            {
+                articles = baiVietDAL.LayDanhSachChoUser(type, keyword, "most_viewed", page, limit, null);
+                total = baiVietDAL.DemDanhSachChoUser(type, keyword, null);
+                totalPages = (int)Math.Ceiling(total / (double)limit);
+            }
+
+            return Json(new
+            {
+                data = articles.Select(BaiVietCamNang_DAL.TaoArticleDto),
+                pagination = new
+                {
+                    page,
+                    limit,
+                    total,
+                    total_pages = totalPages
+                }
+            });
+        }
+
+        [HttpGet("/api/knowledge/stats")]
+        public IActionResult GetStats()
+        {
+            var stats = baiVietDAL.LayThongKeUser();
+            return Json(new { total = stats.Total, news = stats.News, guide = stats.Guide });
+        }
+
+        [HttpGet("/api/knowledge/articles/{slug}")]
+        public IActionResult GetArticleDetail(string slug)
+        {
+            var article = baiVietDAL.LayTheoSlug(slug);
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            baiVietDAL.TangLuotXem(article.MaBaiViet);
+            article.LuotXem += 1;
+            return Json(BaiVietCamNang_DAL.TaoArticleDto(article));
         }
     }
 }

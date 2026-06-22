@@ -29,9 +29,9 @@ namespace DoAnTotNghiep.DAL
                 TongSoHoSoSucKhoe = Dem("SELECT COUNT(*) FROM HoSoSucKhoe"),
                 TongSoVaccineDangSuDung = Dem("SELECT COUNT(*) FROM Vaccine WHERE trangThai = 1"),
                 TongSoLichTiem = Dem("SELECT COUNT(*) FROM LichTiem"),
-                TongSoLichTiemChuaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Chưa tiêm'"),
+                TongSoLichTiemChuaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE ISNULL(trangThai, N'') <> N'Đã tiêm'"),
                 TongSoLichTiemDaTiem = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Đã tiêm'"),
-                TongSoLichTiemQuaHan = Dem("SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Quá hạn'"),
+                TongSoLichTiemQuaHan = Dem("SELECT COUNT(*) FROM LichTiem WHERE ISNULL(trangThai, N'') <> N'Đã tiêm' AND CONVERT(date, ngayTiemDuKien) < CONVERT(date, GETDATE())"),
                 TongSoCauHoiChuaTraLoi = Dem("SELECT COUNT(*) FROM CauHoiTuVan WHERE trangThai = N'Chưa trả lời'"),
                 TongSoCauHoiDaTraLoi = Dem("SELECT COUNT(*) FROM CauHoiTuVan WHERE trangThai = N'Đã trả lời'"),
                 TongSoBaiVietDangHienThi = Dem("SELECT COUNT(*) FROM BaiVietCamNang WHERE trangThai = 1")

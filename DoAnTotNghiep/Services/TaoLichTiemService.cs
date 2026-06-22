@@ -91,6 +91,11 @@ namespace DoAnTotNghiep.Services
 
             foreach (var muiTiem in danhSachMuiTiem)
             {
+                if (!KiemTraMuiTiemPhuHopVoiTuoi(ngaySinh, muiTiem))
+                {
+                    continue;
+                }
+
                 ketQua.SoMuiTiemPhuHop++;
                 ketQua.MaMuiTiemPhuHop.Add(muiTiem.MaMuiTiem);
 
@@ -531,22 +536,7 @@ WHERE NOT EXISTS (
 
         private static DateTime? TinhNgayTiemDuKien(DateTime ngaySinh, int doTuoi, string donViTuoi)
         {
-            var donVi = ChuanHoaDonViTuoi(donViTuoi);
-
-            try
-            {
-                return donVi switch
-                {
-                    "năm" => ngaySinh.AddYears(doTuoi),
-                    "tháng" => ngaySinh.AddMonths(doTuoi),
-                    "ngày" => ngaySinh.AddDays(doTuoi),
-                    _ => null
-                };
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return null;
-            }
+            return DonViTuoiHelper.CongTheoDonVi(ngaySinh, doTuoi, donViTuoi);
         }
 
         private static DateTime TaoNgayTrongNamAnToan(int nam, int thang, int ngay)
@@ -560,7 +550,6 @@ WHERE NOT EXISTS (
             var noiDung = BoDauTiengViet($"{muiTiem.TenVaccine} {muiTiem.NhomVaccine}").ToLowerInvariant();
             return noiDung.Contains("cum")
                 || noiDung.Contains("cum mua")
-                || noiDung.Contains("nhac")
                 || noiDung.Contains("hang nam");
         }
 
@@ -585,22 +574,10 @@ WHERE NOT EXISTS (
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
         private static string ChuanHoaDonViTuoi(string donViTuoi)
         {
-            var donVi = donViTuoi.Trim().ToLower();
-
-            if (donVi == "nam")
-            {
-                return "năm";
-            }
-
-            if (donVi == "thang")
-            {
-                return "tháng";
-            }
-
-            return string.IsNullOrWhiteSpace(donVi) ? "ngày" : donVi;
+            return DonViTuoiHelper.ChuanHoa(donViTuoi);
         }
 
-        // Kiểm tra mũi tiêm có phù hợp với tuổi hiện tại của hồ sơ theo đúng đơn vị ngày/tháng/năm.
+        // Kiểm tra mũi tiêm có phù hợp với tuổi hiện tại của hồ sơ theo đúng đơn vị ngày/tuần/tháng/năm.
         private static bool KiemTraMuiTiemPhuHopVoiTuoi(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
         {
             var donVi = ChuanHoaDonViTuoi(muiTiem.DonViTuoi);
@@ -620,19 +597,7 @@ WHERE NOT EXISTS (
         // Tính tuổi hiện tại của hồ sơ theo đơn vị tương ứng để lọc mũi tiêm phù hợp.
         private static int TinhTuoiTheoDonVi(DateTime ngaySinh, string donViTuoi)
         {
-            var ngayHienTai = DateTime.Today;
-            var ngaySinhDate = ngaySinh.Date;
-            if (ngaySinhDate > ngayHienTai)
-            {
-                return 0;
-            }
-
-            return donViTuoi switch
-            {
-                "năm" => TinhSoNamTuoi(ngaySinhDate, ngayHienTai),
-                "tháng" => TinhSoThangTuoi(ngaySinhDate, ngayHienTai),
-                _ => Math.Max(0, (ngayHienTai - ngaySinhDate).Days)
-            };
+            return DonViTuoiHelper.TinhTuoiHienTai(ngaySinh, donViTuoi);
         }
 
         private static int TinhSoThangTuoi(DateTime ngaySinh, DateTime ngayHienTai)

@@ -46,17 +46,41 @@ namespace DoAnTotNghiep.Controllers
             var danhSachCauHoi = cauHoiTuVanDAL.LayTatCa();
             var danhSachBaiViet = baiVietDAL.LayTatCaChoAdmin();
 
-            ViewBag.HoTen = HttpContext.Session.GetString("HoTen");
-            ViewBag.SoTaiKhoan = taiKhoanDAL.DemTatCa();
-            ViewBag.SoVaccine = danhSachVaccine.Count;
-            ViewBag.SoMuiTiem = danhSachMuiTiem.Count;
-            ViewBag.SoLichTiem = lichTiemDAL.DemTatCa();
-            ViewBag.SoBaiViet = danhSachBaiViet.Count;
-            ViewBag.SoCauHoiChoTraLoi = danhSachCauHoi.Count(x => x.TrangThai != "Đã trả lời");
-            ViewBag.DanhSachVaccine = danhSachVaccine.Take(5).ToList();
-            ViewBag.CauHoiMoi = danhSachCauHoi.Take(5).ToList();
-            ViewBag.BaiVietMoi = danhSachBaiViet.Take(4).ToList();
-            return View();
+            var taiKhoan = taiKhoanDAL.LayTatCa();
+            var bayNgayTruoc = DateTime.Now.Date.AddDays(-7);
+            var baiVietCamNang = danhSachBaiViet
+                .Where(x => string.Equals(x.LoaiBaiViet, "Cẩm nang sức khỏe", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(x.LoaiBaiViet, "Cẩm nang", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var model = new AdminDashboardViewModel
+            {
+                TotalVaccines = danhSachVaccine.Count,
+                TotalInjectionDoses = danhSachMuiTiem.Count,
+                TotalGuideArticles = baiVietCamNang.Count,
+                PendingQuestions = danhSachCauHoi.Count(x => !string.Equals(x.TrangThai, "Đã trả lời", StringComparison.OrdinalIgnoreCase)),
+                NewUsers7Days = taiKhoan.Count(x => x.NgayTao.Date >= bayNgayTruoc),
+                NewArticles7Days = danhSachBaiViet.Count(x => x.NgayTao.Date >= bayNgayTruoc),
+                UpcomingAppointments = lichTiemDAL.DemSapToi(),
+                ActiveVaccines = danhSachVaccine.Count(x => x.TrangThai),
+                AnsweredQuestions7Days = danhSachCauHoi.Count(x =>
+                    string.Equals(x.TrangThai, "Đã trả lời", StringComparison.OrdinalIgnoreCase)
+                    && x.NgayTraLoi.HasValue
+                    && x.NgayTraLoi.Value.Date >= bayNgayTruoc),
+                RecordedInjections = lichTiemDAL.DemDaTiem(),
+                LastUpdated = DateTime.Now,
+                RecentVaccines = danhSachVaccine.Take(5).ToList(),
+                RecentQuestions = danhSachCauHoi
+                    .OrderByDescending(x => x.NgayGui)
+                    .Take(4)
+                    .ToList(),
+                LatestGuideArticles = baiVietCamNang
+                    .OrderByDescending(x => x.NgayTao)
+                    .Take(2)
+                    .ToList()
+            };
+
+            return View(model);
         }
 
         // Mục đích: action taiKhoan xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

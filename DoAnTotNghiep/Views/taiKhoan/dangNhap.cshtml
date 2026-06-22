@@ -17,7 +17,7 @@
         <div class="auth-alert error">@ViewBag.ThongBao</div>
     }
 
-    <form method="post" autocomplete="off">
+    <form method="post" autocomplete="on">
         @Html.AntiForgeryToken()
 
         <div class="form-group">
@@ -27,7 +27,7 @@
                     type="text"
                     name="soDienThoaiDangNhap"
                     id="soDienThoaiDangNhap"
-                    autocomplete="off"
+                    autocomplete="username"
                     autocorrect="off"
                     autocapitalize="off"
                     spellcheck="false"
@@ -42,7 +42,7 @@
                     type="password"
                     name="matKhauDangNhap"
                     id="matKhauDangNhap"
-                    autocomplete="new-password"
+                    autocomplete="current-password"
                     placeholder="Nhập mật khẩu" />
             </div>
         </div>

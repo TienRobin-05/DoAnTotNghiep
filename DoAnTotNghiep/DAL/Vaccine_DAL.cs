@@ -178,7 +178,7 @@ WHERE maVaccine = @MaVaccine";
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
-            const string sql = "DELETE FROM Vaccine WHERE maVaccine = @MaVaccine";
+            const string sql = "UPDATE Vaccine SET trangThai = 0 WHERE maVaccine = @MaVaccine";
 
             // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);

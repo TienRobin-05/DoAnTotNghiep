@@ -10,10 +10,12 @@ namespace DoAnTotNghiep.Controllers
     public class CauHoiTuVanController : Controller
     {
         private readonly CauHoiTuVan_DAL cauHoiTuVanDAL;
+        private readonly Vaccine_DAL vaccineDAL;
 
-        public CauHoiTuVanController(CauHoiTuVan_DAL cauHoiTuVanDAL)
+        public CauHoiTuVanController(CauHoiTuVan_DAL cauHoiTuVanDAL, Vaccine_DAL vaccineDAL)
         {
             this.cauHoiTuVanDAL = cauHoiTuVanDAL;
+            this.vaccineDAL = vaccineDAL;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -59,6 +61,19 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            if (!model.MaVaccine.HasValue || model.MaVaccine.Value <= 0)
+            {
+                ViewBag.ThongBao = "Vui lòng chọn vaccine cần tư vấn.";
+                return View(model);
+            }
+
+            var vaccine = vaccineDAL.LayTheoId(model.MaVaccine.Value);
+            if (vaccine == null || !vaccine.TrangThai)
+            {
+                ViewBag.ThongBao = "Vaccine đã chọn không còn trong danh sách đang dùng.";
+                return View(model);
+            }
+
             if (string.IsNullOrWhiteSpace(model.CauHoi))
             {
                 ViewBag.ThongBao = "Vui lòng nhập nội dung câu hỏi.";
@@ -69,6 +84,7 @@ namespace DoAnTotNghiep.Controllers
             {
                 MaNguoiGui = maTaiKhoan.Value,
                 MaNguoiTraLoi = null,
+                MaVaccine = vaccine.MaVaccine,
                 CauHoi = model.CauHoi.Trim(),
                 CauTraLoi = string.Empty,
                 NgayGui = DateTime.Now,
@@ -92,6 +108,12 @@ namespace DoAnTotNghiep.Controllers
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Details(int maCauHoi)
         {
+            if (LaAdmin())
+            {
+                var cauHoiAdmin = cauHoiTuVanDAL.LayTheoId(maCauHoi);
+                return cauHoiAdmin == null ? NotFound() : View(cauHoiAdmin);
+            }
+
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 

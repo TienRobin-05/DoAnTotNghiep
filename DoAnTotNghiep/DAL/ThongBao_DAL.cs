@@ -12,14 +12,20 @@ namespace DoAnTotNghiep.DAL
         private readonly string chuoiKetNoi;
         private const string BieuThucNhomThongBao = @"CASE
         WHEN lt.maLichTiem IS NOT NULL
-            AND lt.trangThai = N'Chưa tiêm'
-            AND CAST(lt.ngayTiemDuKien AS DATE) < CAST(GETDATE() AS DATE) THEN N'qua-han'
-        WHEN ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN N'qua-han'
+            AND lt.trangThai = N'Đã tiêm' THEN N'da-cap-nhat'
         WHEN lt.maLichTiem IS NOT NULL
-            AND lt.trangThai = N'Chưa tiêm'
+            AND ISNULL(lt.trangThai, N'') <> N'Đã tiêm'
+            AND CAST(lt.ngayTiemDuKien AS DATE) < CAST(GETDATE() AS DATE) THEN N'qua-han'
+        WHEN (lt.maLichTiem IS NULL OR ISNULL(lt.trangThai, N'') <> N'Đã tiêm')
+            AND ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN N'qua-han'
+        WHEN lt.maLichTiem IS NOT NULL
+            AND ISNULL(lt.trangThai, N'') <> N'Đã tiêm'
             AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, 2, CAST(GETDATE() AS DATE)) THEN N'den-lich'
-        WHEN ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%'
-            OR (ISNULL(tb.tieuDe, N'') LIKE N'%Hôm nay%' AND ISNULL(tb.tieuDe, N'') LIKE N'%lịch tiêm%') THEN N'den-lich'
+        WHEN (lt.maLichTiem IS NULL OR ISNULL(lt.trangThai, N'') <> N'Đã tiêm')
+            AND (
+                ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%'
+                OR (ISNULL(tb.tieuDe, N'') LIKE N'%Hôm nay%' AND ISNULL(tb.tieuDe, N'') LIKE N'%lịch tiêm%')
+            ) THEN N'den-lich'
         ELSE N'da-cap-nhat'
     END";
         private static readonly string[] TieuDeThongBaoNhacLich =
@@ -446,14 +452,14 @@ INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
 INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE hs.maTaiKhoan = @MaTaiKhoan
 AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, @SoNgayNhacTruoc, CAST(GETDATE() AS DATE))
-AND lt.trangThai = @TrangThaiChuaTiem
+AND ISNULL(lt.trangThai, N'') <> @TrangThaiDaTiem
 ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
             lenh.Parameters.AddWithValue("@SoNgayNhacTruoc", SoNgayNhacTruoc);
-            lenh.Parameters.AddWithValue("@TrangThaiChuaTiem", "Chưa tiêm");
+            lenh.Parameters.AddWithValue("@TrangThaiDaTiem", "Đã tiêm");
 
             ketNoi.Open();
             using var doc = lenh.ExecuteReader();
@@ -573,7 +579,7 @@ AND tb.tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)
 AND (
     tb.ngayGui < DATEADD(DAY, -@SoNgayGiu, GETDATE())
     OR lt.maLichTiem IS NULL
-    OR lt.trangThai <> @TrangThaiChuaTiem
+    OR lt.trangThai = @TrangThaiDaTiem
 )";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -584,7 +590,7 @@ AND (
             lenh.Parameters.AddWithValue("@TieuDeDenHanCu", TieuDeThongBaoNhacLich[2]);
             lenh.Parameters.AddWithValue("@TieuDeQuaHan", TieuDeThongBaoNhacLich[3]);
             lenh.Parameters.AddWithValue("@SoNgayGiu", SoNgayGiuThongBaoNhacLich);
-            lenh.Parameters.AddWithValue("@TrangThaiChuaTiem", "Chưa tiêm");
+            lenh.Parameters.AddWithValue("@TrangThaiDaTiem", "Đã tiêm");
 
             ketNoi.Open();
             lenh.ExecuteNonQuery();

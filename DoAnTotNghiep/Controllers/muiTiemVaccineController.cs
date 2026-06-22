@@ -1,5 +1,6 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
+using DoAnTotNghiep.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -226,12 +227,13 @@ namespace DoAnTotNghiep.Controllers
 
             if (!string.IsNullOrWhiteSpace(mt.DonViTuoi))
             {
-                var donViHopLe = new[] { "ngày", "tháng", "năm" };
-                if (!donViHopLe.Contains(mt.DonViTuoi.Trim(), StringComparer.OrdinalIgnoreCase))
+                if (!DonViTuoiHelper.HopLe(mt.DonViTuoi))
                 {
-                    ViewBag.ThongBao = "Đơn vị tuổi chỉ gồm: ngày, tháng, năm";
+                    ViewBag.ThongBao = $"Đơn vị tuổi chỉ gồm: {DonViTuoiHelper.DanhSachDonViHopLe()}";
                     return false;
                 }
+
+                mt.DonViTuoi = DonViTuoiHelper.ChuanHoa(mt.DonViTuoi);
             }
 
             if (mt.KhoangCachNgay.HasValue && mt.KhoangCachNgay.Value < 0)

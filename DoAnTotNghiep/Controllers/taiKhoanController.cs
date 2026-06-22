@@ -14,11 +14,13 @@ namespace DoAnTotNghiep.Controllers
     {
         private readonly TaiKhoan_DAL taiKhoanDAL;
         private readonly HoSoSucKhoe_DAL hoSoSucKhoeDAL;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public TaiKhoanController(TaiKhoan_DAL taiKhoanDAL, HoSoSucKhoe_DAL hoSoSucKhoeDAL)
+        public TaiKhoanController(TaiKhoan_DAL taiKhoanDAL, HoSoSucKhoe_DAL hoSoSucKhoeDAL, IWebHostEnvironment webHostEnvironment)
         {
             this.taiKhoanDAL = taiKhoanDAL;
             this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -230,8 +232,14 @@ namespace DoAnTotNghiep.Controllers
                 HttpContext.Session.SetString("DatLaiMatKhau_MaXacNhan", maMoi);
                 HttpContext.Session.SetString("DatLaiMatKhau_HetHanTicks", DateTime.UtcNow.AddMinutes(10).Ticks.ToString());
                 ViewBag.YeuCauMaXacNhan = true;
-                ViewBag.MaXacNhanDemo = maMoi;
-                ViewBag.ThongBao = "Đã tạo mã xác nhận. Nhập mã này để đặt lại mật khẩu.";
+                if (webHostEnvironment.IsDevelopment())
+                {
+                    ViewBag.MaXacNhanDemo = maMoi;
+                }
+
+                ViewBag.ThongBao = webHostEnvironment.IsDevelopment()
+                    ? "Đã tạo mã xác nhận demo. Nhập mã này để đặt lại mật khẩu."
+                    : "Đã tạo mã xác nhận. Vui lòng kiểm tra kênh nhận mã đã cấu hình.";
                 return View();
             }
 

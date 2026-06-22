@@ -25,14 +25,6 @@
         return ketQua.Length <= doDai ? ketQua : ketQua[..doDai].TrimEnd() + "...";
     }
 
-    string LayChuCai(string hoTenHoSo)
-    {
-        if (string.IsNullOrWhiteSpace(hoTenHoSo)) return "HS";
-        var cacTu = hoTenHoSo.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (cacTu.Length == 1) return cacTu[0].Length >= 2 ? cacTu[0][..2].ToUpperInvariant() : cacTu[0].ToUpperInvariant();
-        return $"{cacTu[^2][0]}{cacTu[^1][0]}".ToUpperInvariant();
-    }
-
     string RutGonBaiViet(string noiDung, int doDai = 130)
     {
         if (string.IsNullOrWhiteSpace(noiDung)) return "Thông tin y tế hữu ích giúp bạn chủ động chăm sóc sức khỏe và theo dõi lịch tiêm.";
@@ -696,6 +688,7 @@
         border-radius: 999px;
         color: #059669;
         background: #DCFCE7;
+        font-size: 21px;
     }
 
     .profile-item:nth-child(2n) .avatar { color: #7C3AED; background: #EDE9FE; }
@@ -1118,7 +1111,7 @@
 
             <article class="dashboard-panel health-profile-card">
                 <div class="panel-head"><div class="panel-title"><i class="bi bi-clipboard2-pulse"></i><div><h2>Hồ sơ sức khỏe</h2></div></div><a class="head-link" href="/HoSoSucKhoe/Index">Xem tất cả</a></div>
-                @if (danhSachHoSo.Count == 0){<div class="empty-visual green"><i class="bi bi-journal-medical"></i><strong>Bạn chưa có hồ sơ sức khỏe.</strong><p>Tạo hồ sơ để bắt đầu theo dõi và quản lý sức khỏe.</p><a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}else{<div class="soft-list">@foreach (var hoSo in danhSachHoSo.Take(7)){<div class="profile-item"><span class="avatar">@LayChuCai(hoSo.HoTen)</span><span class="profile-info"><strong>@hoSo.HoTen</strong><span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span></span><a class="secondary-action" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem hồ sơ</a></div>}<a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}
+                @if (danhSachHoSo.Count == 0){<div class="empty-visual green"><i class="bi bi-journal-medical"></i><strong>Bạn chưa có hồ sơ sức khỏe.</strong><p>Tạo hồ sơ để bắt đầu theo dõi và quản lý sức khỏe.</p><a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}else{<div class="soft-list">@foreach (var hoSo in danhSachHoSo.Take(7)){<div class="profile-item"><span class="avatar" aria-hidden="true"><i class="bi bi-person-fill"></i></span><span class="profile-info"><strong>@hoSo.HoTen</strong><span>@hoSo.NgaySinh.ToString("dd/MM/yyyy") - @hoSo.GioiTinh</span></span><a class="secondary-action" href="/LichTiem/Index?maHoSo=@hoSo.MaHoSo">Xem hồ sơ</a></div>}<a class="secondary-action" href="/HoSoSucKhoe/Create"><i class="bi bi-plus-lg"></i> Thêm hồ sơ mới</a></div>}
             </article>
         </div>
     </section>

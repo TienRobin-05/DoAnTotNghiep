@@ -7,8 +7,8 @@
 
 <div class="list-page-head">
     <div>
-        <h2>Quản lý bài viết cẩm nang</h2>
-        <p>@Model.Count bài viết trong hệ thống</p>
+        <h2>Quản lý tin tức &amp; cẩm nang sức khỏe</h2>
+        <p>Thêm và quản lý các bài viết hiển thị cho người dùng - @Model.Count bài viết trong hệ thống</p>
     </div>
     <a asp-action="Create" class="btn btn-primary">Thêm bài viết</a>
 </div>
@@ -17,7 +17,7 @@
 {
     <div class="empty-state empty-action">
         <div>
-            <strong>Chưa có bài viết cẩm nang</strong>
+            <strong>Chưa có bài viết</strong>
             <span>Thêm bài viết để người dùng có nội dung tham khảo về vaccine và chăm sóc sức khỏe.</span>
         </div>
         <a asp-action="Create" class="btn btn-primary">Thêm bài viết</a>
@@ -31,9 +31,10 @@ else
         <tr>
             <th>Bài viết</th>
             <th>Loại</th>
-            <th>Tác giả</th>
-            <th>Ngày tạo</th>
             <th>Trạng thái</th>
+            <th>Nổi bật</th>
+            <th>Lượt xem</th>
+            <th>Ngày đăng</th>
             <th>Thao tác</th>
         </tr>
     </thead>
@@ -52,18 +53,28 @@ else
                     </div>
                     <div>
                         <div class="item-title">@item.TieuDe</div>
-                        <div class="item-meta">Mã bài viết #@item.MaBaiViet</div>
+                        <div class="item-meta">@(string.IsNullOrWhiteSpace(item.MoTaNgan) ? item.Slug : item.MoTaNgan)</div>
                     </div>
                 </div>
             </td>
             <td><span class="article-type-pill">@item.LoaiBaiViet</span></td>
-            <td>@item.TenTacGia</td>
-            <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
             <td>
                 <span class="status-badge @(item.TrangThai ? "status-ok" : "status-muted")">
-                    @(item.TrangThai ? "Đang hiển thị" : "Đang ẩn")
+                    @(item.TrangThai ? "Đã xuất bản" : "Đã ẩn")
                 </span>
             </td>
+            <td>
+                <form asp-action="DoiNoiBat" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maBaiViet" value="@item.MaBaiViet" />
+                    <input type="hidden" name="noiBat" value="@(!item.NoiBat)" />
+                    <button type="submit" class="btn btn-sm @(item.NoiBat ? "btn-warning" : "btn-outline-secondary")">
+                        @(item.NoiBat ? "Nổi bật" : "Thường")
+                    </button>
+                </form>
+            </td>
+            <td>@item.LuotXem.ToString("N0")</td>
+            <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
             <td class="table-actions">
                 <a asp-action="Details" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
                 <a asp-action="Edit" asp-route-maBaiViet="@item.MaBaiViet" class="btn btn-sm btn-outline-primary">Sửa</a>

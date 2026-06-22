@@ -6,20 +6,6 @@
         ?? new Dictionary<int, List<LichSuTiem>>();
     var maHoSoDuocChon = ViewBag.MaHoSoDuocChon as int? ?? Model.FirstOrDefault()?.MaHoSo;
 
-    string LayChuVietTat(string hoTen)
-    {
-        if (string.IsNullOrWhiteSpace(hoTen)) return "HS";
-        var cacTu = hoTen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (cacTu.Length == 1)
-        {
-            return cacTu[0].Length >= 2
-                ? cacTu[0][..2].ToUpperInvariant()
-                : cacTu[0].ToUpperInvariant();
-        }
-
-        return $"{cacTu[0][0]}{cacTu[^1][0]}".ToUpperInvariant();
-    }
-
     string HienThiNgay(DateTime ngay)
     {
         return ngay == default ? "Chưa cập nhật" : ngay.ToString("dd-MM-yyyy");
@@ -184,9 +170,9 @@
         height: 46px;
         flex: 0 0 46px;
         border-radius: 50%;
-        font-size: 15px;
+        font-size: 22px;
         font-weight: 750;
-        letter-spacing: .4px;
+        letter-spacing: 0;
     }
 
     .vaccination-avatar-blue { color: #1769aa; background: #dcefff; }
@@ -272,7 +258,7 @@
         width: 64px;
         height: 64px;
         flex-basis: 64px;
-        font-size: 20px;
+        font-size: 30px;
     }
 
     .vaccination-selected-copy {
@@ -672,7 +658,7 @@
                                 data-profile-id="@hoSo.MaHoSo"
                                 data-search="@hoSo.HoTen #@hoSo.MaHoSo @hoSo.MaHoSo"
                                 aria-pressed="@(dangChon ? "true" : "false")">
-                            <span class="vaccination-profile-avatar @mauAvatar">@LayChuVietTat(hoSo.HoTen)</span>
+                            <span class="vaccination-profile-avatar @mauAvatar" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
                             <span class="vaccination-profile-copy">
                                 <span class="vaccination-profile-name">@(string.IsNullOrWhiteSpace(hoSo.HoTen) ? "Chưa cập nhật họ tên" : hoSo.HoTen)</span>
                                 <span class="vaccination-profile-code">Mã hồ sơ #@hoSo.MaHoSo</span>
@@ -716,7 +702,7 @@
                          class="vaccination-history-panel @(dangChon ? "is-active" : string.Empty)"
                          data-profile-panel="@hoSo.MaHoSo">
                         <div class="vaccination-selected-profile">
-                            <span class="vaccination-profile-avatar @mauAvatar">@LayChuVietTat(hoSo.HoTen)</span>
+                            <span class="vaccination-profile-avatar @mauAvatar" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
                             <div class="vaccination-selected-copy">
                                 <h3 class="vaccination-selected-name">@(string.IsNullOrWhiteSpace(hoSo.HoTen) ? "Chưa cập nhật họ tên" : hoSo.HoTen)</h3>
                                 <div class="vaccination-selected-meta">

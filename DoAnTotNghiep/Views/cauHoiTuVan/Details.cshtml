@@ -12,6 +12,14 @@
         <p><strong>Người gửi:</strong> @Model.TenNguoiGui</p>
         <p><strong>Ngày gửi:</strong> @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
         <p><strong>Trạng thái:</strong> @Model.TrangThai</p>
+        @if (Model.MaVaccine.HasValue)
+        {
+            <p><strong>Vaccine liên quan:</strong> @Model.TenVaccine</p>
+            @if (!string.IsNullOrWhiteSpace(Model.NhomVaccine) || !string.IsNullOrWhiteSpace(Model.DoTuoiVaccine))
+            {
+                <p class="text-muted">@Model.NhomVaccine @(!string.IsNullOrWhiteSpace(Model.NhomVaccine) && !string.IsNullOrWhiteSpace(Model.DoTuoiVaccine) ? "•" : "") @Model.DoTuoiVaccine</p>
+            }
+        }
         <hr />
         <p><strong>Câu hỏi:</strong></p>
         <p>@Model.CauHoi</p>

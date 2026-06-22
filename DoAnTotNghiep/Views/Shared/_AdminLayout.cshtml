@@ -24,7 +24,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</title>
+    <title>@ViewData["Title"] - Pharmacy City Admin</title>
     <link rel="icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
     <link rel="shortcut icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1053,39 +1053,214 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .admin-shell {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            min-height: 100vh;
+            background: #f5f8fc;
+        }
+
+        .admin-sidebar {
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 0 16px 18px;
+            border-right: 1px solid #e2e8f0;
+            background: #ffffff;
+            z-index: 20;
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 80px;
+            padding: 20px 4px;
+            color: #0f172a;
+        }
+
+        .admin-brand img {
+            width: 40px;
+            height: 40px;
+            max-width: 40px;
+            max-height: 40px;
+            object-fit: contain;
+            flex: 0 0 auto;
+        }
+
+        .admin-brand strong {
+            color: #0866d8;
+            font-size: 17px;
+            font-weight: 850;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .admin-side-nav {
+            display: grid;
+            gap: 8px;
+            padding-top: 8px;
+        }
+
+        .admin-side-nav a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-height: 46px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #334155;
+            font-size: 15px;
+            font-weight: 750;
+            transition: background .18s ease, color .18s ease, transform .18s ease;
+        }
+
+        .admin-side-nav a:hover {
+            color: #0866d8;
+            background: #eff6ff;
+        }
+
+        .admin-side-nav a.active {
+            color: #ffffff;
+            background: #0866d8;
+            box-shadow: 0 12px 24px rgba(8, 102, 216, .18);
+        }
+
+        .admin-side-nav i {
+            width: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .admin-sidebar-card {
+            margin-top: auto;
+            padding: 16px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #f1f7ff;
+            text-align: center;
+        }
+
+        .admin-sidebar-card strong {
+            display: block;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 850;
+        }
+
+        .admin-sidebar-card p {
+            margin: 8px 0 12px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .admin-version {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            color: #0866d8;
+            background: #dbeafe;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .admin-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-main .page {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .admin-main .footer {
+            margin-top: auto;
+        }
+
+        @@media (max-width: 960px) {
+            .admin-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-sidebar {
+                position: static;
+                height: auto;
+                padding: 0 16px 14px;
+                border-right: 0;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .admin-side-nav {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                overflow-x: auto;
+            }
+
+            .admin-side-nav a {
+                justify-content: center;
+                white-space: nowrap;
+            }
+
+            .admin-sidebar-card {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 640px) {
+            .admin-side-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-main .page {
+                padding: 16px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
 </head>
 <body class="site-page-shell">
-    <header class="top-header">
-        <a class="brand-area" href="/Admin/Index" aria-label="Pharmacy City">
-            <img src="/images/logo/pharmacy-logo.png" alt="Pharmacy City" />
-            <div class="brand-text">
-                <h1>Quản lý sức khỏe và lịch tiêm chủng Pharmacy City</h1>
+    <div class="admin-shell">
+        <aside class="admin-sidebar" aria-label="Menu quản trị">
+            <a class="admin-brand" href="/Admin/Index" aria-label="Pharmacy City Admin">
+                <img src="/images/logo/pharmacy-favicon.png" alt="Pharmacy City" />
+                <strong>Pharmacy City</strong>
+            </a>
+
+            <nav class="admin-side-nav">
+                <a class="@Active("Admin", "Index")" href="/Admin/Index"><i class="bi bi-house-door"></i><span>Trang chủ</span></a>
+                <a class="@Active("vaccine")" href="/vaccine/index"><i class="bi bi-shield-plus"></i><span>Vaccine</span></a>
+                <a class="@Active("muiTiemVaccine")" href="/muiTiemVaccine/index"><i class="bi bi-syringe"></i><span>Mũi tiêm</span></a>
+                <a class="@activeBaiViet" href="/AdminBaiViet/Index"><i class="bi bi-newspaper"></i><span>Bài viết</span></a>
+                <a class="@Active("cauHoiTuVan")" href="/cauHoiTuVan/index"><i class="bi bi-chat-dots"></i><span>Câu hỏi tư vấn</span></a>
+                <a class="@Active("QuickQuestionAdmin")" href="/QuickQuestionAdmin/Index"><i class="bi bi-lightning-charge"></i><span>Câu hỏi nhanh</span></a>
+                <a class="@Active("Admin", "taiKhoan")" href="/Admin/taiKhoan"><i class="bi bi-people"></i><span>Tài khoản</span></a>
+            </nav>
+
+            <div class="admin-sidebar-card">
+                <strong>Pharmacy City Admin</strong>
+                <p>Hệ thống quản lý sức khỏe<br />và lịch tiêm chủng</p>
+                <span class="admin-version">Phiên bản 1.0.0</span>
             </div>
-        </a>
-        <nav class="main-navbar" aria-label="Menu quản trị">
-                <a class="@Active("Admin", "Index")" href="/Admin/Index">Trang chủ</a>
-                <a class="@Active("vaccine")" href="/vaccine/index">Vaccine</a>
-                <a class="@Active("muiTiemVaccine")" href="/muiTiemVaccine/index">Mũi tiêm</a>
-                <a class="@activeBaiViet" href="/AdminBaiViet/Index">Bài viết</a>
-                <a class="@Active("cauHoiTuVan")" href="/cauHoiTuVan/index">Câu hỏi tư vấn</a>
-                <a class="@Active("Admin", "taiKhoan")" href="/Admin/taiKhoan">Tài khoản</a>
-                <details class="account-menu">
-                    <summary>@tenTaiKhoanHienThi</summary>
-                    <div class="account-dropdown">
-                        <a href="/TaiKhoan/DangXuat">Đăng xuất</a>
-                    </div>
-                </details>
-        </nav>
-    </header>
+        </aside>
 
-    <main class="page">
-        <partial name="_ThongBao" />
-        @RenderBody()
-    </main>
+        <div class="admin-main">
+            <main class="page">
+                <partial name="_ThongBao" />
+                @RenderBody()
+            </main>
 
-    <partial name="_Footer" />
+            <partial name="_Footer" />
+        </div>
+    </div>
     <script>
         (() => {
             const accountMenus = document.querySelectorAll(".account-menu");

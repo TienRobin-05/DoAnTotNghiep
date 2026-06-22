@@ -1,5 +1,6 @@
 ﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
+using DoAnTotNghiep.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -21,25 +22,76 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index(string? tuKhoa)
+        public IActionResult Index(string? tuKhoa, string? nhom, string? trangThai, int page = 1, int pageSize = 10)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
-            var danhSach = vaccineDAL.LayDanhSach();
-            // Lọc danh sách vaccine theo tên vaccine hoặc nhóm vaccine, không thay đổi cấu trúc database.
+            var tatCaVaccine = vaccineDAL.LayDanhSach();
+            var danhSachLoc = tatCaVaccine.AsEnumerable();
+
             if (!string.IsNullOrWhiteSpace(tuKhoa))
             {
                 var tuKhoaTimKiem = tuKhoa.Trim();
-                danhSach = danhSach
+                danhSachLoc = danhSachLoc
                     .Where(vaccine =>
                         vaccine.TenVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase)
-                        || vaccine.NhomVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                        || vaccine.NhomVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase)
+                        || vaccine.MaVaccine.ToString().Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase));
             }
 
+            if (!string.IsNullOrWhiteSpace(nhom))
+            {
+                var nhomTimKiem = nhom.Trim();
+                danhSachLoc = danhSachLoc.Where(vaccine =>
+                    string.Equals(vaccine.NhomVaccine, nhomTimKiem, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (string.Equals(trangThai, "active", StringComparison.OrdinalIgnoreCase))
+            {
+                danhSachLoc = danhSachLoc.Where(vaccine => vaccine.TrangThai);
+            }
+            else if (string.Equals(trangThai, "inactive", StringComparison.OrdinalIgnoreCase))
+            {
+                danhSachLoc = danhSachLoc.Where(vaccine => !vaccine.TrangThai);
+            }
+
+            pageSize = new[] { 10, 20, 50 }.Contains(pageSize) ? pageSize : 10;
+            var tongKetQua = danhSachLoc.Count();
+            var tongTrang = Math.Max(1, (int)Math.Ceiling(tongKetQua / (double)pageSize));
+            page = Math.Clamp(page, 1, tongTrang);
+
+            var danhSach = danhSachLoc
+                .OrderByDescending(vaccine => vaccine.MaVaccine)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var viewModel = new AdminVaccineIndexViewModel
+            {
+                TotalVaccines = tatCaVaccine.Count,
+                ActiveVaccines = tatCaVaccine.Count(vaccine => vaccine.TrangThai),
+                LastUpdatedText = $"Hôm nay, {DateTime.Now:HH:mm}",
+                Keyword = tuKhoa,
+                SelectedGroup = nhom,
+                SelectedStatus = trangThai,
+                VaccineGroups = tatCaVaccine
+                    .Select(vaccine => vaccine.NhomVaccine)
+                    .Where(nhomVaccine => !string.IsNullOrWhiteSpace(nhomVaccine))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(nhomVaccine => nhomVaccine)
+                    .ToList(),
+                Vaccines = danhSach,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = tongKetQua,
+                StartItem = tongKetQua == 0 ? 0 : ((page - 1) * pageSize) + 1,
+                EndItem = Math.Min(page * pageSize, tongKetQua),
+                TotalPages = tongTrang
+            };
+
             ViewBag.TuKhoa = tuKhoa;
-            return View(danhSach);
+            return View(viewModel);
         }
 
         // Mục đích: action TraCuu xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -60,9 +112,56 @@ namespace DoAnTotNghiep.Controllers
                     .ToList();
             }
 
+            var viewModel = new AdminVaccineIndexViewModel
+            {
+                TotalVaccines = danhSach.Count,
+                ActiveVaccines = danhSach.Count,
+                Keyword = tuKhoa,
+                Vaccines = danhSach,
+                Page = 1,
+                PageSize = Math.Max(danhSach.Count, 1),
+                TotalItems = danhSach.Count,
+                StartItem = danhSach.Count == 0 ? 0 : 1,
+                EndItem = danhSach.Count,
+                TotalPages = 1
+            };
+
             ViewBag.LaTraCuu = true;
             ViewBag.TuKhoa = tuKhoa;
-            return View("Index", danhSach);
+            return View("Index", viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult DanhSachDangSuDungJson(string? tuKhoa, int limit = 1000)
+        {
+            var danhSach = vaccineDAL.LayDanhSachDangSuDung();
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var tuKhoaTimKiem = tuKhoa.Trim();
+                danhSach = danhSach
+                    .Where(vaccine =>
+                        vaccine.TenVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase)
+                        || vaccine.NhomVaccine.Contains(tuKhoaTimKiem, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            if (limit > 0)
+            {
+                danhSach = danhSach.Take(limit).ToList();
+            }
+
+            return Json(new
+            {
+                data = danhSach.Select(vaccine => new
+                {
+                    id = vaccine.MaVaccine,
+                    name = vaccine.TenVaccine,
+                    group = vaccine.NhomVaccine,
+                    age_range = HienThiDoTuoi(vaccine),
+                    status = vaccine.TrangThai ? "active" : "inactive",
+                    status_label = vaccine.TrangThai ? "Đang dùng" : "Đã ẩn"
+                })
+            });
         }
 
         // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -185,7 +284,7 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            TempData["ThongBao"] = "Xóa vaccine thành công";
+            TempData["ThongBao"] = "Đã ngừng dùng vaccine";
             TempData["LoaiThongBao"] = "success";
             return RedirectToAction(nameof(Index));
         }
@@ -218,15 +317,29 @@ namespace DoAnTotNghiep.Controllers
 
             if (!string.IsNullOrWhiteSpace(vaccine.DonViTuoi))
             {
-                var donViHopLe = new[] { "ngày", "tháng", "năm" };
-                if (!donViHopLe.Contains(vaccine.DonViTuoi.Trim(), StringComparer.OrdinalIgnoreCase))
+                if (!DonViTuoiHelper.HopLe(vaccine.DonViTuoi))
                 {
-                    ViewBag.ThongBao = "Đơn vị tuổi chỉ gồm: ngày, tháng, năm";
+                    ViewBag.ThongBao = $"Đơn vị tuổi chỉ gồm: {DonViTuoiHelper.DanhSachDonViHopLe()}";
                     return false;
                 }
+
+                vaccine.DonViTuoi = DonViTuoiHelper.ChuanHoa(vaccine.DonViTuoi);
             }
 
             return true;
+        }
+
+        private static string HienThiDoTuoi(Vaccine vaccine)
+        {
+            if (!vaccine.DoTuoiToiThieu.HasValue && !vaccine.DoTuoiToiDa.HasValue)
+            {
+                return "Chưa cấu hình";
+            }
+
+            var toiThieu = vaccine.DoTuoiToiThieu?.ToString() ?? "0";
+            var toiDa = vaccine.DoTuoiToiDa?.ToString() ?? "không giới hạn";
+            var donVi = string.IsNullOrWhiteSpace(vaccine.DonViTuoi) ? string.Empty : $" {vaccine.DonViTuoi.Trim()}";
+            return $"{toiThieu} - {toiDa}{donVi}";
         }
 
         // Mục đích: action LaAdmin xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

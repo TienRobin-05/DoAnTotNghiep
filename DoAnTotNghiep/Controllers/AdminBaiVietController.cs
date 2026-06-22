@@ -37,7 +37,7 @@ namespace DoAnTotNghiep.Controllers
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
-            return View(new BaiVietCamNang { TrangThai = true, LoaiBaiViet = "Cẩm nang" });
+            return View(new BaiVietCamNang { TrangThai = true, LoaiBaiViet = "Cẩm nang sức khỏe" });
         }
 
         [HttpPost]
@@ -74,6 +74,18 @@ namespace DoAnTotNghiep.Controllers
             }
 
             TempData["ThongBao"] = "Thêm bài viết thành công";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DoiNoiBat(int maBaiViet, bool noiBat)
+        {
+            var chanQuyen = ChanNeuKhongPhaiAdmin();
+            if (chanQuyen != null) return chanQuyen;
+
+            baiVietDAL.DoiNoiBat(maBaiViet, noiBat);
+            TempData["ThongBao"] = "Đổi trạng thái nổi bật thành công";
             return RedirectToAction(nameof(Index));
         }
 
@@ -192,6 +204,12 @@ namespace DoAnTotNghiep.Controllers
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(model.MoTaNgan))
+            {
+                ViewBag.ThongBao = "Mô tả ngắn không được bỏ trống.";
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(model.LoaiBaiViet))
             {
                 ViewBag.ThongBao = "Vui lòng chọn loại bài viết.";
@@ -223,6 +241,12 @@ namespace DoAnTotNghiep.Controllers
                 return null;
             }
 
+            if (!LaTepAnhHopLe(anhDaiDienFile, duoiFile))
+            {
+                ViewBag.ThongBao = "Tệp tải lên không đúng định dạng ảnh.";
+                return null;
+            }
+
             var thuMucUpload = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "bai-viet");
             Directory.CreateDirectory(thuMucUpload);
 
@@ -232,6 +256,54 @@ namespace DoAnTotNghiep.Controllers
             anhDaiDienFile.CopyTo(stream);
 
             return $"/uploads/bai-viet/{tenFile}";
+        }
+
+        private static bool LaTepAnhHopLe(IFormFile file, string duoiFile)
+        {
+            var contentType = (file.ContentType ?? string.Empty).ToLowerInvariant();
+            var mimeHopLe = duoiFile switch
+            {
+                ".jpg" or ".jpeg" => contentType is "image/jpeg" or "image/pjpeg",
+                ".png" => contentType == "image/png",
+                ".webp" => contentType == "image/webp",
+                _ => false
+            };
+
+            if (!mimeHopLe)
+            {
+                return false;
+            }
+
+            Span<byte> header = stackalloc byte[12];
+            using var stream = file.OpenReadStream();
+            var soByteDoc = stream.Read(header);
+
+            return duoiFile switch
+            {
+                ".jpg" or ".jpeg" => soByteDoc >= 3
+                    && header[0] == 0xFF
+                    && header[1] == 0xD8
+                    && header[2] == 0xFF,
+                ".png" => soByteDoc >= 8
+                    && header[0] == 0x89
+                    && header[1] == 0x50
+                    && header[2] == 0x4E
+                    && header[3] == 0x47
+                    && header[4] == 0x0D
+                    && header[5] == 0x0A
+                    && header[6] == 0x1A
+                    && header[7] == 0x0A,
+                ".webp" => soByteDoc >= 12
+                    && header[0] == 0x52
+                    && header[1] == 0x49
+                    && header[2] == 0x46
+                    && header[3] == 0x46
+                    && header[8] == 0x57
+                    && header[9] == 0x45
+                    && header[10] == 0x42
+                    && header[11] == 0x50,
+                _ => false
+            };
         }
 
         // Mục đích: action LaAdmin xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

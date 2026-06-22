@@ -80,18 +80,9 @@ namespace DoAnTotNghiep.Controllers
             thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
             ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             ViewBag.HoTenHoSo = hoSo.HoTen;
-            var danhSachLichTiem = lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value);
-            if (ketQuaTaoLich.MaMuiTiemPhuHop.Count > 0)
-            {
-                danhSachLichTiem = danhSachLichTiem
-                    .Where(lich => ketQuaTaoLich.MaMuiTiemPhuHop.Contains(lich.MaMuiTiem))
-                    .Where(LaLichTiemNenHienThi)
-                    .ToList();
-            }
-            else
-            {
-                danhSachLichTiem = new List<LichTiem>();
-            }
+            var danhSachLichTiem = lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value)
+                .Where(LaLichTiemNenHienThi)
+                .ToList();
 
             var boLoc = ChuanHoaBoLoc(trangThai);
             ViewBag.MaHoSo = maHoSo;
@@ -168,14 +159,20 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
             }
 
-            lichTiemDAL.CapNhatDaTiem(maLichTiem);
-            lichSuTiemDAL.Them(new LichSuTiem
+            var daCapNhat = lichTiemDAL.CapNhatDaTiemVaGhiLichSu(new LichSuTiem
             {
                 MaLichTiem = maLichTiem,
                 NgayTiemThucTe = ngayTiemThucTe,
                 GhiChu = ghiChu ?? string.Empty,
                 NgayCapNhat = DateTime.Now
-            });
+            }, maTaiKhoan.Value);
+
+            if (!daCapNhat)
+            {
+                TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
+            }
 
             var soLichDaDieuChinh = taoLichTiemService.DieuChinhLichMuiTiepTheoSauKhiTiem(
                 lichTiem.MaHoSo,
@@ -252,9 +249,8 @@ namespace DoAnTotNghiep.Controllers
 
         private static bool LaVaccineNhacHangNam(LichTiem lich)
         {
-            var noiDung = BoDauTiengViet($"{lich.TenVaccine} {lich.NhomVaccine} {lich.TenMui}").ToLowerInvariant();
+            var noiDung = BoDauTiengViet($"{lich.TenVaccine} {lich.NhomVaccine}").ToLowerInvariant();
             return noiDung.Contains("cum")
-                || noiDung.Contains("nhac")
                 || noiDung.Contains("hang nam");
         }
 

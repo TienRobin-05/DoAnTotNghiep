@@ -88,6 +88,29 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             return Convert.ToInt32(lenh.ExecuteScalar());
         }
 
+        public int DemDaTiem()
+        {
+            const string sql = "SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Đã tiêm'";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
+        public int DemSapToi()
+        {
+            const string sql = @"SELECT COUNT(*)
+FROM LichTiem
+WHERE CONVERT(date, ngayTiemDuKien) >= CONVERT(date, GETDATE())
+AND ISNULL(trangThai, N'') <> N'Đã tiêm'";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
         // Mục đích: phương thức KiemTraHoSoCoLichTiem thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -213,6 +236,155 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        public bool CapNhatDaTiemVaGhiLichSu(LichSuTiem lichSu, int maTaiKhoan)
+        {
+            const string sqlKhoaLich = @"SELECT TOP 1
+    lt.maLichTiem,
+    lt.trangThai,
+    lt.ngayTiemDuKien,
+    hs.hoTen,
+    v.tenVaccine,
+    mt.tenMui,
+    mt.soMui
+FROM LichTiem lt WITH (UPDLOCK, HOLDLOCK)
+INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
+INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
+WHERE lt.maLichTiem = @MaLichTiem
+AND hs.maTaiKhoan = @MaTaiKhoan";
+
+            const string sqlKiemTraLichSu = "SELECT COUNT(*) FROM LichSuTiem WITH (UPDLOCK, HOLDLOCK) WHERE maLichTiem = @MaLichTiem";
+            const string sqlCapNhatLich = "UPDATE LichTiem SET trangThai = @TrangThai WHERE maLichTiem = @MaLichTiem";
+            const string sqlThemLichSu = @"INSERT INTO LichSuTiem(maLichTiem, ngayTiemThucTe, ghiChu, ngayCapNhat)
+VALUES(@MaLichTiem, @NgayTiemThucTe, @GhiChu, @NgayCapNhat)";
+            const string sqlTimThongBaoCapNhat = @"SELECT TOP 1 maThongBao
+FROM ThongBao WITH (UPDLOCK, HOLDLOCK)
+WHERE maTaiKhoan = @MaTaiKhoan
+AND maLichTiem = @MaLichTiem
+AND tieuDe = @TieuDeDaCapNhat
+ORDER BY ngayGui DESC, maThongBao DESC";
+            const string sqlTimThongBaoNhacLich = @"SELECT TOP 1 maThongBao
+FROM ThongBao WITH (UPDLOCK, HOLDLOCK)
+WHERE maTaiKhoan = @MaTaiKhoan
+AND maLichTiem = @MaLichTiem
+AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)
+ORDER BY ngayGui DESC, maThongBao DESC";
+            const string sqlChuyenThongBao = @"UPDATE ThongBao
+SET tieuDe = @TieuDeDaCapNhat,
+    noiDung = @NoiDungDaCapNhat,
+    ngayGui = @NgayGui,
+    daDoc = 0
+WHERE maThongBao = @MaThongBao
+AND maTaiKhoan = @MaTaiKhoan";
+            const string sqlThemThongBao = @"INSERT INTO ThongBao(maTaiKhoan, maLichTiem, tieuDe, noiDung, ngayGui, daDoc)
+VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDeDaCapNhat, @NoiDungDaCapNhat, @NgayGui, 0)";
+            const string sqlXoaThongBaoNhacLichConLai = @"DELETE FROM ThongBao
+WHERE maTaiKhoan = @MaTaiKhoan
+AND maLichTiem = @MaLichTiem
+AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            ketNoi.Open();
+            using var giaoDich = ketNoi.BeginTransaction();
+
+            try
+            {
+                string hoTenHoSo;
+                string tenVaccine;
+                string tenMui;
+                int soMui;
+
+                using (var lenh = new SqlCommand(sqlKhoaLich, ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaLichTiem", lichSu.MaLichTiem);
+                    lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+                    using var doc = lenh.ExecuteReader();
+                    if (!doc.Read())
+                    {
+                        giaoDich.Rollback();
+                        return false;
+                    }
+
+                    hoTenHoSo = doc["hoTen"] == DBNull.Value ? string.Empty : doc["hoTen"].ToString() ?? string.Empty;
+                    tenVaccine = doc["tenVaccine"] == DBNull.Value ? string.Empty : doc["tenVaccine"].ToString() ?? string.Empty;
+                    tenMui = doc["tenMui"] == DBNull.Value ? string.Empty : doc["tenMui"].ToString() ?? string.Empty;
+                    soMui = doc["soMui"] == DBNull.Value ? 0 : Convert.ToInt32(doc["soMui"]);
+                }
+
+                using (var lenh = new SqlCommand(sqlKiemTraLichSu, ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaLichTiem", lichSu.MaLichTiem);
+                    if (Convert.ToInt32(lenh.ExecuteScalar()) > 0)
+                    {
+                        giaoDich.Rollback();
+                        return false;
+                    }
+                }
+
+                using (var lenh = new SqlCommand(sqlCapNhatLich, ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaLichTiem", lichSu.MaLichTiem);
+                    lenh.Parameters.AddWithValue("@TrangThai", "Đã tiêm");
+                    if (lenh.ExecuteNonQuery() <= 0)
+                    {
+                        giaoDich.Rollback();
+                        return false;
+                    }
+                }
+
+                using (var lenh = new SqlCommand(sqlThemLichSu, ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaLichTiem", lichSu.MaLichTiem);
+                    lenh.Parameters.AddWithValue("@NgayTiemThucTe", lichSu.NgayTiemThucTe.Date);
+                    lenh.Parameters.AddWithValue("@GhiChu", string.IsNullOrWhiteSpace(lichSu.GhiChu) ? DBNull.Value : lichSu.GhiChu);
+                    lenh.Parameters.AddWithValue("@NgayCapNhat", lichSu.NgayCapNhat);
+                    lenh.ExecuteNonQuery();
+                }
+
+                var tieuDeDaCapNhat = "Đã cập nhật lịch tiêm";
+                var thongTinMui = soMui > 0 ? $"mũi {soMui}" : "mũi tiêm";
+                if (!string.IsNullOrWhiteSpace(tenMui))
+                {
+                    thongTinMui += $" - {tenMui}";
+                }
+
+                var noiDungDaCapNhat = $"{hoTenHoSo} đã được cập nhật là đã tiêm {thongTinMui} {tenVaccine} ngày {lichSu.NgayTiemThucTe:dd-MM-yyyy}.";
+                var maThongBaoDaCapNhat = LayMaThongBao(sqlTimThongBaoCapNhat, ketNoi, giaoDich, maTaiKhoan, lichSu.MaLichTiem, tieuDeDaCapNhat);
+
+                if (!maThongBaoDaCapNhat.HasValue)
+                {
+                    var maThongBaoNhacLich = LayMaThongBao(sqlTimThongBaoNhacLich, ketNoi, giaoDich, maTaiKhoan, lichSu.MaLichTiem, tieuDeDaCapNhat);
+                    if (maThongBaoNhacLich.HasValue)
+                    {
+                        using var lenh = new SqlCommand(sqlChuyenThongBao, ketNoi, giaoDich);
+                        GanThamSoThongBao(lenh, maTaiKhoan, lichSu.MaLichTiem, tieuDeDaCapNhat, noiDungDaCapNhat);
+                        lenh.Parameters.AddWithValue("@MaThongBao", maThongBaoNhacLich.Value);
+                        lenh.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        using var lenh = new SqlCommand(sqlThemThongBao, ketNoi, giaoDich);
+                        GanThamSoThongBao(lenh, maTaiKhoan, lichSu.MaLichTiem, tieuDeDaCapNhat, noiDungDaCapNhat);
+                        lenh.ExecuteNonQuery();
+                    }
+                }
+
+                using (var lenh = new SqlCommand(sqlXoaThongBaoNhacLichConLai, ketNoi, giaoDich))
+                {
+                    GanThamSoThongBaoCoBan(lenh, maTaiKhoan, lichSu.MaLichTiem);
+                    lenh.ExecuteNonQuery();
+                }
+
+                giaoDich.Commit();
+                return true;
+            }
+            catch
+            {
+                giaoDich.Rollback();
+                throw;
+            }
+        }
+
         // Mục đích: phương thức CapNhatTrangThai thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -294,6 +466,33 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
             }
 
             return false;
+        }
+
+        private static int? LayMaThongBao(string sql, SqlConnection ketNoi, SqlTransaction giaoDich, int maTaiKhoan, int maLichTiem, string tieuDeDaCapNhat)
+        {
+            using var lenh = new SqlCommand(sql, ketNoi, giaoDich);
+            GanThamSoThongBaoCoBan(lenh, maTaiKhoan, maLichTiem);
+            lenh.Parameters.AddWithValue("@TieuDeDaCapNhat", tieuDeDaCapNhat);
+            var ketQua = lenh.ExecuteScalar();
+            return ketQua == null || ketQua == DBNull.Value ? null : Convert.ToInt32(ketQua);
+        }
+
+        private static void GanThamSoThongBao(SqlCommand lenh, int maTaiKhoan, int maLichTiem, string tieuDeDaCapNhat, string noiDungDaCapNhat)
+        {
+            GanThamSoThongBaoCoBan(lenh, maTaiKhoan, maLichTiem);
+            lenh.Parameters.AddWithValue("@TieuDeDaCapNhat", tieuDeDaCapNhat);
+            lenh.Parameters.AddWithValue("@NoiDungDaCapNhat", noiDungDaCapNhat);
+            lenh.Parameters.AddWithValue("@NgayGui", DateTime.Now);
+        }
+
+        private static void GanThamSoThongBaoCoBan(SqlCommand lenh, int maTaiKhoan, int maLichTiem)
+        {
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
+            lenh.Parameters.AddWithValue("@TieuDeSapDen", "Sắp đến lịch tiêm");
+            lenh.Parameters.AddWithValue("@TieuDeHomNay", "Hôm nay là lịch tiêm");
+            lenh.Parameters.AddWithValue("@TieuDeDenHanCu", "Đã đến lịch tiêm");
+            lenh.Parameters.AddWithValue("@TieuDeQuaHan", "Quá hạn lịch tiêm");
         }
 
         // Chuẩn hóa ghi chú cũ/null để người dùng không thấy nội dung kỹ thuật khi xem lịch tiêm.

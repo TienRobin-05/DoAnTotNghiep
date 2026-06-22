@@ -4,18 +4,6 @@
     ViewData["Title"] = "Chọn hồ sơ xem lịch tiêm";
     var ngayHienTai = DateTime.Today;
 
-    string LayChuCai(string hoTen)
-    {
-        if (string.IsNullOrWhiteSpace(hoTen)) return "HS";
-        var cacTu = hoTen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (cacTu.Length == 1)
-        {
-            return cacTu[0].Length >= 2 ? cacTu[0][..2].ToUpperInvariant() : cacTu[0].ToUpperInvariant();
-        }
-
-        return $"{cacTu[0][0]}{cacTu[^1][0]}".ToUpperInvariant();
-    }
-
     int TinhTuoi(DateTime ngaySinh)
     {
         var tuoi = ngayHienTai.Year - ngaySinh.Year;
@@ -226,7 +214,7 @@
         border-radius: 50%;
         color: #047857;
         background: #D1FAE5;
-        font-size: 15px;
+        font-size: 24px;
         font-weight: 850;
     }
 
@@ -488,7 +476,7 @@
                 var gioiTinh = gioiTinhTrong ? "—" : item.GioiTinh;
                 <article class="schedule-profile-card" data-search="@item.HoTen @item.MaHoSo #@item.MaHoSo" data-age-group="@nhomTuoi">
                     <div class="schedule-profile-card-head">
-                        <span class="schedule-profile-avatar">@LayChuCai(item.HoTen)</span>
+                        <span class="schedule-profile-avatar" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
                         <div>
                             <h2 class="schedule-profile-name">@item.HoTen</h2>
                             <div class="schedule-profile-code">Mã hồ sơ #@item.MaHoSo</div>
