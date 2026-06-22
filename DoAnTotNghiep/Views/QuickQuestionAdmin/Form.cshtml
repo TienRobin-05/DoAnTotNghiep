@@ -1,0 +1,104 @@
+@model QuickQuestion
+@{
+    var isEdit = Model.Id > 0;
+    ViewData["Title"] = isEdit ? "Sửa câu hỏi nhanh" : "Thêm câu hỏi nhanh";
+    var topics = new[] { "Vaccine cúm", "Lịch tiêm", "Phản ứng sau tiêm", "HPV", "Vaccine phế cầu", "Thai kỳ và vaccine", "Khác" };
+}
+
+<div class="list-page-head">
+    <div>
+        <h2>@ViewData["Title"]</h2>
+        <p>@(isEdit ? "Cập nhật nội dung câu hỏi nhanh" : "Tạo câu hỏi có sẵn để người dùng gửi nhanh")</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
+</div>
+
+<form asp-action="@(isEdit ? "Edit" : "Create")" method="post" class="quick-question-form">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    @if (ViewBag.ThongBao != null)
+    {
+        <div class="alert alert-danger">@ViewBag.ThongBao</div>
+    }
+
+    <div class="mb-3">
+        <label asp-for="Question" class="form-label">Câu hỏi hiển thị</label>
+        <input asp-for="Question" class="form-control" placeholder="Ví dụ: Sau khi tiêm vaccine bị sốt nhẹ có sao không?" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label">Nội dung gửi đi</label>
+        <textarea asp-for="Content" rows="6" class="form-control" placeholder="Nhập nội dung đầy đủ sẽ được gửi thành câu hỏi tư vấn khi người dùng chọn..."></textarea>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col-md-6">
+            <label asp-for="Topic" class="form-label">Chủ đề</label>
+            <select asp-for="Topic" class="form-select">
+                <option value="">Chọn chủ đề</option>
+                @foreach (var topic in topics)
+                {
+                    <option value="@topic">@topic</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3 col-md-6">
+            <label asp-for="BadgeLabel" class="form-label">Nhãn hiển thị</label>
+            <input asp-for="BadgeLabel" class="form-control" placeholder="Ví dụ: Phản ứng sau tiêm" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col-md-6">
+            <label asp-for="SortOrder" class="form-label">Thứ tự hiển thị</label>
+            <input asp-for="SortOrder" type="number" class="form-control" />
+        </div>
+
+        <div class="mb-3 col-md-6 quick-switch-field">
+            <label class="form-label">Trạng thái</label>
+            <label class="quick-switch">
+                <input asp-for="IsActive" type="checkbox" />
+                <span>Bật câu hỏi này</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
+        <button type="submit" class="btn btn-primary">@(isEdit ? "Lưu thay đổi" : "Thêm câu hỏi")</button>
+    </div>
+</form>
+
+<style>
+    .quick-question-form {
+        max-width: 900px;
+    }
+
+    .quick-switch-field {
+        display: grid;
+        align-content: end;
+    }
+
+    .quick-switch {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1f2937;
+        font-weight: 800;
+    }
+
+    .quick-switch input {
+        width: 20px;
+        height: 20px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 8px;
+    }
+</style>

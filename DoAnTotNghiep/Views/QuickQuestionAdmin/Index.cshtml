@@ -1,0 +1,122 @@
+@model List<QuickQuestion>
+@{
+    ViewData["Title"] = "Quản lý câu hỏi nhanh";
+    var keyword = ViewBag.Keyword as string ?? string.Empty;
+    var topic = ViewBag.Topic as string ?? string.Empty;
+    var trangThai = ViewBag.TrangThai as string ?? string.Empty;
+    var topics = Model.Select(item => item.Topic).Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().OrderBy(t => t).ToList();
+}
+
+<div class="list-page-head">
+    <div>
+        <h2>Quản lý câu hỏi nhanh</h2>
+        <p>Danh sách câu hỏi có sẵn để người dùng gửi nhanh</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Thêm câu hỏi nhanh</a>
+</div>
+
+<form method="get" class="list-toolbar quick-admin-toolbar">
+    <input name="keyword" value="@keyword" class="form-control" placeholder="Tìm kiếm câu hỏi nhanh..." />
+    <select name="topic" class="form-select">
+        <option value="">Tất cả chủ đề</option>
+        @foreach (var item in topics)
+        {
+            <option value="@item" selected="@(string.Equals(topic, item, StringComparison.OrdinalIgnoreCase))">@item</option>
+        }
+    </select>
+    <select name="trangThai" class="form-select">
+        <option value="">Tất cả trạng thái</option>
+        <option value="active" selected="@(trangThai == "active")">Đang bật</option>
+        <option value="inactive" selected="@(trangThai == "inactive")">Đang tắt</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Tìm</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Làm mới</a>
+</form>
+
+<section class="list-card quick-admin-card">
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state empty-action">
+            <div>
+                <strong>Chưa có câu hỏi nhanh phù hợp</strong>
+                <span>Thêm câu hỏi nhanh để người dùng có thể gửi các thắc mắc phổ biến.</span>
+            </div>
+            <a asp-action="Create" class="btn btn-primary">Thêm câu hỏi nhanh</a>
+        </div>
+    }
+    else
+    {
+        <table class="table list-table">
+            <thead>
+                <tr>
+                    <th>Câu hỏi</th>
+                    <th>Chủ đề</th>
+                    <th>Thứ tự</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="item-title quick-question-title">@item.Question</div>
+                            <div class="item-meta quick-question-content">@item.Content</div>
+                        </td>
+                        <td><span class="soft-badge">@(string.IsNullOrWhiteSpace(item.BadgeLabel) ? item.Topic : item.BadgeLabel)</span></td>
+                        <td>@item.SortOrder</td>
+                        <td>
+                            <span class="status-badge @(item.IsActive ? "status-ok" : "status-muted")">
+                                @(item.IsActive ? "Đang bật" : "Đang tắt")
+                            </span>
+                        </td>
+                        <td>@item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="table-actions">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                            <form asp-action="Toggle" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-warning">@(item.IsActive ? "Tắt" : "Bật")</button>
+                            </form>
+                            <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Xóa câu hỏi nhanh này?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+<style>
+    .quick-admin-toolbar {
+        max-width: 1180px;
+        grid-template-columns: minmax(260px, 1fr) 190px 170px auto auto;
+    }
+
+    .quick-admin-card,
+    .list-page-head {
+        max-width: 1180px;
+    }
+
+    .quick-question-title,
+    .quick-question-content {
+        max-width: 460px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+    }
+
+    @@media (max-width: 960px) {
+        .quick-admin-toolbar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
