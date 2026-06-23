@@ -22,12 +22,75 @@ namespace DoAnTotNghiep.Controllers
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
         // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index()
+        public IActionResult Index(string? keyword, string? trangThai, string? topic, string? sort, int page = 1, int pageSize = 10)
         {
             if (LaAdmin())
             {
+                var danhSachGoc = cauHoiTuVanDAL.LayTatCa();
+                var danhSach = danhSachGoc.AsEnumerable();
+
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    var tuKhoa = keyword.Trim();
+                    danhSach = danhSach.Where(item =>
+                        item.MaCauHoi.ToString().Contains(tuKhoa, StringComparison.OrdinalIgnoreCase)
+                        || item.CauHoi.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase)
+                        || item.CauTraLoi.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase)
+                        || item.TenNguoiGui.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase)
+                        || item.TenVaccine.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase)
+                        || item.NhomVaccine.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (!string.IsNullOrWhiteSpace(trangThai))
+                {
+                    danhSach = trangThai switch
+                    {
+                        "answered" => danhSach.Where(DaTraLoi),
+                        "pending" => danhSach.Where(item => !DaTraLoi(item)),
+                        _ => danhSach
+                    };
+                }
+
+                if (!string.IsNullOrWhiteSpace(topic))
+                {
+                    danhSach = danhSach.Where(item =>
+                        string.Equals(item.TenVaccine, topic, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(item.NhomVaccine, topic, StringComparison.OrdinalIgnoreCase));
+                }
+
+                danhSach = string.Equals(sort, "oldest", StringComparison.OrdinalIgnoreCase)
+                    ? danhSach.OrderBy(item => item.NgayGui)
+                    : danhSach.OrderByDescending(item => item.NgayGui);
+
+                pageSize = pageSize is 20 or 50 ? pageSize : 10;
+                var tongKetQua = danhSach.Count();
+                var tongTrang = Math.Max(1, (int)Math.Ceiling(tongKetQua / (double)pageSize));
+                page = Math.Clamp(page, 1, tongTrang);
+                var batDau = tongKetQua == 0 ? 0 : ((page - 1) * pageSize) + 1;
+                var ketThuc = Math.Min(page * pageSize, tongKetQua);
+
                 ViewBag.LaAdmin = true;
-                return View(cauHoiTuVanDAL.LayTatCa());
+                ViewBag.Keyword = keyword ?? string.Empty;
+                ViewBag.TrangThai = trangThai ?? string.Empty;
+                ViewBag.Topic = topic ?? string.Empty;
+                ViewBag.Sort = string.IsNullOrWhiteSpace(sort) ? "newest" : sort;
+                ViewBag.Page = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalItems = tongKetQua;
+                ViewBag.TotalPages = tongTrang;
+                ViewBag.StartItem = batDau;
+                ViewBag.EndItem = ketThuc;
+                ViewBag.TotalQuestions = danhSachGoc.Count;
+                ViewBag.AnsweredQuestions = danhSachGoc.Count(DaTraLoi);
+                ViewBag.PendingQuestions = danhSachGoc.Count(item => !DaTraLoi(item));
+                ViewBag.Topics = danhSachGoc
+                    .Select(item => string.IsNullOrWhiteSpace(item.TenVaccine) ? item.NhomVaccine : item.TenVaccine)
+                    .Where(item => !string.IsNullOrWhiteSpace(item))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(item => item)
+                    .ToList();
+
+                return View(danhSach.Skip((page - 1) * pageSize).Take(pageSize).ToList());
             }
 
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -195,6 +258,13 @@ namespace DoAnTotNghiep.Controllers
             return HttpContext.Session.GetInt32("MaTaiKhoan") != null
                 && (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
                     || string.Equals(vaiTro, "Quản trị viên", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool DaTraLoi(CauHoiTuVan cauHoi)
+        {
+            return cauHoi.NgayTraLoi.HasValue
+                || !string.IsNullOrWhiteSpace(cauHoi.CauTraLoi)
+                || cauHoi.TrangThai.Contains("Đã", StringComparison.OrdinalIgnoreCase);
         }
 
         private IActionResult? ChanNeuKhongPhaiAdmin()
