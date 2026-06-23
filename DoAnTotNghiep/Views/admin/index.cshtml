@@ -1,4 +1,4 @@
-@model AdminDashboardViewModel
+﻿@model AdminDashboardViewModel
 @{
     ViewData["Title"] = "Bảng điều khiển";
     Layout = "_AdminLayout";
@@ -7,20 +7,11 @@
 <section class="admin-dashboard">
     <header class="dashboard-top">
         <div>
-            <h1>Bảng điều khiển</h1>
-            <p>Tổng quan hoạt động của hệ thống quản lý tiêm chủng.</p>
+            <h1 class="admin-page-title">Bảng điều khiển</h1>
+            <p class="admin-page-subtitle">Tổng quan hoạt động của hệ thống quản lý tiêm chủng.</p>
         </div>
 
         <div class="dashboard-tools">
-            <label class="dashboard-search" aria-label="Tìm kiếm">
-                <i class="bi bi-search"></i>
-                <input type="search" placeholder="Tìm kiếm..." />
-                <span>⌘ K</span>
-            </label>
-            <button type="button" class="notification-button" aria-label="Thông báo">
-                <i class="bi bi-bell"></i>
-                <span>3</span>
-            </button>
             <details class="admin-user-menu">
                 <summary>
                     <span class="admin-avatar"><i class="bi bi-person-fill"></i></span>
@@ -48,7 +39,7 @@
             </span>
         </article>
         <article class="dashboard-stat-card green">
-            <span class="stat-icon"><i class="bi bi-syringe"></i></span>
+            <span class="stat-icon"><i class="fa-solid fa-syringe"></i></span>
             <span class="stat-copy">
                 <span>Tổng mũi tiêm</span>
                 <strong>@Model.TotalInjectionDoses.ToString("N0")</strong>
@@ -244,65 +235,9 @@
         gap: 12px;
     }
 
-    .dashboard-search {
-        display: grid;
-        grid-template-columns: 20px minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 9px;
-        width: 310px;
-        height: 44px;
-        padding: 0 12px;
-        border: 1px solid #dbe5f0;
-        border-radius: 10px;
-        color: #64748b;
-        background: #ffffff;
-    }
 
-    .dashboard-search input {
-        width: 100%;
-        min-width: 0;
-        border: 0;
-        outline: 0;
-        color: #0f172a;
-        background: transparent;
-        font: inherit;
-    }
 
-    .dashboard-search span {
-        padding: 3px 7px;
-        border-radius: 7px;
-        color: #64748b;
-        background: #f1f5f9;
-        font-size: 12px;
-        font-weight: 800;
-    }
 
-    .notification-button {
-        position: relative;
-        width: 44px;
-        height: 44px;
-        border: 1px solid #dbe5f0;
-        border-radius: 12px;
-        color: #0f172a;
-        background: #ffffff;
-        font-size: 18px;
-    }
-
-    .notification-button span {
-        position: absolute;
-        top: -5px;
-        right: -4px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 18px;
-        height: 18px;
-        border-radius: 999px;
-        color: #ffffff;
-        background: #ef4444;
-        font-size: 11px;
-        font-weight: 800;
-    }
 
     .admin-user-menu {
         position: relative;
@@ -772,7 +707,6 @@
             flex-direction: column;
         }
 
-        .dashboard-search,
         .admin-user-menu summary {
             width: 100%;
         }
@@ -844,3 +778,6 @@
         return luotXem >= 1000 ? $"{luotXem / 1000d:0.#}k" : luotXem.ToString("N0");
     }
 }
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {

@@ -1,0 +1,635 @@
+/* =========================================================
+   Pharmacy City - Global Typography System
+   Applied for both User and Admin
+   Loaded after Bootstrap / ui-polish to override defaults
+   ========================================================= */
+
+:root {
+    --pc-font-main: "Inter", "Segoe UI", Arial, sans-serif;
+
+    --pc-text-primary: #0f172a;
+    --pc-text-secondary: #334155;
+    --pc-text-muted: #64748b;
+    --pc-text-soft: #94a3b8;
+
+    --pc-primary-blue: #0d6efd;
+    --pc-primary-blue-dark: #0b5ed7;
+    --pc-primary-orange: #ff7a00;
+
+    --pc-font-xs: 12px;
+    --pc-font-sm: 14px;
+    --pc-font-base: 16px;
+    --pc-font-md: 18px;
+    --pc-font-lg: 20px;
+    --pc-font-xl: 24px;
+    --pc-font-2xl: 30px;
+    --pc-font-3xl: 36px;
+    --pc-font-4xl: 44px;
+
+    --pc-line-tight: 1.15;
+    --pc-line-normal: 1.5;
+    --pc-line-relaxed: 1.65;
+}
+
+/* Reset font toàn hệ thống */
+html,
+body {
+    font-family: var(--pc-font-main);
+    font-size: var(--pc-font-base);
+    line-height: var(--pc-line-normal);
+    font-weight: 400;
+    color: var(--pc-text-primary);
+    letter-spacing: -0.01em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+table,
+a,
+span,
+p,
+div,
+label,
+small,
+strong,
+b,
+li,
+td,
+th {
+    font-family: var(--pc-font-main);
+}
+
+strong,
+b {
+    font-weight: 700;
+}
+
+/* =========================================================
+   Headings - global
+   ========================================================= */
+h1,
+.page-title,
+.admin-page-title,
+.user-page-title {
+    font-family: var(--pc-font-main);
+    font-size: clamp(32px, 3vw, 48px);
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    color: var(--pc-text-primary);
+    margin: 0;
+}
+
+h2,
+.section-title,
+.admin-section-title,
+.card-title-large {
+    font-family: var(--pc-font-main);
+    font-size: clamp(26px, 2.4vw, 36px);
+    line-height: 1.18;
+    font-weight: 800;
+    letter-spacing: -0.038em;
+    color: var(--pc-text-primary);
+    margin: 0;
+}
+
+h3,
+.card-title,
+.block-title,
+.panel-title {
+    font-family: var(--pc-font-main);
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.028em;
+    color: var(--pc-text-primary);
+    margin: 0;
+}
+
+h4,
+.item-title,
+.table-title {
+    font-family: var(--pc-font-main);
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    color: var(--pc-text-primary);
+    margin: 0;
+}
+
+/* =========================================================
+   Page subtitle / description
+   ========================================================= */
+.page-subtitle,
+.admin-page-subtitle,
+.user-page-subtitle,
+.section-subtitle,
+.card-description,
+.page-description {
+    font-family: var(--pc-font-main);
+    font-size: 18px;
+    line-height: 1.6;
+    font-weight: 400;
+    color: var(--pc-text-muted);
+    letter-spacing: -0.012em;
+    margin-top: 8px;
+}
+
+/* =========================================================
+   Highlight heading giống phong cách Long Châu
+   Ví dụ: Mùa này cần tiêm gì?
+   ========================================================= */
+.highlight-heading,
+.landing-highlight-title {
+    font-family: var(--pc-font-main);
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1.08;
+    font-weight: 850;
+    letter-spacing: -0.05em;
+    color: var(--pc-text-primary);
+    text-align: center;
+}
+
+.highlight-heading .accent,
+.landing-highlight-title .accent {
+    color: var(--pc-primary-orange);
+    font-style: italic;
+    font-weight: 850;
+    position: relative;
+    display: inline-block;
+}
+
+.highlight-heading .accent::after,
+.landing-highlight-title .accent::after {
+    content: "";
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    bottom: -4px;
+    height: 4px;
+    background: var(--pc-primary-orange);
+    border-radius: 999px;
+    transform: rotate(-2deg);
+    opacity: 0.9;
+}
+
+/* =========================================================
+   Sidebar / Navigation typography
+   ========================================================= */
+.sidebar,
+.admin-sidebar,
+.user-sidebar,
+.side-menu,
+.admin-menu {
+    font-family: var(--pc-font-main);
+}
+
+.sidebar-logo-text,
+.admin-logo-text,
+.user-logo-text,
+.brand-name,
+.logo-text,
+.admin-brand strong {
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--pc-primary-blue);
+}
+
+.sidebar-menu-item,
+.admin-menu-item,
+.user-menu-item,
+.side-menu a,
+.admin-sidebar a,
+.user-sidebar a,
+.admin-side-nav a {
+    font-size: 17px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.018em;
+}
+
+.sidebar-menu-item.active,
+.admin-menu-item.active,
+.user-menu-item.active,
+.side-menu a.active,
+.admin-sidebar a.active,
+.user-sidebar a.active,
+.admin-side-nav a.active {
+    font-weight: 800;
+}
+
+/* =========================================================
+   Navbar / Top navigation typography
+   ========================================================= */
+.top-nav a,
+.header-nav a,
+.navbar a,
+.user-navbar a,
+.admin-navbar a,
+.main-nav a,
+.main-navbar a,
+.dashboard-nav-link {
+    font-family: var(--pc-font-main);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+}
+
+.top-nav a.active,
+.header-nav a.active,
+.navbar a.active,
+.user-navbar a.active,
+.admin-navbar a.active,
+.main-nav a.active,
+.main-navbar a.active,
+.dashboard-nav-link.active {
+    font-weight: 800;
+}
+
+/* =========================================================
+   Buttons typography
+   ========================================================= */
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.action-btn,
+.btn-action,
+.primary-action,
+.secondary-action,
+.primary-small,
+.outline-small {
+    font-family: var(--pc-font-main);
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+}
+
+.btn-lg,
+.button-large,
+.primary-action {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.btn-sm,
+.button-small,
+.outline-small {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   Tables typography
+   ========================================================= */
+table,
+.table,
+.admin-table,
+.user-table,
+.vaccine-table,
+.consult-table,
+.quick-table {
+    font-family: var(--pc-font-main);
+}
+
+table th,
+.table th,
+.admin-table th,
+.user-table th,
+.vaccine-table th,
+.consult-table th,
+.quick-table th,
+.list-table thead th,
+.dashboard-table th {
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: 0.018em;
+    text-transform: uppercase;
+    color: #334155;
+}
+
+table td,
+.table td,
+.admin-table td,
+.user-table td,
+.vaccine-table td,
+.consult-table td,
+.quick-table td,
+.list-table tbody td,
+.dashboard-table td {
+    font-size: 15.5px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--pc-text-primary);
+}
+
+.table-main-text,
+.row-title,
+.cell-title,
+.vaccine-name,
+.question-row-title,
+.question-row-title-text {
+    font-size: 16.5px;
+    line-height: 1.35;
+    font-weight: 800;
+    letter-spacing: -0.018em;
+    color: var(--pc-text-primary);
+}
+
+.table-sub-text,
+.row-subtitle,
+.cell-subtitle,
+.vaccine-code,
+.question-code,
+.question-row-sub-text {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--pc-text-muted);
+}
+
+/* =========================================================
+   Statistic / metric cards typography
+   ========================================================= */
+.stat-label,
+.metric-label,
+.dashboard-stat-label {
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: var(--pc-text-muted);
+    letter-spacing: -0.01em;
+}
+
+.stat-value,
+.metric-value,
+.dashboard-stat-value {
+    font-size: 36px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    color: var(--pc-primary-blue);
+}
+
+.stat-description,
+.metric-description,
+.dashboard-stat-description {
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--pc-text-muted);
+}
+
+/* =========================================================
+   Badges / Pills typography
+   ========================================================= */
+.badge,
+.status-badge,
+.group-badge,
+.tag,
+.pill,
+.topic-badge,
+.quick-topic-badge,
+.quick-status-badge,
+.soft-badge,
+.dose-pill,
+.handbook-topic,
+.handbook-count {
+    font-family: var(--pc-font-main);
+    font-size: 13.5px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.006em;
+}
+
+/* =========================================================
+   Form typography
+   ========================================================= */
+input,
+select,
+textarea,
+.form-control,
+.form-select {
+    font-family: var(--pc-font-main);
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--pc-text-primary);
+    letter-spacing: -0.012em;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+label,
+.form-label {
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: var(--pc-text-primary);
+    letter-spacing: -0.012em;
+}
+
+.form-hint,
+.help-text,
+.input-note,
+.validation-message {
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--pc-text-muted);
+}
+
+/* =========================================================
+   Articles / Knowledge pages typography
+   ========================================================= */
+.article-title,
+.post-title,
+.knowledge-title {
+    font-size: clamp(26px, 3vw, 42px);
+    line-height: 1.18;
+    font-weight: 850;
+    letter-spacing: -0.045em;
+    color: var(--pc-text-primary);
+}
+
+.article-summary,
+.post-summary,
+.knowledge-summary {
+    font-size: 18px;
+    line-height: 1.65;
+    font-weight: 400;
+    color: var(--pc-text-muted);
+}
+
+.article-content,
+.post-content,
+.knowledge-content {
+    font-size: 18px;
+    line-height: 1.8;
+    font-weight: 400;
+    color: #1e293b;
+}
+
+.article-content h2,
+.post-content h2,
+.knowledge-content h2 {
+    font-size: 30px;
+    line-height: 1.25;
+    font-weight: 800;
+    margin-top: 32px;
+    margin-bottom: 14px;
+}
+
+.article-content h3,
+.post-content h3,
+.knowledge-content h3 {
+    font-size: 24px;
+    line-height: 1.3;
+    font-weight: 800;
+    margin-top: 28px;
+    margin-bottom: 12px;
+}
+
+.article-content p,
+.post-content p,
+.knowledge-content p {
+    margin-bottom: 16px;
+}
+
+.article-meta,
+.post-meta,
+.knowledge-meta {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pc-text-muted);
+}
+
+/* =========================================================
+   Consultation / Question typography
+   ========================================================= */
+.question-title,
+.consult-question-title {
+    font-size: 22px;
+    line-height: 1.35;
+    font-weight: 850;
+    letter-spacing: -0.035em;
+    color: var(--pc-text-primary);
+}
+
+.question-preview,
+.consult-question-preview,
+.question-summary {
+    font-size: 15.5px;
+    line-height: 1.55;
+    font-weight: 500;
+    color: var(--pc-text-muted);
+}
+
+.answer-title,
+.consult-answer-title {
+    font-size: 20px;
+    line-height: 1.35;
+    font-weight: 800;
+    color: var(--pc-text-primary);
+}
+
+.answer-content,
+.consult-answer-content {
+    font-size: 16.5px;
+    line-height: 1.75;
+    font-weight: 400;
+    color: #1e293b;
+}
+
+/* =========================================================
+   Modal / Dialog typography
+   ========================================================= */
+.modal-title,
+.dialog-title,
+.confirm-title {
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 850;
+    letter-spacing: -0.04em;
+    color: var(--pc-text-primary);
+}
+
+.modal-body,
+.dialog-body,
+.confirm-message {
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 500;
+    color: var(--pc-text-secondary);
+}
+
+.modal-footer button,
+.dialog-actions button,
+.confirm-actions button {
+    font-size: 15px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   Pagination typography
+   ========================================================= */
+.pagination,
+.page-link {
+    font-family: var(--pc-font-main);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+}
+
+.page-item.active .page-link {
+    font-weight: 800;
+}
+
+/* =========================================================
+   Typography utilities
+   ========================================================= */
+.text-main {
+    color: var(--pc-text-primary) !important;
+}
+
+.text-muted-custom {
+    color: var(--pc-text-muted) !important;
+}
+
+.fw-medium {
+    font-weight: 500 !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fw-extrabold {
+    font-weight: 800 !important;
+}
+
+.text-tight {
+    letter-spacing: -0.03em !important;
+}

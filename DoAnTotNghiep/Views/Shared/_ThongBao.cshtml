@@ -137,11 +137,11 @@
         if (!target) return;
 
         if (target.closest(".js-delete-confirm")) return;
+        if (target.closest(".no-browser-confirm")) return;
 
         var message = target.getAttribute("data-confirm");
         var href = target.getAttribute("href") || "";
         var form = target.closest("form");
-        if (form && form.id === "deleteConfirmForm") return;
 
         var formAction = form ? (form.getAttribute("action") || "") : "";
         var text = (target.textContent || "").trim().toLowerCase();

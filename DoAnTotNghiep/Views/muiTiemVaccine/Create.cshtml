@@ -1,16 +1,159 @@
-﻿@* Khu vực giao diện của view Create.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model MuiTiemVaccine
+﻿@model MuiTiemVaccine
 @{
     ViewData["Title"] = "Thêm mũi tiêm vaccine";
+    var daChonVaccine = Model.MaVaccine > 0;
 }
 
-<h2>Thêm mũi tiêm vaccine</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-dose-create.css" asp-append-version="true" />
+}
 
-@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-<form method="post" class="col-md-8">
-    @Html.AntiForgeryToken()
-    <partial name="_FormMuiTiem" model="Model" />
-    <button type="submit" class="btn btn-primary">Lưu</button>
-    <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@Model.MaVaccine" class="btn btn-link">Quay lại</a>
-</form>
+<div class="dose-create-page">
+    <div class="dose-breadcrumb">
+        <a href="/Admin/Index">Trang chủ</a>
+        <span>/</span>
+        <a href="/muiTiemVaccine">Mũi tiêm</a>
+        <span>/</span>
+        <strong>Thêm mũi tiêm</strong>
+    </div>
+
+    <section class="dose-create-hero">
+        <div class="dose-hero-icon">
+            <i class="fa-solid fa-syringe"></i>
+        </div>
+        <div>
+            <h1>Thêm mũi tiêm vaccine</h1>
+            <p>Tạo mới mũi tiêm trong phác đồ tiêm chủng.</p>
+        </div>
+        <div class="dose-hero-art" aria-hidden="true"></div>
+    </section>
+
+    <section class="dose-form-card">
+        <h2>Thông tin mũi tiêm</h2>
+
+        <form asp-action="Create" method="post" class="dose-create-form">
+            @Html.AntiForgeryToken()
+
+            @if (ViewBag.ThongBao != null)
+            {
+                <div class="alert alert-danger">@ViewBag.ThongBao</div>
+            }
+
+            <div class="dose-form-grid three">
+                <div class="dose-field">
+                    <label>Vaccine <span>*</span></label>
+                    @if (daChonVaccine)
+                    {
+                        <input type="hidden" name="MaVaccine" value="@Model.MaVaccine" />
+                        <select asp-for="MaVaccine" asp-items="ViewBag.DanhSachVaccine" class="dose-input" disabled>
+                            <option value="0">-- Chọn vaccine --</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="MaVaccine" asp-items="ViewBag.DanhSachVaccine" class="dose-input">
+                            <option value="0">-- Chọn vaccine --</option>
+                        </select>
+                    }
+                    <span asp-validation-for="MaVaccine" class="text-danger"></span>
+                </div>
+
+                <div class="dose-field">
+                    <label>Tên mũi tiêm <span>*</span></label>
+                    <input asp-for="TenMui" class="dose-input" placeholder="Nhập tên mũi tiêm" />
+                    <span asp-validation-for="TenMui" class="text-danger"></span>
+                </div>
+
+                <div class="dose-field">
+                    <label>Số thứ tự mũi <span>*</span></label>
+                    <input asp-for="SoMui" type="number" min="1" class="dose-input" placeholder="Nhập số thứ tự mũi" />
+                    <span asp-validation-for="SoMui" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="dose-field-group">
+                <h3>Độ tuổi áp dụng <span>*</span></h3>
+
+                <div class="dose-form-grid three">
+                    <div class="dose-field">
+                        <label>Tuổi tối thiểu</label>
+                        <input asp-for="DoTuoiToiThieu" type="number" min="0" class="dose-input" placeholder="Nhập tuổi tối thiểu" />
+                    </div>
+
+                    <div class="dose-field">
+                        <label>Tuổi tối đa</label>
+                        <input asp-for="DoTuoiToiDa" type="number" min="0" class="dose-input" placeholder="Nhập tuổi tối đa" />
+                    </div>
+
+                    <div class="dose-field">
+                        <label>Tuổi khuyến nghị</label>
+                        <input asp-for="DoTuoiKhuyenNghi" type="number" min="0" class="dose-input" placeholder="Nhập tuổi khuyến nghị" />
+                    </div>
+                </div>
+
+                <div class="dose-form-grid three" style="margin-top:22px;">
+                    <div class="dose-field">
+                        <label>Đơn vị tuổi <span>*</span></label>
+                        <select asp-for="DonViTuoi" class="dose-input">
+                            <option value="">-- Chọn đơn vị --</option>
+                            <option value="ngày">ngày</option>
+                            <option value="tuần">tuần</option>
+                            <option value="tháng">tháng</option>
+                            <option value="năm">năm</option>
+                        </select>
+                        <span asp-validation-for="DonViTuoi" class="text-danger"></span>
+                    </div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+
+            <div class="dose-interval-box">
+                <div class="dose-field">
+                    <label>Khoảng cách <span>*</span></label>
+                    <input asp-for="KhoangCachNgay" type="number" min="0" class="dose-input" placeholder="Nhập số ngày" />
+                    <span asp-validation-for="KhoangCachNgay" class="text-danger"></span>
+                </div>
+
+                <div class="dose-field">
+                    <label>Đơn vị</label>
+                    <select asp-for="DonViTuoi" class="dose-input">
+                        <option value="">Chọn đơn vị</option>
+                        <option value="ngày">Ngày</option>
+                        <option value="tháng">Tháng</option>
+                    </select>
+                </div>
+
+                <div class="dose-field">
+                    <label>Hình thức khoảng cách</label>
+                    <div class="dose-radio-row">
+                        <label class="dose-radio">
+                            <input type="radio" name="IntervalType" value="Age" checked />
+                            <span>Theo độ tuổi</span>
+                        </label>
+                        <label class="dose-radio">
+                            <input type="radio" name="IntervalType" value="Day" />
+                            <span>Theo ngày</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dose-field">
+                <label>Ghi chú</label>
+                <textarea asp-for="GhiChu" class="dose-input dose-textarea" placeholder="Nhập ghi chú nếu có"></textarea>
+            </div>
+
+            <div class="dose-form-actions">
+                <a asp-controller="muiTiemVaccine" asp-action="Index" class="dose-back-btn">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Quay lại mũi tiêm
+                </a>
+                <button type="submit" class="dose-submit-btn">
+                    <i class="fa-solid fa-plus"></i>
+                    Thêm mũi tiêm
+                </button>
+            </div>
+        </form>
+    </section>
+</div>

@@ -500,8 +500,8 @@
         <header class="vaccine-lookup-header">
             <span class="vaccine-lookup-heading-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
             <div>
-                <h1>Tra cứu vaccine</h1>
-                <p>@Model.Vaccines.Count vaccine trong danh sách</p>
+                <h1 class="page-title user-page-title">Tra cứu vaccine</h1>
+                <p class="page-subtitle">@Model.Vaccines.Count vaccine trong danh sách</p>
             </div>
         </header>
 
@@ -558,8 +558,8 @@
                                     <div class="vaccine-identity">
                                         <span class="vaccine-row-icon"><i class="bi @iconVaccine" aria-hidden="true"></i></span>
                                         <div class="vaccine-identity-copy">
-                                            <a asp-action="Details" asp-route-id="@item.MaVaccine" class="vaccine-name-link">@item.TenVaccine</a>
-                                            <span class="vaccine-code">Mã vaccine #@item.MaVaccine</span>
+                                            <a asp-action="Details" asp-route-id="@item.MaVaccine" class="vaccine-name-link table-main-text">@item.TenVaccine</a>
+                                            <span class="vaccine-code table-sub-text">Mã vaccine #@item.MaVaccine</span>
                                         </div>
                                     </div>
                                 </td>
@@ -1058,9 +1058,8 @@ else
             <div class="admin-vaccine-title">
                 <span class="admin-vaccine-title-icon"><i class="bi bi-capsule-pill" aria-hidden="true"></i></span>
                 <div>
-                    <h1>Quản lý vaccine</h1>
-                    <p>@Model.TotalItems vaccine trong danh sách</p>
-                </div>
+                    <h1 class="admin-page-title">Quản lý vaccine</h1>
+                    <p class="admin-page-subtitle">@Model.TotalItems vaccine trong danh sách</p>
             </div>
             <div class="admin-vaccine-summary">
                 <div class="admin-vaccine-stat">
@@ -1144,8 +1143,8 @@ else
                                         <div class="admin-vaccine-identity">
                                             <span class="admin-vaccine-row-icon"><i class="bi @iconVaccine" aria-hidden="true"></i></span>
                                             <div>
-                                                <a asp-action="Details" asp-route-id="@item.MaVaccine" class="admin-vaccine-name">@item.TenVaccine</a>
-                                                <span class="admin-vaccine-code">Mã vaccine #@item.MaVaccine</span>
+                                                <a asp-action="Details" asp-route-id="@item.MaVaccine" class="admin-vaccine-name table-main-text">@item.TenVaccine</a>
+                                                <span class="admin-vaccine-code table-sub-text">Mã vaccine #@item.MaVaccine</span>
                                             </div>
                                         </div>
                                     </td>
@@ -1161,27 +1160,33 @@ else
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="admin-vaccine-actions">
-                                            <a asp-action="Details" asp-route-id="@item.MaVaccine" class="admin-vaccine-action" title="Chi tiết">
+                                        <div class="table-actions vaccine-actions">
+                                            <a asp-action="Details" asp-route-id="@item.MaVaccine" class="table-action-btn vaccine-action-btn" title="Chi tiết">
                                                 <i class="bi bi-eye" aria-hidden="true"></i>
                                                 Chi tiết
                                             </a>
-                                            <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="admin-vaccine-action" title="Quản lý mũi tiêm">
+                                            <a asp-controller="muiTiemVaccine" asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="table-action-btn vaccine-action-btn" title="Quản lý mũi tiêm">
                                                 <i class="bi bi-list-check" aria-hidden="true"></i>
                                                 Mũi tiêm
                                             </a>
-                                            <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="admin-vaccine-action" title="Sửa vaccine">
+                                            <a asp-action="Edit" asp-route-id="@item.MaVaccine" class="table-action-btn vaccine-action-btn" title="Sửa vaccine">
                                                 <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                                 Sửa
                                             </a>
-                                            <button type="button"
-                                                    class="admin-vaccine-action delete js-delete-confirm"
-                                                    data-delete-url="@Url.Action("Delete", new { id = item.MaVaccine })"
-                                                    data-delete-title="Xóa vaccine"
-                                                    title="Xóa vaccine">
-                                                <i class="bi bi-trash3" aria-hidden="true"></i>
-                                                Xóa
-                                            </button>
+                                            <div class="table-more-menu">
+                                                <button type="button" class="table-more-btn js-table-more-btn" title="Thêm thao tác">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <div class="table-more-dropdown">
+                                                    <button type="button"
+                                                            class="table-more-item danger js-delete-confirm"
+                                                            data-delete-url="@Url.Action("Delete", new { id = item.MaVaccine })"
+                                                            data-delete-title="Xóa vaccine">
+                                                        <i class="bi bi-trash3"></i>
+                                                        Xóa
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

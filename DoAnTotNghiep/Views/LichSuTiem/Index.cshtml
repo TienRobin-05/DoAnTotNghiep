@@ -7,7 +7,7 @@
 
 <div class="list-page-head">
     <div>
-        <h2>Lịch sử tiêm của @ViewBag.HoTenHoSo</h2>
+        <h1 class="user-page-title">Lịch sử tiêm của @ViewBag.HoTenHoSo</h1>
         <p>@Model.Count mũi tiêm đã được ghi nhận</p>
     </div>
     <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
@@ -46,12 +46,12 @@ else
         {
             <tr>
                 <td>
-                    <div class="item-title">@item.TenVaccine</div>
-                    <div class="item-meta">@item.HoTenHoSo</div>
+                    <div class="item-title table-main-text">@item.TenVaccine</div>
+                    <div class="item-meta table-sub-text">@item.HoTenHoSo</div>
                 </td>
                 <td>
                     <span class="soft-badge">Mũi @item.SoMui</span>
-                    <div class="item-meta">@item.TenMui</div>
+                    <div class="item-meta table-sub-text">@item.TenMui</div>
                 </td>
                 <td>@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</td>
                 <td><span class="status-badge status-ok">@item.NgayTiemThucTe.ToString("dd/MM/yyyy")</span></td>

@@ -85,8 +85,8 @@
 
 <div class="list-page-head">
     <div>
-        <h2>Quản lý tài khoản</h2>
-        <p>@Model.Count tài khoản trong hệ thống</p>
+        <h2 class="admin-page-title">Quản lý tài khoản</h2>
+        <p class="admin-page-subtitle">@Model.Count tài khoản trong hệ thống</p>
     </div>
     <form asp-action="donDepTaiKhoanKhongHoatDong" method="post">
         @Html.AntiForgeryToken()

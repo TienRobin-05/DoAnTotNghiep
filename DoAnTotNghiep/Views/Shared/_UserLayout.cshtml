@@ -81,11 +81,11 @@
             max-width: none;
             min-height: 72px;
             margin: 0;
-            padding: 0 20px;
+            padding: 0 16px;
             display: grid;
-            grid-template-columns: 286px minmax(0, 1fr) auto;
+            grid-template-columns: 260px minmax(0, 1fr) auto;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .dashboard-brand {
@@ -96,11 +96,12 @@
             overflow: hidden;
             color: inherit;
             text-decoration: none;
+            max-width: 260px;
         }
 
         .dashboard-brand-logo {
-            width: 46px;
-            height: 46px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -109,10 +110,10 @@
             overflow: hidden;
             color: #2563EB;
             display: -webkit-box;
-            max-width: 212px;
-            font-size: 15px;
+            max-width: 200px;
+            font-size: 14px;
             font-weight: 800;
-            line-height: 1.28;
+            line-height: 1.22;
             text-overflow: ellipsis;
             white-space: normal;
             -webkit-line-clamp: 2;
@@ -124,18 +125,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            overflow: hidden;
+            gap: 6px;
+            overflow: visible;
         }
 
         .dashboard-nav-link {
-            height: 42px;
-            padding: 0 13px;
-            border-radius: 11px;
+            height: 40px;
+            padding: 0 10px;
+            border-radius: 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 7px;
+            gap: 6px;
             color: #123B73;
             font-size: 14px;
             font-weight: 700;
@@ -146,7 +147,7 @@
         }
 
         .dashboard-nav-link i {
-            font-size: 17px;
+            font-size: 16px;
         }
 
         .dashboard-nav-link:hover {
@@ -186,11 +187,14 @@
             align-items: center;
             justify-content: flex-end;
             flex-shrink: 0;
+            max-width: 220px;
+            min-width: 0;
         }
 
         .dashboard-user summary {
-            height: 46px;
-            padding: 0 16px;
+            height: 44px;
+            max-width: 220px;
+            padding: 0 14px;
             border: none;
             border-radius: 999px;
             background: #F8FBFF;
@@ -198,20 +202,27 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
             list-style: none;
             white-space: nowrap;
             box-shadow: none;
+            overflow: hidden;
         }
 
-        .dashboard-user summary::-webkit-details-marker {
-            display: none;
+        .dashboard-user summary span {
+            min-width: 0;
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
         }
 
         .dashboard-user summary i {
-            font-size: 18px;
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
         .dashboard-user .account-dropdown {
@@ -1447,41 +1458,54 @@
 
         @@media (max-width: 1500px) {
             .dashboard-topbar-inner {
-                grid-template-columns: 286px minmax(0, 1fr) auto;
-                gap: 14px;
+                grid-template-columns: 240px minmax(0, 1fr) auto;
+                gap: 10px;
+                padding: 0 14px;
             }
 
             .dashboard-brand-logo {
-                width: 46px;
-                height: 46px;
+                width: 38px;
+                height: 38px;
             }
 
             .dashboard-brand-title {
-                max-width: 212px;
-                font-size: 15px;
+                max-width: 180px;
+                font-size: 13.5px;
             }
 
             .dashboard-nav-link {
-                padding: 0 10px;
-                font-size: 14px;
+                padding: 0 8px;
+                font-size: 13.5px;
+                height: 38px;
+            }
+
+            .dashboard-user summary {
+                max-width: 180px;
+                padding: 0 12px;
+                font-size: 13px;
+                height: 40px;
+            }
+
+            .dashboard-user summary span {
+                max-width: 110px;
             }
         }
 
         @@media (max-width: 1280px) {
             .dashboard-topbar-inner {
-                grid-template-columns: 250px minmax(0, 1fr) auto;
-                gap: 12px;
-                padding: 0 16px;
+                grid-template-columns: 220px minmax(0, 1fr) auto;
+                gap: 10px;
+                padding: 0 12px;
             }
 
             .dashboard-brand-logo {
-                width: 42px;
-                height: 42px;
+                width: 36px;
+                height: 36px;
             }
 
             .dashboard-brand-title {
-                max-width: 190px;
-                font-size: 14px;
+                max-width: 160px;
+                font-size: 13px;
                 -webkit-line-clamp: 2;
             }
 
@@ -1493,6 +1517,27 @@
 
             .dashboard-nav::-webkit-scrollbar {
                 display: none;
+            }
+
+            .dashboard-nav-link {
+                padding: 0 7px;
+                font-size: 13px;
+                height: 36px;
+            }
+
+            .dashboard-nav-link i {
+                font-size: 15px;
+            }
+
+            .dashboard-user summary {
+                max-width: 160px;
+                padding: 0 10px;
+                font-size: 13px;
+                height: 38px;
+            }
+
+            .dashboard-user summary span {
+                max-width: 90px;
             }
         }
 
@@ -1657,6 +1702,8 @@
         }
     </style>
     <link rel="stylesheet" href="/css/ui-polish.css?v=1" />
+    <link rel="stylesheet" href="/css/pharmacy-typography.css?v=1" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="site-page-shell">
     <header class="dashboard-topbar">
@@ -1723,6 +1770,7 @@
         })();
     </script>
     <script src="/js/push-notification.js?v=6"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
 

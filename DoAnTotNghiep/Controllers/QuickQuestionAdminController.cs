@@ -13,22 +13,62 @@ namespace DoAnTotNghiep.Controllers
             this.quickQuestionDAL = quickQuestionDAL;
         }
 
-        public IActionResult Index(string? keyword, string? topic, string? trangThai)
+        public IActionResult Index(string? keyword, string? status, string? topic, string? sort, int page = 1, int pageSize = 5)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
-            bool? isActive = trangThai switch
+            bool? isActive = status switch
             {
-                "active" => true,
-                "inactive" => false,
+                "visible" => true,
+                "hidden" => false,
                 _ => null
             };
 
-            ViewBag.Keyword = keyword ?? string.Empty;
-            ViewBag.Topic = topic ?? string.Empty;
-            ViewBag.TrangThai = trangThai ?? string.Empty;
-            return View(quickQuestionDAL.LayDanhSach(keyword, topic, isActive));
+            var allItems = quickQuestionDAL.LayDanhSach(keyword, topic, isActive);
+
+            allItems = sort switch
+            {
+                "oldest" => allItems.OrderBy(x => x.UpdatedAt ?? x.CreatedAt).ToList(),
+                "az" => allItems.OrderBy(x => x.Question).ToList(),
+                "updated" => allItems.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ToList(),
+                _ => allItems.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ToList()
+            };
+
+            var totalItems = allItems.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling((double)totalItems / pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+
+            var pagedItems = allItems.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var model = new AdminQuickQuestionIndexViewModel
+            {
+                TotalQuestions = quickQuestionDAL.DemTheoTrangThai(null),
+                VisibleQuestions = quickQuestionDAL.DemTheoTrangThai(true),
+                HiddenQuestions = quickQuestionDAL.DemTheoTrangThai(false),
+                Keyword = keyword,
+                SelectedStatus = status,
+                SelectedTopic = topic,
+                SelectedSort = sort,
+                Topics = quickQuestionDAL.LayDanhSachChuDe(),
+                Items = pagedItems.Select(x => new AdminQuickQuestionItemViewModel
+                {
+                    Id = x.Id,
+                    QuestionCode = $"HQ-{x.CreatedAt:yyyyMMdd}-{x.Id:00000}",
+                    Title = x.Question,
+                    TopicName = x.Topic,
+                    IsVisible = x.IsActive,
+                    UpdatedAt = x.UpdatedAt ?? x.CreatedAt
+                }).ToList(),
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                StartItem = totalItems == 0 ? 0 : (page - 1) * pageSize + 1,
+                EndItem = Math.Min(page * pageSize, totalItems),
+                TotalPages = totalPages
+            };
+
+            return View(model);
         }
 
         [HttpGet]
@@ -80,7 +120,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Toggle(int id)
+        public IActionResult Toggle(int id, string? returnUrl)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
@@ -90,6 +130,11 @@ namespace DoAnTotNghiep.Controllers
 
             quickQuestionDAL.CapNhatTrangThai(id, !quickQuestion.IsActive, HttpContext.Session.GetInt32("MaTaiKhoan"));
             TempData["ThongBao"] = quickQuestion.IsActive ? "Đã tắt câu hỏi nhanh" : "Đã bật câu hỏi nhanh";
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
             return RedirectToAction(nameof(Index));
         }
 

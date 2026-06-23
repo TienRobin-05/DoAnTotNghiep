@@ -170,6 +170,16 @@ WHERE maVaccine = @MaVaccine";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        public bool KiemTraVaccineCoMuiTiem(int maVaccine)
+        {
+            const string sql = "SELECT COUNT(*) FROM MuiTiemVaccine WHERE maVaccine = @MaVaccine";
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaVaccine", maVaccine);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
+        }
+
         // Mục đích: phương thức XoaHoacAn thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.

@@ -20,15 +20,81 @@ namespace DoAnTotNghiep.Controllers
             this.vaccineDAL = vaccineDAL;
         }
 
-        // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index()
+        public IActionResult Index(string? keyword, string? intervalType, int page = 1, int pageSize = 10)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
-            return View(muiTiemVaccineDAL.LayTatCaMuiTiemKemVaccine());
+
+            var allItems = muiTiemVaccineDAL.LayTatCaMuiTiemKemVaccine();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim().ToLowerInvariant();
+                allItems = allItems.Where(x =>
+                    (x.TenVaccine ?? "").ToLowerInvariant().Contains(kw) ||
+                    (x.TenMui ?? "").ToLowerInvariant().Contains(kw) ||
+                    x.MaMuiTiem.ToString().Contains(kw)).ToList();
+            }
+
+            if (intervalType == "age")
+            {
+                allItems = allItems.Where(x => x.KhoangCachNgay == null || x.KhoangCachNgay == 0).ToList();
+            }
+            else if (intervalType == "days")
+            {
+                allItems = allItems.Where(x => x.KhoangCachNgay.HasValue && x.KhoangCachNgay.Value > 0).ToList();
+            }
+
+            var totalItems = allItems.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling((double)totalItems / pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+
+            var pagedItems = allItems.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var model = new AdminDoseIndexViewModel
+            {
+                TotalDoses = totalItems,
+                Keyword = keyword,
+                SelectedIntervalType = intervalType,
+                Items = pagedItems.Select(x => new AdminDoseItemViewModel
+                {
+                    Id = x.MaMuiTiem,
+                    VaccineId = x.MaVaccine,
+                    VaccineName = x.TenVaccine,
+                    DoseNumber = x.SoMui,
+                    DoseName = x.TenMui,
+                    RecommendedScheduleText = HienThiDoTuoi(x),
+                    IntervalText = HienThiKhoangCach(x)
+                }).ToList(),
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                StartItem = totalItems == 0 ? 0 : (page - 1) * pageSize + 1,
+                EndItem = Math.Min(page * pageSize, totalItems),
+                TotalPages = totalPages
+            };
+
+            return View(model);
+        }
+
+        private static string HienThiDoTuoi(MuiTiemVaccine x)
+        {
+            if (x.DoTuoiKhuyenNghi.HasValue)
+                return $"{x.DoTuoiKhuyenNghi} {x.DonViTuoi}";
+            if (x.DoTuoiToiThieu.HasValue && x.DoTuoiToiDa.HasValue)
+                return $"{x.DoTuoiToiThieu}-{x.DoTuoiToiDa} {x.DonViTuoi}";
+            if (x.DoTuoiToiThieu.HasValue)
+                return $"Từ {x.DoTuoiToiThieu} {x.DonViTuoi}";
+            if (x.DoTuoiToiDa.HasValue)
+                return $"Đến {x.DoTuoiToiDa} {x.DonViTuoi}";
+            return "Chưa cấu hình";
+        }
+
+        private static string HienThiKhoangCach(MuiTiemVaccine x)
+        {
+            if (x.KhoangCachNgay.HasValue && x.KhoangCachNgay.Value > 0)
+                return $"{x.KhoangCachNgay} ngày";
+            return "Theo tuổi";
         }
 
         // Mục đích: action IndexTheoVaccine xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

@@ -37,6 +37,11 @@
         new { TieuDe = "Có thể tiêm cùng lúc vaccine cúm và COVID-19?", MoTa = "Tôi định tiêm cúm và COVID-19 nhắc lại trong tuần này. Không biết có thể tiêm cùng lúc không?", ThoiGian = "02/06/2026 14:10", TrangThai = "Tự động trả lời", Kieu = "auto", Icon = "bi-lightning-charge", Active = false },
         new { TieuDe = "Phụ nữ đang mang thai có tiêm được vaccine cúm không?", MoTa = "Vợ tôi đang mang thai 20 tuần, có nên tiêm vaccine cúm vào mùa cúm không?", ThoiGian = "30/05/2026 11:06", TrangThai = "Đã trả lời", Kieu = "answered", Icon = "bi-heart-pulse", Active = false }
     };
+
+    var quickQuestions = ViewBag.QuickQuestions as List<QuickQuestion> ?? new List<QuickQuestion>();
+    var firstQuestion = Model.FirstOrDefault();
+    var hasOfficialAnswer = firstQuestion != null && !string.IsNullOrWhiteSpace(firstQuestion.CauTraLoi);
+    var questionCode = firstQuestion != null ? $"HQ-{firstQuestion.NgayGui:yyyyMMdd}-{firstQuestion.MaCauHoi:00000}" : "";
 }
 
 @if (laAdmin)
@@ -45,8 +50,8 @@
         <section class="admin-consultation-hero">
             <div class="admin-hero-copy">
                 <span class="admin-eyebrow"><i class="bi bi-chat-square-heart"></i> Pharmacy City Admin</span>
-                <h1>Quản lý câu hỏi tư vấn</h1>
-                <p>Quản lý, theo dõi và trả lời các câu hỏi tư vấn từ người dùng.</p>
+                <h1 class="admin-page-title">Quản lý câu hỏi tư vấn</h1>
+                <p class="admin-page-subtitle">Quản lý, theo dõi và trả lời các câu hỏi tư vấn từ người dùng.</p>
                 <strong>@totalQuestions câu hỏi trong danh sách</strong>
             </div>
 
@@ -138,9 +143,9 @@
                                 var topicName = tenChuDe(item);
                                 <tr>
                                     <td class="question-main-cell">
-                                        <div class="question-title-line">@item.CauHoi</div>
-                                        <p>@tomTat(item)</p>
-                                        <span>ID: HQ-@item.NgayGui.ToString("yyyyMMdd")-@item.MaCauHoi.ToString("D5")</span>
+                                        <div class="question-title-line question-title">@item.CauHoi</div>
+                                        <p class="question-preview">@tomTat(item)</p>
+                                        <span class="table-sub-text">ID: HQ-@item.NgayGui.ToString("yyyyMMdd")-@item.MaCauHoi.ToString("D5")</span>
                                     </td>
                                     <td><span class="topic-pill">@topicName</span></td>
                                     <td>
@@ -169,15 +174,15 @@
                                         }
                                     </td>
                                     <td class="actions-cell">
-                                        <div class="admin-row-actions">
-                                            <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="btn-action btn-view" title="Xem chi tiết"><i class="bi bi-eye"></i><span>Xem</span></a>
+                                        <div class="table-actions consult-actions">
+                                            <a asp-action="Details" asp-route-maCauHoi="@item.MaCauHoi" class="table-action-btn consult-action-btn" title="Xem chi tiết"><i class="bi bi-eye"></i><span>Xem</span></a>
                                             @if (!answered)
                                             {
-                                                <a asp-action="traLoi" asp-route-id="@item.MaCauHoi" class="btn-action btn-reply" title="Trả lời"><i class="bi bi-reply"></i><span>Trả lời</span></a>
+                                                <a asp-action="traLoi" asp-route-id="@item.MaCauHoi" class="table-action-btn consult-action-btn primary" title="Trả lời"><i class="bi bi-reply"></i><span>Trả lời</span></a>
                                             }
                                             else
                                             {
-                                                <a asp-action="traLoi" asp-route-id="@item.MaCauHoi" class="btn-action btn-reply muted" title="Sửa câu trả lời"><i class="bi bi-pencil-square"></i><span>Sửa</span></a>
+                                                <a asp-action="traLoi" asp-route-id="@item.MaCauHoi" class="table-action-btn consult-action-btn muted" title="Sửa câu trả lời"><i class="bi bi-pencil-square"></i><span>Sửa</span></a>
                                             }
                                         </div>
                                     </td>
@@ -275,207 +280,125 @@
 *@
 @if (!laAdmin)
 {
-    <div class="consultation-page">
-        <header class="consultation-header">
-            <div class="consultation-title">
-                <span class="title-icon"><i class="bi bi-chat-dots-fill"></i></span>
-                <div>
-                    <h1>Tư vấn trực tuyến</h1>
-                    <p>Xem câu trả lời nhanh từ hệ thống hoặc phản hồi từ bác sĩ chuyên môn</p>
+    var userQuestions = Model;
+    var firstUserQ = userQuestions.FirstOrDefault();
+    var firstQuickQ = quickQuestions.FirstOrDefault();
+
+    <div class="consult-page">
+        <div class="consult-shell">
+
+            <header class="consult-hero">
+                <div class="consult-hero-left">
+                    <div class="consult-hero-icon"><i class="bi bi-chat-dots-fill"></i></div>
+                    <div>
+                        <h1>Tư vấn trực tuyến</h1>
+                        <p>Xem nhanh câu trả lời từ hệ thống và các bác sĩ chuyên môn cho mọi thắc mắc của bạn.</p>
+                    </div>
                 </div>
+                <a asp-action="Create" class="consult-create-btn"><i class="bi bi-plus-lg"></i>Tạo câu hỏi mới</a>
+            </header>
+
+            <div class="consult-tabs">
+                <button type="button" class="consult-tab active" data-mode="quick"><i class="bi bi-lightning-charge"></i>Câu hỏi nhanh</button>
+                <button type="button" class="consult-tab" data-mode="mine"><i class="bi bi-person-circle"></i>Câu hỏi của bạn</button>
             </div>
-            <a asp-action="Create" class="btn-new-question">
-                <i class="bi bi-plus-lg"></i>
-                <span>Tạo câu hỏi mới</span>
-            </a>
-        </header>
 
-        <section class="consultation-grid" aria-label="Không gian tư vấn trực tuyến">
-            <aside class="question-panel">
-                <div class="panel-card question-list-card">
-                    <div class="question-tools">
-                        <label class="search-field" aria-label="Tìm kiếm câu hỏi">
+            <div class="consult-layout">
+                <aside class="consult-left-panel">
+                    <section class="consult-list-card">
+                        <div class="consult-card-heading">
+                            <h2>Câu hỏi nhanh</h2>
+                            <p>Chọn câu hỏi để xem câu trả lời chi tiết</p>
+                        </div>
+                        <div class="consult-search">
+                            <input id="quickQuestionSearch" type="text" placeholder="Tìm kiếm câu hỏi..." />
                             <i class="bi bi-search"></i>
-                            <input type="search" placeholder="Tìm kiếm câu hỏi, chủ đề..." />
-                        </label>
-                        <label class="status-select" aria-label="Lọc trạng thái">
-                            <select>
-                                <option>Tất cả trạng thái</option>
-                                <option>Đã trả lời</option>
-                                <option>Đang xử lý</option>
-                                <option>Tự động trả lời</option>
-                            </select>
-                            <i class="bi bi-chevron-down"></i>
-                        </label>
-                    </div>
-
-                    <div class="question-list">
-                        @foreach (var cauHoi in cauHoiMau)
-                        {
-                            <button type="button" class="question-item @(cauHoi.Active ? "is-active" : "")">
-                                <span class="question-icon"><i class="bi @cauHoi.Icon"></i></span>
-                                <span class="question-body">
-                                    <span class="question-row">
-                                        <strong>@cauHoi.TieuDe</strong>
-                                        <span class="question-status status-@cauHoi.Kieu">@cauHoi.TrangThai</span>
+                        </div>
+                        <div class="consult-question-list" id="quickQuestionList">
+                            @foreach (var item in quickQuestions.Take(5))
+                            {
+                                <button type="button" class="consult-question-item js-select-consult-item"
+                                        data-type="quick"
+                                        data-title="@item.Question"
+                                        data-answer="@item.Content"
+                                        data-topic="@item.Topic"
+                                        data-updated="@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? item.CreatedAt.ToString("dd/MM/yyyy HH:mm"))">
+                                    <span class="consult-question-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+                                    <span class="consult-question-text">
+                                        <strong>@item.Question</strong>
+                                        <small>@item.Topic</small>
                                     </span>
-                                    <span class="question-desc">@cauHoi.MoTa</span>
-                                    <span class="question-time"><i class="bi bi-clock"></i>@cauHoi.ThoiGian</span>
-                                </span>
-                            </button>
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            }
+                        </div>
+                        @if (quickQuestions.Count > 5)
+                        {
+                            <button type="button" class="consult-more-btn">Xem thêm câu hỏi <i class="bi bi-chevron-down"></i></button>
                         }
-                    </div>
+                    </section>
+                </aside>
 
-                    <div class="pagination-row" aria-label="Phân trang">
-                        <button type="button" class="pager-button" title="Trang trước"><i class="bi bi-chevron-left"></i></button>
-                        <button type="button" class="pager-number is-active">1</button>
-                        <button type="button" class="pager-number">2</button>
-                        <button type="button" class="pager-number">3</button>
-                        <span class="pager-dots">...</span>
-                        <button type="button" class="pager-number">10</button>
-                        <button type="button" class="pager-button" title="Trang sau"><i class="bi bi-chevron-right"></i></button>
-                    </div>
-                </div>
-            </aside>
-
-            <main class="answer-column">
-                <article class="panel-card detail-card">
-                    <div class="detail-code">Mã câu hỏi: HQ-20250609-00124</div>
-                    <h2>Sau khi tiêm vaccine cúm có sốt nhẹ có sao không?</h2>
-                    <div class="detail-meta">
-                        <span><i class="bi bi-calendar2-week"></i>09/06/2026 10:15</span>
-                        <span><i class="bi bi-person-circle"></i>Robino</span>
-                        <span><i class="bi bi-info-circle"></i>Nam, 28 tuổi</span>
-                    </div>
-                </article>
-
-                <article class="panel-card answer-card quick-answer">
-                    <div class="answer-head">
-                        <span class="system-icon"><i class="bi bi-lightning-charge-fill"></i></span>
-                        <div>
-                            <h3>Phản hồi nhanh từ hệ thống</h3>
-                            <p>Tóm tắt từ kho kiến thức đã được kiểm duyệt</p>
+                <main class="consult-answer-panel">
+                    <section class="consult-main-card" id="answerCard">
+                        <div class="consult-answer-badge" id="answerBadge"><i class="bi bi-lightning-charge"></i><span>Nguồn: Câu hỏi nhanh</span></div>
+                        <h2 id="answerTitle">Chọn câu hỏi để xem câu trả lời</h2>
+                        <div class="consult-answer-meta" id="answerMeta"></div>
+                        <div class="consult-info-note" id="answerHighlight"><i class="bi bi-info-circle"></i><span>Thông tin mang tính tham khảo.</span></div>
+                        <div class="consult-answer-content" id="answerContent">
+                            <p>Vui lòng chọn một câu hỏi từ danh sách bên trái để xem câu trả lời chi tiết.</p>
                         </div>
-                    </div>
-                    <p>Sốt nhẹ sau tiêm vaccine cúm thường là phản ứng thông thường và có thể tự giảm sau 1-2 ngày. Bạn nên nghỉ ngơi và theo dõi thêm tại nhà.</p>
-                    <ul class="check-list">
-                        <li><i class="bi bi-check-circle-fill"></i>Uống nhiều nước, nghỉ ngơi đầy đủ</li>
-                        <li><i class="bi bi-check-circle-fill"></i>Đi khám nếu sốt cao kéo dài hoặc có dấu hiệu bất thường</li>
-                    </ul>
-                    <div class="answer-foot">
-                        <span>Nguồn: Bộ Y tế & WHO</span>
-                        <span>Trả lời lúc 09/06/2026 10:15</span>
-                    </div>
-                </article>
+                    </section>
+                </main>
 
-                <article class="panel-card answer-card doctor-answer">
-                    <div class="doctor-answer-head">
-                        <div>
-                            <h3>Bác sĩ phản hồi chi tiết</h3>
-                            <div class="doctor-line">
-                                <span class="doctor-avatar"><i class="bi bi-person-fill"></i></span>
-                                <span>
-                                    <strong>@tenBacSi <i class="bi bi-patch-check-fill"></i></strong>
-                                    <small>Chuyên khoa Truyền nhiễm • Pharmacy City</small>
-                                </span>
+                <aside class="consult-right-panel">
+                    <section class="consult-side-card">
+                        <div class="consult-card-heading">
+                            <h2>Câu hỏi của bạn</h2>
+                            <p>Xem câu hỏi bạn đã gửi và câu trả lời từ bác sĩ</p>
+                        </div>
+                        @if (userQuestions.Count == 0)
+                        {
+                            <div class="empty-state" style="margin-top:16px;">Bạn chưa gửi câu hỏi nào.</div>
+                        }
+                        else
+                        {
+                            <div class="user-question-list">
+                                @foreach (var item in userQuestions)
+                                {
+                                    var daTraLoi = !string.IsNullOrWhiteSpace(item.CauTraLoi);
+                                    <button type="button" class="user-question-item js-select-consult-item"
+                                            data-type="user"
+                                            data-title="@item.CauHoi"
+                                            data-answer="@item.CauTraLoi"
+                                            data-status="@item.TrangThai"
+                                            data-doctor="Hệ thống"
+                                            data-created="@item.NgayGui.ToString("dd/MM/yyyy HH:mm")"
+                                            data-answered="@(item.NgayTraLoi?.ToString("dd/MM/yyyy HH:mm") ?? "")">
+                                        <span class="user-question-icon"><i class="bi bi-chat-dots"></i></span>
+                                        <span class="user-question-main">
+                                            <strong>@item.CauHoi</strong>
+                                            <small>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </span>
+                                        <span class="user-question-status @(daTraLoi ? "answered" : "pending")">@(daTraLoi ? "Đã trả lời" : "Đang chờ")</span>
+                                    </button>
+                                }
                             </div>
-                        </div>
-                        <span class="reply-time">Trả lời lúc 09/06/2026 11:02</span>
-                    </div>
+                        }
+                        <a asp-action="Index" class="consult-view-all-btn">Xem tất cả câu hỏi của bạn <i class="bi bi-arrow-right"></i></a>
+                    </section>
 
-                    <div class="doctor-content">
-                        <p>Chào bạn Robino,</p>
-                        <p>Với mức sốt 37.8°C và đau đầu nhẹ sau tiêm, đây thường là phản ứng bình thường của cơ thể khi tạo miễn dịch. Hiện tại bạn có thể tiếp tục theo dõi tại nhà nếu triệu chứng không tăng lên.</p>
-                        <p>Nếu bạn chỉ sốt nhẹ, vẫn ăn uống được và không khó thở, bạn chưa cần quá lo lắng.</p>
-                    </div>
-
-                    <div class="advice-grid">
-                        <div class="advice-box should">
-                            <h4>Bạn nên</h4>
-                            <ul>
-                                <li><i class="bi bi-check2-circle"></i>Nghỉ ngơi, uống đủ nước</li>
-                                <li><i class="bi bi-check2-circle"></i>Có thể dùng paracetamol nếu sốt từ 38.5°C trở lên hoặc cảm thấy khó chịu nhiều</li>
-                                <li><i class="bi bi-check2-circle"></i>Tránh vận động mạnh trong 24 giờ đầu</li>
-                            </ul>
+                    <section class="consult-trust-card">
+                        <div class="trust-icon"><i class="bi bi-shield-check"></i></div>
+                        <div>
+                            <h3>Thông tin tin cậy</h3>
+                            <p>Các câu trả lời được tổng hợp từ Bộ Y tế, WHO và đội ngũ bác sĩ chuyên môn.</p>
                         </div>
-                        <div class="advice-box warning">
-                            <h4>Bạn nên đi khám nếu</h4>
-                            <ul>
-                                <li><i class="bi bi-exclamation-triangle-fill"></i>Sốt cao trên 39°C hoặc kéo dài hơn 48 giờ</li>
-                                <li><i class="bi bi-exclamation-triangle-fill"></i>Nổi mẩn nhiều, khó thở, sưng môi lưỡi, chóng mặt</li>
-                            </ul>
-                        </div>
-                    </div>
+                    </section>
+                </aside>
+            </div>
 
-                    <p class="doctor-note">Nếu cần, bạn có thể gửi thêm thông tin về tình trạng hiện tại để tôi hỗ trợ tiếp.</p>
-                </article>
-
-                <div class="state-templates" hidden>
-                    <p>Bạn chưa gửi câu hỏi tư vấn nào.</p>
-                    <p>Không thể tải danh sách câu hỏi. Vui lòng thử lại.</p>
-                    <p>Không tìm thấy câu hỏi.</p>
-                    <p>Không thể tải chi tiết câu hỏi. Vui lòng thử lại.</p>
-                </div>
-            </main>
-
-            <aside class="support-column">
-                <section class="panel-card info-card processing-card">
-                    <h2 class="processing-card-title">Thông tin xử lý</h2>
-                    <div class="processing-info-list">
-                        <div class="processing-info-row">
-                            <span class="processing-info-label">Trạng thái</span>
-                            <span class="status-badge answered">Đã trả lời</span>
-                        </div>
-                        <div class="processing-info-row">
-                            <span class="processing-info-label">Chủ đề</span>
-                            <span class="processing-info-value">Vaccine cúm</span>
-                        </div>
-                        <div class="processing-info-row">
-                            <span class="processing-info-label">Thời gian phản hồi</span>
-                            <span class="processing-info-value">47 phút</span>
-                        </div>
-                        <div class="processing-info-row doctor-row">
-                            <span class="processing-info-label">Bác sĩ phụ trách</span>
-                            <span class="processing-info-value doctor-name">@tenBacSi</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="panel-card action-card">
-                    <h2>Hành động nhanh</h2>
-                    <div class="quick-actions">
-                        <button type="button" class="quick-action">
-                            <i class="bi bi-chat-dots"></i>
-                            <span><strong>Đặt câu hỏi bổ sung</strong><small>Tiếp tục hỏi để làm rõ thêm thông tin</small></span>
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                        <button type="button" class="quick-action">
-                            <i class="bi bi-bookmark"></i>
-                            <span><strong>Lưu câu trả lời</strong><small>Lưu lại để xem lại sau</small></span>
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                        <button type="button" class="quick-action">
-                            <i class="bi bi-calendar-check"></i>
-                            <span><strong>Xem lịch tiêm liên quan</strong><small>Kiểm tra các mũi tiêm liên quan</small></span>
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                        <button type="button" class="quick-action">
-                            <i class="bi bi-telephone"></i>
-                            <span><strong>Liên hệ cơ sở y tế</strong><small>Gọi hoặc chat với cơ sở y tế gần bạn</small></span>
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
-                    <p class="action-note">Thao tác nhanh để tiếp tục theo dõi và xử lý câu hỏi của bạn.</p>
-                </section>
-
-                <section class="panel-card related-card">
-                    <h2>Bài viết liên quan</h2>
-                    <a href="#"><i class="bi bi-file-earmark-medical"></i>Phản ứng sau tiêm vaccine: bình thường và khi nào cần lo lắng?</a>
-                    <a href="#"><i class="bi bi-file-earmark-medical"></i>Vaccine cúm hoạt động như thế nào trong cơ thể?</a>
-                    <a href="#"><i class="bi bi-file-earmark-medical"></i>Những lưu ý quan trọng khi tiêm vaccine cúm mùa</a>
-                </section>
-            </aside>
-        </section>
+        </div>
     </div>
 }
 
@@ -759,7 +682,7 @@
 
     .admin-question-table {
         width: 100%;
-        min-width: 1180px;
+        min-width: 1200px;
         border-collapse: collapse;
         table-layout: fixed;
     }
@@ -787,35 +710,35 @@
 
     .admin-question-table th:nth-child(1),
     .admin-question-table td:nth-child(1) {
-        width: 34%;
+        width: 30%;
     }
 
     .admin-question-table th:nth-child(2),
     .admin-question-table td:nth-child(2) {
-        width: 15%;
+        width: 13%;
     }
 
     .admin-question-table th:nth-child(3),
     .admin-question-table td:nth-child(3) {
-        width: 13%;
+        width: 12%;
     }
 
     .admin-question-table th:nth-child(4),
     .admin-question-table td:nth-child(4) {
-        width: 13%;
+        width: 12%;
     }
 
     .admin-question-table th:nth-child(5),
     .admin-question-table td:nth-child(5),
     .admin-question-table th:nth-child(6),
     .admin-question-table td:nth-child(6) {
-        width: 10%;
+        width: 9%;
     }
 
     .admin-question-table th.actions-col,
     .admin-question-table td.actions-cell {
-        width: 190px;
-        min-width: 190px;
+        width: 240px;
+        min-width: 240px;
         white-space: nowrap;
     }
 
@@ -895,6 +818,45 @@
         flex-wrap: nowrap;
         gap: 10px;
         white-space: nowrap;
+    }
+
+    .table-actions.consult-actions {
+        gap: 8px;
+    }
+
+    .table-action-btn.consult-action-btn {
+        height: 36px;
+        padding: 0 11px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 800;
+        gap: 6px;
+    }
+
+    .table-action-btn.consult-action-btn i {
+        font-size: 13px;
+    }
+
+    .table-action-btn.consult-action-btn.primary {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    .table-action-btn.consult-action-btn.primary:hover {
+        background: #0b5ed7;
+        color: #ffffff;
+    }
+
+    .table-action-btn.consult-action-btn.muted {
+        color: #0d6efd;
+        background: #eaf4ff;
+        border-color: #93c5fd;
+    }
+
+    .table-action-btn.consult-action-btn.muted:hover {
+        background: #dbeafe;
+        color: #0d6efd;
     }
 
     .btn-action {
@@ -1849,4 +1811,779 @@
             grid-template-columns: 34px minmax(0, 1fr) 16px;
         }
     }
+
+    .consult-response-card {
+        background: #ffffff;
+        border: 1px solid #dbe5f0;
+        border-radius: 18px;
+        padding: 26px;
+        margin-top: 22px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .official-response-card {
+        background: #ffffff;
+        border-color: #bfdbfe;
+        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.08);
+    }
+
+    .consult-response-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .consult-response-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .consult-response-icon.official {
+        background: #eff6ff;
+        color: #0d6efd;
+    }
+
+    .consult-response-header h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px;
+        line-height: 1.3;
+        font-weight: 850;
+    }
+
+    .consult-response-header p {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: 15px;
+        line-height: 1.45;
+        font-weight: 500;
+    }
+
+    .consult-response-title-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .official-answer-badge {
+        min-height: 32px;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #0d6efd;
+        padding: 8px 13px;
+        font-size: 13.5px;
+        font-weight: 850;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    .official-answer-content {
+        color: #0f172a;
+        font-size: 16px;
+        line-height: 1.75;
+        font-weight: 500;
+        white-space: pre-line;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 18px;
+    }
+
+    .consult-waiting-official-card {
+        margin-top: 18px;
+        border: 1px dashed #fbbf24;
+        border-radius: 16px;
+        background: #fffbeb;
+        color: #92400e;
+        padding: 18px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .consult-waiting-official-card strong {
+        display: block;
+        font-size: 15px;
+        font-weight: 850;
+        margin-bottom: 4px;
+    }
+
+    .consult-waiting-official-card p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .detail-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 800;
+        font-size: 14px;
+    }
+
+    .detail-status.answered {
+        color: #16a34a;
+    }
+
+    .detail-status.pending {
+        color: #f97316;
+    }
+
+    .quick-questions-section {
+        margin-bottom: 10px;
+    }
+
+    .quick-search-box {
+        width: 100%;
+        height: 54px;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        margin-bottom: 16px;
+    }
+
+    .quick-search-box i {
+        color: #64748b;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .quick-search-box input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .quick-search-box input::placeholder {
+        color: #94a3b8;
+    }
+
+    .quick-question-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .quick-question-card {
+        width: 100%;
+        min-height: 74px;
+        border: 1px solid #dbe5f0;
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 14px 16px;
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr) auto 20px;
+        align-items: center;
+        gap: 14px;
+        text-align: left;
+        cursor: pointer;
+        transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .quick-question-card:hover {
+        border-color: #93c5fd;
+        background: #f8fbff;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, .06);
+    }
+
+    .quick-question-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #0d6efd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .quick-question-main {
+        min-width: 0;
+    }
+
+    .quick-question-title {
+        color: #0f172a;
+        font-size: 16px;
+        line-height: 1.3;
+        font-weight: 850;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .quick-question-topic {
+        min-height: 30px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #0d6efd;
+        padding: 7px 11px;
+        font-size: 13px;
+        font-weight: 850;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .quick-question-arrow {
+        color: #94a3b8;
+        font-size: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform .2s ease;
+    }
+
+    .quick-question-card:hover .quick-question-arrow {
+        color: #0d6efd;
+        transform: translateX(3px);
+    }
+
+    .quick-answer-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 9999;
+    }
+
+    .quick-answer-overlay[hidden] {
+        display: none;
+    }
+
+    .quick-answer-dialog {
+        width: min(640px, 100%);
+        max-height: calc(100vh - 48px);
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 24px 72px rgba(15, 23, 42, .24);
+        padding: 26px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .quick-answer-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 34px;
+        height: 34px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .quick-answer-close:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .quick-answer-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding-right: 36px;
+        margin-bottom: 18px;
+    }
+
+    .quick-answer-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #0d6efd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .quick-answer-heading {
+        min-width: 0;
+    }
+
+    .quick-answer-heading h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 19px;
+        line-height: 1.3;
+        font-weight: 850;
+    }
+
+    .quick-answer-topic-badge {
+        margin-top: 10px;
+        min-height: 30px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #0d6efd;
+        padding: 7px 12px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 13px;
+        line-height: 1;
+        font-weight: 850;
+    }
+
+    .quick-answer-body {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 16px;
+        overflow-y: auto;
+        max-height: 50vh;
+    }
+
+    .quick-answer-label {
+        color: #0d6efd;
+        font-size: 15px;
+        line-height: 1.3;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .quick-answer-content {
+        color: #334155;
+        font-size: 16px;
+        line-height: 1.6;
+        font-weight: 500;
+        white-space: pre-line;
+    }
+
+    .quick-answer-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 18px;
+    }
+
+    .quick-answer-done {
+        height: 42px;
+        min-width: 88px;
+        border: none;
+        border-radius: 10px;
+        background: #0d6efd;
+        color: #ffffff;
+        padding: 0 16px;
+        font-size: 15px;
+        font-weight: 850;
+        cursor: pointer;
+    }
+
+    .quick-answer-done:hover {
+        background: #0b5ed7;
+    }
+
+.consult-page {
+    min-height: calc(100vh - 72px);
+    background: #f4f8fd;
+    padding: 28px 26px 56px;
+    color: #0f172a;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+.consult-shell {
+    width: min(1760px, 100%);
+    margin: 0 auto;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #dbe5f0;
+    border-radius: 24px;
+    padding: 34px 38px 42px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
+}
+.consult-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 34px;
+}
+.consult-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.consult-hero-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+.consult-hero h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+.consult-hero p {
+    margin: 9px 0 0;
+    color: #64748b;
+    font-size: 17px;
+    line-height: 1.45;
+    font-weight: 500;
+}
+.consult-create-btn {
+    height: 54px;
+    padding: 0 24px;
+    border-radius: 14px;
+    background: #2563eb;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 850;
+    text-decoration: none;
+    box-shadow: 0 16px 32px rgba(37, 99, 235, 0.22);
+    flex-shrink: 0;
+}
+.consult-create-btn:hover { background: #1d4ed8; color: #ffffff; }
+.consult-tabs {
+    width: min(690px, 100%);
+    height: 64px;
+    margin: 0 auto 28px;
+    border: 1px solid #dbe5f0;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+}
+.consult-tab {
+    border: none;
+    border-radius: 14px;
+    background: transparent;
+    color: #64748b;
+    font-size: 16px;
+    font-weight: 850;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.consult-tab.active { background: #2563eb; color: #ffffff; box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18); }
+.consult-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.45fr 0.85fr;
+    gap: 24px;
+    align-items: start;
+}
+.consult-left-panel, .consult-answer-panel, .consult-right-panel { min-width: 0; }
+.consult-list-card, .consult-main-card, .consult-side-card, .consult-trust-card {
+    background: #ffffff;
+    border: 1px solid #dbe5f0;
+    border-radius: 18px;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+.consult-list-card { padding: 24px; }
+.consult-card-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 900;
+}
+.consult-card-heading p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+}
+.consult-search { position: relative; margin: 20px 0 18px; }
+.consult-search input {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #dbe5f0;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 0 44px 0 16px;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+}
+.consult-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10); }
+.consult-search i { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #64748b; }
+.consult-question-list { display: flex; flex-direction: column; gap: 12px; }
+.consult-question-item {
+    width: 100%;
+    min-height: 74px;
+    border: 1px solid #dbe5f0;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.consult-question-item:hover, .consult-question-item.active { border-color: #2563eb; background: #f8fbff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08); }
+.consult-question-icon {
+    width: 44px; height: 44px; border-radius: 14px; background: #eff6ff; color: #2563eb;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.consult-question-text { min-width: 0; }
+.consult-question-text strong {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    color: #0f172a; font-size: 15px; line-height: 1.3; font-weight: 850;
+}
+.consult-question-text small {
+    display: block; margin-top: 4px; color: #64748b; font-size: 13px; font-weight: 600;
+}
+.consult-question-item > i { color: #334155; font-size: 14px; }
+.consult-more-btn {
+    width: 100%; height: 46px; margin-top: 18px; border: 1px solid #dbe5f0; border-radius: 12px;
+    background: #ffffff; color: #2563eb; display: flex; align-items: center; justify-content: center;
+    gap: 9px; font-size: 15px; font-weight: 850; cursor: pointer;
+}
+.consult-more-btn:hover { background: #eff6ff; }
+.consult-main-card { position: relative; padding: 34px; min-height: 500px; }
+.consult-answer-badge {
+    width: fit-content; min-height: 32px; border-radius: 999px; background: #eff6ff; color: #2563eb;
+    padding: 8px 13px; display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 850; margin-bottom: 18px;
+}
+.consult-main-card h2 {
+    margin: 0; color: #0f172a; font-size: 26px; line-height: 1.28; font-weight: 900; letter-spacing: -0.03em;
+}
+.consult-answer-meta {
+    display: flex; align-items: center; gap: 10px; margin: 16px 0 24px; color: #64748b; font-size: 15px; font-weight: 600; flex-wrap: wrap;
+}
+.consult-info-note {
+    border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 12px;
+    background: #f8fbff; color: #1e3a8a; padding: 14px 16px; display: flex; gap: 12px;
+    align-items: flex-start; margin-bottom: 24px; font-size: 15px; line-height: 1.55; font-weight: 600;
+}
+.consult-info-note i { margin-top: 2px; color: #2563eb; flex-shrink: 0; }
+.consult-answer-content { color: #334155; font-size: 16px; line-height: 1.75; font-weight: 500; }
+.consult-answer-content p { margin: 0 0 14px; }
+.consult-answer-content h3 { margin: 24px 0 10px; color: #0f172a; font-size: 19px; font-weight: 900; }
+.consult-answer-content ul { margin: 10px 0 20px; padding: 0; list-style: none; display: grid; gap: 10px; }
+.consult-answer-content li { position: relative; padding-left: 26px; }
+.consult-answer-content li::before {
+    content: "✓"; position: absolute; left: 0; top: 3px; width: 18px; height: 18px;
+    border-radius: 999px; background: #16a34a; color: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 900;
+}
+.consult-important-note {
+    margin-top: 20px; border: 1px solid #bfdbfe; border-radius: 12px; background: #f8fbff;
+    padding: 16px; display: flex; gap: 12px; color: #1e3a8a; font-size: 15px; line-height: 1.55;
+}
+.consult-feedback-box {
+    margin-top: 28px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc;
+    padding: 14px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.consult-feedback-box span { margin-right: auto; color: #64748b; font-size: 14px; font-weight: 600; }
+.consult-feedback-box button {
+    height: 38px; border: 1px solid #cbd5e1; border-radius: 10px; background: #ffffff;
+    color: #334155; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 800; cursor: pointer;
+}
+.consult-feedback-box button:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+.consult-side-card { padding: 24px; }
+.user-question-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.user-question-item {
+    width: 100%; min-height: 80px; border: 1px solid #dbe5f0; border-radius: 14px;
+    background: #ffffff; padding: 14px; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 12px; align-items: center; text-align: left; cursor: pointer; transition: all 0.18s ease;
+}
+.user-question-item:hover, .user-question-item.active { border-color: #2563eb; background: #f8fbff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08); }
+.user-question-icon {
+    width: 40px; height: 40px; border-radius: 12px; background: #eff6ff; color: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+}
+.user-question-main { min-width: 0; }
+.user-question-main strong {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    color: #0f172a; font-size: 14px; line-height: 1.3; font-weight: 850;
+}
+.user-question-main small { display: block; margin-top: 4px; color: #64748b; font-size: 12px; font-weight: 600; }
+.user-question-status {
+    min-height: 24px; border-radius: 999px; padding: 5px 9px; font-size: 11px; font-weight: 850; white-space: nowrap;
+}
+.user-question-status.answered { background: #dcfce7; color: #16a34a; }
+.user-question-status.pending { background: #eff6ff; color: #2563eb; }
+.consult-view-all-btn {
+    height: 44px; margin-top: 18px; border: 1px solid #bfdbfe; border-radius: 12px;
+    background: #ffffff; color: #2563eb; display: flex; align-items: center; justify-content: center;
+    gap: 10px; font-size: 14px; font-weight: 850; text-decoration: none;
+}
+.consult-view-all-btn:hover { background: #eff6ff; color: #2563eb; }
+.consult-trust-card { margin-top: 24px; padding: 22px; display: flex; align-items: flex-start; gap: 14px; background: #f8fbff; }
+.trust-icon {
+    width: 44px; height: 44px; border-radius: 14px; background: #eff6ff; color: #2563eb;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.consult-trust-card h3 { margin: 0 0 6px; color: #2563eb; font-size: 16px; font-weight: 900; }
+.consult-trust-card p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.5; font-weight: 500; }
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var modal = document.getElementById("quickAnswerModal");
+    var titleEl = document.getElementById("quickAnswerTitle");
+    var topicEl = document.getElementById("quickAnswerTopic");
+    var contentEl = document.getElementById("quickAnswerContent");
+    var closeBtn = document.getElementById("quickAnswerClose");
+    var doneBtn = document.getElementById("quickAnswerDone");
+    var searchInput = document.getElementById("quickQuestionSearch");
+
+    if (!modal || !titleEl || !contentEl) return;
+
+    function openModal(button) {
+        titleEl.textContent = button.getAttribute("data-question") || "";
+        var topic = button.getAttribute("data-topic") || "";
+        if (topicEl) {
+            topicEl.textContent = topic;
+            topicEl.hidden = !topic;
+        }
+        contentEl.textContent = button.getAttribute("data-answer") || "Đang cập nhật câu trả lời.";
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = "";
+    }
+
+    document.querySelectorAll(".js-open-quick-answer").forEach(function (btn) {
+        btn.addEventListener("click", function () { openModal(btn); });
+    });
+
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (doneBtn) doneBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !modal.hidden) closeModal();
+    });
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            var q = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll(".quick-question-card").forEach(function (card) {
+                var text = ((card.getAttribute("data-question") || "") + " " + (card.getAttribute("data-topic") || "")).toLowerCase();
+                card.style.display = text.includes(q) ? "" : "none";
+            });
+        });
+    }
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var items = document.querySelectorAll(".js-select-consult-item");
+    var tabs = document.querySelectorAll(".consult-tab");
+    var badge = document.getElementById("answerBadge");
+    var title = document.getElementById("answerTitle");
+    var meta = document.getElementById("answerMeta");
+    var highlight = document.getElementById("answerHighlight");
+    var content = document.getElementById("answerContent");
+    var searchInput = document.getElementById("quickQuestionSearch");
+
+    function esc(v) { return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+    function setTab(type) {
+        tabs.forEach(function (t) { t.classList.toggle("active", t.dataset.mode === (type === "quick" ? "quick" : "mine")); });
+    }
+    function clearActive() {
+        items.forEach(function (el) { el.classList.remove("active"); });
+    }
+
+    function renderContent(item) {
+        var type = item.dataset.type;
+        var q = item.dataset.title || "";
+        var a = item.dataset.answer || "";
+
+        clearActive();
+        item.classList.add("active");
+        setTab(type);
+
+        if (type === "quick") {
+            var topic = item.dataset.topic || "";
+            var updated = item.dataset.updated || "";
+            badge.innerHTML = '<i class="bi bi-lightning-charge"></i><span>Nguồn: Câu hỏi nhanh</span>';
+            title.textContent = q;
+            meta.innerHTML = '<span style="color:#16a34a;font-weight:800;">&#10003; Trả lời bởi Bộ Y tế &amp; WHO</span><span class="consult-meta-sep">|</span><span>Cập nhật: ' + esc(updated) + '</span>';
+            highlight.innerHTML = '<i class="bi bi-info-circle"></i><span>Thông tin mang tính tham khảo, không thay thế cho chẩn đoán y khoa.</span>';
+            content.innerHTML =
+                '<h3>Câu trả lời</h3><p>' + esc(a) + '</p>' +
+                '<h3>Khuyến cáo</h3><ul><li>Theo dõi sức khỏe sau tiêm và nghỉ ngơi đầy đủ.</li><li>Liên hệ cơ sở y tế nếu có dấu hiệu bất thường.</li></ul>' +
+                '<div class="consult-important-note"><i class="bi bi-shield-check"></i><span>Vui lòng hỏi ý kiến bác sĩ nếu bạn có bệnh nền, đang mang thai hoặc có tiền sử dị ứng.</span></div>';
+        } else {
+            var doctor = item.dataset.doctor || "Hệ thống";
+            var answered = item.dataset.answered || "";
+            badge.innerHTML = '<i class="bi bi-person-circle"></i><span>Câu hỏi của bạn</span>';
+            title.textContent = q;
+            if (a && a.trim()) {
+                meta.innerHTML = '<span style="color:#16a34a;font-weight:800;">&#10003; Chuyên gia đã trả lời</span><span class="consult-meta-sep">|</span><span>Trả lời lúc: ' + esc(answered) + '</span>';
+                highlight.innerHTML = '<i class="bi bi-person-badge"></i><span>Phản hồi từ ' + esc(doctor) + '</span>';
+                content.innerHTML = '<h3>Câu trả lời chi tiết</h3><p>' + esc(a) + '</p>';
+            } else {
+                meta.innerHTML = '<span style="color:#f59e0b;font-weight:800;">&#9201; Đang chờ phản hồi</span>';
+                highlight.innerHTML = '<i class="bi bi-clock"></i><span>Câu hỏi của bạn đang được tiếp nhận.</span>';
+                content.innerHTML = '<h3>Đang chờ câu trả lời</h3><p>Chúng tôi sẽ cập nhật câu trả lời ngay khi có phản hồi chính thức.</p>';
+            }
+        }
+    }
+
+    items.forEach(function (item) {
+        item.addEventListener("click", function () { renderContent(item); });
+    });
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            var first = document.querySelector('.js-select-consult-item[data-type="' + (tab.dataset.mode === "mine" ? "user" : "quick") + '"]');
+            if (first) first.click();
+        });
+    });
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            var q = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll("#quickQuestionList .consult-question-item").forEach(function (card) {
+                var text = ((card.dataset.title || "") + " " + (card.dataset.topic || "")).toLowerCase();
+                card.style.display = text.includes(q) ? "" : "none";
+            });
+        });
+    }
+});
+</script>

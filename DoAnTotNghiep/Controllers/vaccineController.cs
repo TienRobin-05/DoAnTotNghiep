@@ -262,6 +262,13 @@ namespace DoAnTotNghiep.Controllers
             var chanQuyen = ChanNeuKhongPhaiAdmin();
             if (chanQuyen != null) return chanQuyen;
 
+            if (vaccineDAL.KiemTraVaccineCoMuiTiem(id))
+            {
+                TempData["ThongBao"] = "Không thể xóa vaccine vì đã có dữ liệu mũi tiêm liên quan. Bạn có thể chuyển vaccine sang trạng thái ngừng sử dụng.";
+                TempData["LoaiThongBao"] = "warning";
+                return RedirectToAction(nameof(Index));
+            }
+
             try
             {
                 if (!vaccineDAL.XoaHoacAn(id))

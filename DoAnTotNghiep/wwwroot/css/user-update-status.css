@@ -1,0 +1,347 @@
+/* ===========================================================
+   Pharmacy City - User Update Vaccination Status Page
+   =========================================================== */
+
+.user-update-vaccine-page {
+    min-height: calc(100vh - 72px);
+    background: #f4f8fd;
+    padding: 36px 24px 64px;
+    color: #0f172a;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.user-update-container {
+    width: min(1120px, calc(100vw - 48px));
+    margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.update-page-header {
+    margin-bottom: 26px;
+}
+
+.update-page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 36px;
+    line-height: 1.15;
+    font-weight: 850;
+    letter-spacing: -0.04em;
+}
+
+.update-page-header p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 15.5px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* ---- Info card ---- */
+.update-info-card {
+    background: #ffffff;
+    border: 1px solid #dbe5f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    padding: 28px;
+    margin-bottom: 22px;
+}
+
+.update-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.update-info-item {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+}
+
+.update-info-item:nth-child(4),
+.update-info-item:nth-child(5) {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 20px;
+    margin-top: 8px;
+}
+
+.update-info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.update-info-icon.profile { background: #eff6ff; color: #0d6efd; }
+.update-info-icon.vaccine { background: #eaf3ff; color: #2563eb; }
+.update-info-icon.dose { background: #dcfce7; color: #16a34a; }
+.update-info-icon.date { background: #f3e8ff; color: #8b5cf6; }
+.update-info-icon.status { background: #fff7ed; color: #f97316; }
+
+.update-info-label {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 3px;
+}
+
+.update-info-value {
+    color: #0f172a;
+    font-size: 15.5px;
+    line-height: 1.35;
+    font-weight: 800;
+}
+
+.update-status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.update-status-badge.not-injected {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.update-status-badge.injected {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* ---- Form card ---- */
+.update-form-card {
+    background: #ffffff;
+    border: 1px solid #dbe5f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    padding: 24px 28px;
+}
+
+.update-form-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.update-form-title-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #0d6efd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.update-form-title h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.update-vaccine-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.update-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #0f172a;
+    font-size: 14.5px;
+    font-weight: 800;
+}
+
+.update-field label span {
+    color: #ef4444;
+}
+
+.update-date-field {
+    max-width: 550px;
+}
+
+.update-date-input-wrap {
+    position: relative;
+}
+
+.update-date-input-wrap input {
+    padding-right: 44px;
+}
+
+.update-date-input-wrap i {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #334155;
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.update-input {
+    width: 100%;
+    height: 46px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.update-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.10);
+}
+
+.update-input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.update-textarea {
+    height: 92px;
+    min-height: 92px;
+    padding: 12px 14px;
+    resize: vertical;
+    line-height: 1.45;
+}
+
+.update-text-counter {
+    margin-top: -26px;
+    padding-right: 10px;
+    text-align: right;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.update-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -2px;
+}
+
+.update-submit-btn,
+.update-back-btn {
+    height: 40px;
+    border-radius: 7px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.update-submit-btn {
+    border: none;
+    background: #0d6efd;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(13, 110, 253, 0.20);
+}
+
+.update-submit-btn:hover {
+    background: #0b5ed7;
+    color: #ffffff;
+}
+
+.update-back-btn {
+    border: 1px solid #93c5fd;
+    background: #ffffff;
+    color: #0d6efd;
+}
+
+.update-back-btn:hover {
+    background: #eff6ff;
+    color: #0d6efd;
+}
+
+.text-danger {
+    display: block;
+    margin-top: 6px;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .user-update-vaccine-page {
+        padding: 24px 16px 48px;
+    }
+
+    .user-update-container {
+        width: 100%;
+    }
+
+    .update-page-header h1 {
+        font-size: 30px;
+    }
+
+    .update-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .update-info-item {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 16px;
+        margin-top: 0;
+    }
+
+    .update-info-item:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+
+    .update-info-item:nth-child(4),
+    .update-info-item:nth-child(5) {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 16px;
+        margin-top: 0;
+    }
+
+    .update-date-field {
+        max-width: 100%;
+    }
+
+    .update-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .update-submit-btn,
+    .update-back-btn {
+        width: 100%;
+    }
+}

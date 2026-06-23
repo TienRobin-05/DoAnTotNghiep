@@ -11,11 +11,13 @@ namespace DoAnTotNghiep.Controllers
     {
         private readonly CauHoiTuVan_DAL cauHoiTuVanDAL;
         private readonly Vaccine_DAL vaccineDAL;
+        private readonly QuickQuestion_DAL quickQuestionDAL;
 
-        public CauHoiTuVanController(CauHoiTuVan_DAL cauHoiTuVanDAL, Vaccine_DAL vaccineDAL)
+        public CauHoiTuVanController(CauHoiTuVan_DAL cauHoiTuVanDAL, Vaccine_DAL vaccineDAL, QuickQuestion_DAL quickQuestionDAL)
         {
             this.cauHoiTuVanDAL = cauHoiTuVanDAL;
             this.vaccineDAL = vaccineDAL;
+            this.quickQuestionDAL = quickQuestionDAL;
         }
 
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
@@ -97,6 +99,7 @@ namespace DoAnTotNghiep.Controllers
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
             ViewBag.LaAdmin = false;
+            ViewBag.QuickQuestions = quickQuestionDAL.LayDanhSachDangBat();
             return View(cauHoiTuVanDAL.LayDanhSachTheoNguoiGui(maTaiKhoan.Value));
         }
 

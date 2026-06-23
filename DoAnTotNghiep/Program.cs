@@ -62,6 +62,28 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        var chuoiKetNoi = config.GetConnectionString("DefaultConnection") ?? "";
+        if (!string.IsNullOrWhiteSpace(chuoiKetNoi))
+        {
+            using var ketNoi = new Microsoft.Data.SqlClient.SqlConnection(chuoiKetNoi);
+            ketNoi.Open();
+            using var kiemTra = new Microsoft.Data.SqlClient.SqlCommand(@"
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TaiKhoan_SoDienThoai')
+    CREATE UNIQUE NONCLUSTERED INDEX IX_TaiKhoan_SoDienThoai ON TaiKhoan(soDienThoai) WHERE soDienThoai IS NOT NULL AND soDienThoai <> ''", ketNoi);
+            kiemTra.ExecuteNonQuery();
+        }
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Khong tao duoc unique index cho so dien thoai (co the da ton tai hoac bang chua duoc khoi tao).");
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -81,6 +103,8 @@ app.UseStaticFiles(new StaticFileOptions
         }
     }
 });
+// Bật middleware chuyển hướng HTTP sang HTTPS để đảm bảo kết nối an toàn khi có chứng chỉ.
+app.UseHttpsRedirection();
 // Bật middleware định tuyến để ASP.NET Core xác định Controller/Action cần chạy cho mỗi URL.
 app.UseRouting();
 // Bật middleware Session trước khi Controller chạy để có thể đọc/ghi dữ liệu phiên đăng nhập.

@@ -1,0 +1,532 @@
+/* ===========================================================
+   Pharmacy City - Admin Vaccine Doses Page
+   =========================================================== */
+
+.dose-admin-page {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    color: #0f172a;
+}
+
+section.dose-header-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.dose-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+.dose-header-icon {
+    width: 78px;
+    height: 78px;
+    border-radius: 22px;
+    background: #eff6ff;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.dose-page-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.dose-page-subtitle {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+a.dose-add-btn {
+    height: 56px;
+    padding: 0 28px;
+    border-radius: 12px;
+    background: #0d6efd;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 12px 24px rgba(13, 110, 253, 0.22);
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+}
+
+a.dose-add-btn:hover {
+    background: #0b5ed7;
+    color: #ffffff;
+}
+
+form.dose-filter-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1.4fr 0.7fr 0.8fr 0.7fr 140px;
+    gap: 16px;
+    align-items: center;
+    max-width: none !important;
+}
+
+.dose-search-wrap {
+    height: 52px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    background: #ffffff;
+}
+
+.dose-search-wrap i {
+    color: #64748b;
+    font-size: 16px;
+}
+
+.dose-search-wrap input {
+    border: none;
+    outline: none;
+    width: 100%;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.dose-search-wrap input::placeholder {
+    color: #94a3b8;
+}
+
+.dose-select {
+    width: 100%;
+    height: 52px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.dose-reset-btn {
+    height: 52px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.dose-reset-btn:hover {
+    background: #eff6ff;
+    color: #0d6efd;
+}
+
+section.dose-table-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+.dose-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.dose-table {
+    width: 100%;
+    min-width: 1180px;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.dose-table thead th {
+    height: 58px;
+    background: #f8fafc;
+    padding: 0 24px;
+    text-align: left;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.015em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dose-table tbody td {
+    padding: 18px 24px;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+    color: #0f172a;
+}
+
+.dose-table thead th:nth-child(1) { width: 24%; }
+.dose-table thead th:nth-child(2) { width: 16%; }
+.dose-table thead th:nth-child(3) { width: 16%; }
+.dose-table thead th:nth-child(4) { width: 14%; }
+.dose-table thead th:nth-child(5) { width: 30%; }
+
+.dose-vaccine-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dose-vaccine-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #eff6ff;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.dose-vaccine-name {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.dose-vaccine-code {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.dose-number-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dose-number-badge {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.dose-name {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.dose-schedule-text {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.dose-interval-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.dose-interval-badge.warning {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.dose-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+}
+
+.dose-action-btn {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid #bfdbfe;
+    background: #ffffff;
+    color: #0d6efd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    flex-shrink: 0;
+    cursor: pointer;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.dose-action-btn:hover {
+    background: #eff6ff;
+    color: #0d6efd;
+}
+
+.dose-action-btn.danger {
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.dose-action-btn.danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.dose-table-footer {
+    min-height: 64px;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.dose-pagination {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dose-page-size {
+    height: 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 500;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.dose-page-btn {
+    min-width: 42px;
+    height: 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.dose-page-btn:hover {
+    background: #f1f5f9;
+}
+
+.dose-page-btn.active {
+    background: #0d6efd;
+    border-color: #0d6efd;
+    color: #ffffff;
+}
+
+.dose-page-btn.disabled {
+    color: #cbd5e1;
+    pointer-events: none;
+    background: #ffffff;
+}
+
+.dose-empty-state {
+    padding: 52px 20px;
+    text-align: center;
+    color: #64748b;
+    font-weight: 700;
+}
+
+/* ---- Delete modal ---- */
+.dose-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.dose-modal-overlay[hidden] {
+    display: none;
+}
+
+.dose-confirm-modal {
+    width: 440px;
+    max-width: calc(100vw - 32px);
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+
+.dose-warning-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 999px;
+    background: #ffedd5;
+    color: #f97316;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.dose-confirm-modal h3 {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.dose-confirm-modal p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+.dose-confirm-modal p strong {
+    color: #dc2626;
+}
+
+.dose-modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.dose-btn-cancel,
+.dose-btn-delete {
+    flex: 1;
+    height: 48px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.dose-btn-cancel {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.dose-btn-cancel:hover {
+    background: #f1f5f9;
+}
+
+.dose-btn-delete {
+    border: none;
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.dose-btn-delete:hover {
+    background: #b91c1c;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1200px) {
+    section.dose-header-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    form.dose-filter-card {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dose-table {
+        min-width: 1180px;
+    }
+}
+
+@media (max-width: 768px) {
+    section.dose-header-card {
+        padding: 22px;
+    }
+
+    .dose-page-title {
+        font-size: 30px;
+    }
+
+    form.dose-filter-card {
+        grid-template-columns: 1fr;
+    }
+
+    .dose-table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

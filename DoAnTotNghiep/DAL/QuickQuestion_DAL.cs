@@ -155,6 +155,36 @@ WHERE id = @Id";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        public int DemTheoTrangThai(bool? isActive)
+        {
+            KhoiTaoBangNeuChuaCo();
+            const string sql = @"SELECT COUNT(*) FROM dbo.QuickQuestion
+WHERE (@IsActive IS NULL OR isActive = @IsActive)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@IsActive", isActive.HasValue ? isActive.Value : DBNull.Value);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar());
+        }
+
+        public List<string> LayDanhSachChuDe()
+        {
+            KhoiTaoBangNeuChuaCo();
+            const string sql = @"SELECT DISTINCT topic FROM dbo.QuickQuestion ORDER BY topic";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            var ds = new List<string>();
+            while (doc.Read())
+            {
+                ds.Add(doc[0].ToString() ?? string.Empty);
+            }
+            return ds;
+        }
+
         public bool Xoa(int id)
         {
             KhoiTaoBangNeuChuaCo();

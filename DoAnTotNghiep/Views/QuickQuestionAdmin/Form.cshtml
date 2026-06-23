@@ -7,8 +7,8 @@
 
 <div class="list-page-head">
     <div>
-        <h2>@ViewData["Title"]</h2>
-        <p>@(isEdit ? "Cập nhật nội dung câu hỏi nhanh" : "Tạo câu hỏi có sẵn để người dùng gửi nhanh")</p>
+        <h1 class="admin-page-title">@ViewData["Title"]</h1>
+        <p class="admin-page-subtitle">@(isEdit ? "Cập nhật nội dung câu hỏi nhanh" : "Tạo câu hỏi có sẵn để người dùng gửi nhanh")</p>
     </div>
     <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
 </div>

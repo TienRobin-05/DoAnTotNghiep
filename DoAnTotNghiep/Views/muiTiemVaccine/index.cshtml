@@ -1,71 +1,204 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model List<MuiTiemVaccine>
+﻿@model AdminDoseIndexViewModel
 @{
     ViewData["Title"] = "Quản lý mũi tiêm vaccine";
+    var currentUrl = Context.Request.Path + Context.Request.QueryString;
+
+    string pageUrl(int p) => Url.Action("Index", new
+    {
+        keyword = Model.Keyword,
+        intervalType = Model.SelectedIntervalType,
+        page = p,
+        pageSize = Model.PageSize
+    }) ?? "#";
 }
 
-<div class="list-page-head">
-    <div>
-        <h2>Quản lý mũi tiêm vaccine</h2>
-        <p>@Model.Count mũi tiêm đang được cấu hình</p>
-    </div>
-    <a asp-action="Create" class="btn btn-primary">Thêm mũi tiêm</a>
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-vaccine-doses.css" asp-append-version="true" />
+}
+
+<div class="dose-admin-page">
+    <section class="dose-header-card">
+        <div class="dose-header-left">
+            <div class="dose-header-icon">
+                <i class="fa-solid fa-syringe"></i>
+            </div>
+            <div>
+                <h1 class="dose-page-title">Quản lý mũi tiêm vaccine</h1>
+                <p class="dose-page-subtitle">@Model.TotalDoses mũi tiêm đang được cấu hình</p>
+            </div>
+        </div>
+    </section>
+
+    <form class="dose-filter-card" method="get" action="@Url.Action("Index")">
+        <input type="hidden" name="page" value="1" />
+        <div class="dose-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm kiếm vaccine, mũi tiêm..." />
+        </div>
+
+        <select class="dose-select" name="intervalType">
+            <option value="">Tất cả khoảng cách</option>
+            <option value="age" selected="@(Model.SelectedIntervalType == "age")">Theo tuổi</option>
+            <option value="days" selected="@(Model.SelectedIntervalType == "days")">Theo ngày</option>
+        </select>
+
+        <div></div>
+
+        <div></div>
+
+        <a href="@Url.Action("Index")" class="dose-reset-btn">
+            <i class="fa-solid fa-rotate-right"></i>
+            Làm mới
+        </a>
+    </form>
+
+    <section class="dose-table-card">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="dose-empty-state">Chưa có mũi tiêm nào.</div>
+        }
+        else
+        {
+            <div class="dose-table-responsive">
+                <table class="dose-table">
+                    <thead>
+                        <tr>
+                            <th>Vaccine</th>
+                            <th>Mũi</th>
+                            <th>Lịch khuyến nghị</th>
+                            <th>Khoảng cách</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="dose-vaccine-cell">
+                                        <div class="dose-vaccine-icon">
+                                            <i class="fa-solid fa-shield-virus"></i>
+                                        </div>
+                                        <div>
+                                            <div class="dose-vaccine-name table-main-text">@item.VaccineName</div>
+                                            <div class="dose-vaccine-code table-sub-text">Mã mũi #@item.Id</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="dose-number-wrap">
+                                        <span class="dose-number-badge">Mũi @item.DoseNumber</span>
+                                        <span class="dose-name">@item.DoseName</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="dose-schedule-text">@item.RecommendedScheduleText</span>
+                                </td>
+                                <td>
+                                    <span class="dose-interval-badge @(item.IntervalText.Contains("ngày") ? "" : "warning")">
+                                        @item.IntervalText
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="dose-actions">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="dose-action-btn" title="Chi tiết">
+                                            <i class="fa-regular fa-eye"></i>
+                                            Chi tiết
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="dose-action-btn" title="Sửa">
+                                            <i class="fa-solid fa-pen"></i>
+                                            Sửa
+                                        </a>
+                                        <button type="button" class="dose-action-btn danger js-open-delete-dose"
+                                                data-id="@item.Id"
+                                                data-name="@item.VaccineName - Mũi @item.DoseNumber"
+                                                title="Xóa">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                            Xóa
+                                        </button>
+                                        <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.VaccineId" class="dose-action-btn" title="Theo vaccine">
+                                            <i class="fa-solid fa-cube"></i>
+                                            Theo vaccine
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="dose-table-footer">
+                <span>
+                    Hiển thị @Model.StartItem đến @Model.EndItem của @Model.TotalItems mũi tiêm
+                </span>
+                <div class="dose-pagination">
+                    <select class="dose-page-size" onchange="window.location.href='@Url.Action("Index", new { keyword = Model.Keyword, intervalType = Model.SelectedIntervalType, page = 1, pageSize = "__ps__" })'.replace('__ps__', this.value)">
+                        <option value="10" selected="@(Model.PageSize == 10)">10 / trang</option>
+                        <option value="20" selected="@(Model.PageSize == 20)">20 / trang</option>
+                        <option value="50" selected="@(Model.PageSize == 50)">50 / trang</option>
+                    </select>
+                    @if (Model.TotalPages > 1)
+                    {
+                        <a href="@pageUrl(Model.Page - 1)" class="dose-page-btn @(Model.Page <= 1 ? "disabled" : "")">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                        @for (var p = 1; p <= Model.TotalPages; p++)
+                        {
+                            <a href="@pageUrl(p)" class="dose-page-btn @(p == Model.Page ? "active" : "")">@p</a>
+                        }
+                        <a href="@pageUrl(Model.Page + 1)" class="dose-page-btn @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </section>
 </div>
 
-<section class="list-card">
-@if (Model.Count == 0)
-{
-    <div class="empty-state">Chưa có dữ liệu mũi tiêm.</div>
-}
-else
-{
-<table class="table list-table">
-    <thead>
-        <tr>
-            <th>Vaccine</th>
-            <th>Mũi</th>
-            <th>Lịch khuyến nghị</th>
-            <th>Khoảng cách</th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model)
-    {
-        var tuoiKhuyenNghi = item.DoTuoiKhuyenNghi.HasValue
-            ? $"{item.DoTuoiKhuyenNghi} {item.DonViTuoi}"
-            : "Chưa cấu hình";
-        var khoangCach = item.KhoangCachNgay.HasValue && item.KhoangCachNgay.Value > 0
-            ? $"{item.KhoangCachNgay} ngày"
-            : "Theo tuổi";
-        <tr>
-            <td>
-                <div class="item-title">@item.TenVaccine</div>
-                <div class="item-meta">Mã mũi #@item.MaMuiTiem</div>
-            </td>
-            <td>
-                <span class="dose-pill">Mũi @item.SoMui</span>
-                <div class="item-meta">@item.TenMui</div>
-            </td>
-            <td>@tuoiKhuyenNghi</td>
-            <td><span class="soft-badge">@khoangCach</span></td>
-            <td class="table-actions">
-                <a asp-action="Details" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-light">Chi tiết</a>
-                <a asp-action="Edit" asp-route-id="@item.MaMuiTiem" class="btn btn-sm btn-outline-primary">Sửa</a>
-                <button type="button"
-                        class="btn btn-sm btn-outline-danger js-delete-confirm"
-                        data-delete-url="@Url.Action("Delete", new { id = item.MaMuiTiem })"
-                        data-delete-title="Xóa mũi tiêm">
-                    Xóa
-                </button>
-                <a asp-action="IndexTheoVaccine" asp-route-maVaccine="@item.MaVaccine" class="btn btn-sm btn-outline-info">Theo vaccine</a>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
-}
-</section>
+<div id="deleteDoseModal" class="dose-modal-overlay" hidden>
+    <div class="dose-confirm-modal">
+        <div class="dose-warning-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3>Xác nhận xóa mũi tiêm</h3>
+        <p>
+            Bạn có chắc chắn muốn xóa
+            <strong id="deleteDoseName"></strong>?
+            Hành động này không thể hoàn tác.
+        </p>
+        <form id="deleteDoseForm" method="post" asp-controller="muiTiemVaccine" asp-action="Delete" class="no-browser-confirm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="deleteDoseId" />
+            <div class="dose-modal-actions">
+                <button type="button" class="dose-btn-cancel" id="cancelDeleteDose">Hủy bỏ</button>
+                <button type="submit" class="dose-btn-delete">Xóa mũi tiêm</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<partial name="_ConfirmDeleteModal" />
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("deleteDoseModal");
+            var form = document.getElementById("deleteDoseForm");
+            var nameEl = document.getElementById("deleteDoseName");
+            var cancelBtn = document.getElementById("cancelDeleteDose");
+            var idInput = document.getElementById("deleteDoseId");
+
+            document.querySelectorAll(".js-open-delete-dose").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    idInput.value = button.getAttribute("data-id");
+                    nameEl.textContent = '"' + button.getAttribute("data-name") + '"';
+                    modal.hidden = false;
+                });
+            });
+
+            cancelBtn.addEventListener("click", function () { modal.hidden = true; });
+            modal.addEventListener("click", function (event) { if (event.target === modal) modal.hidden = true; });
+            document.addEventListener("keydown", function (event) { if (event.key === "Escape") modal.hidden = true; });
+        });
+    </script>
+}

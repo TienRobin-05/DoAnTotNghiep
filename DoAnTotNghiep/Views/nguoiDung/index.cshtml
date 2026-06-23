@@ -1018,7 +1018,7 @@
     <section class="dashboard-hero">
         <div class="hero-copy">
             <div class="hero-eyebrow"><i class="bi bi-heart-pulse"></i> Pharmacy City</div>
-            <h1><span>Chủ động sức khỏe -</span><span>Đúng hẹn tiêm chủng</span></h1>
+            <h1 class="user-page-title"><span>Chủ động sức khỏe -</span><span>Đúng hẹn tiêm chủng</span></h1>
             <p>Cùng theo dõi hồ sơ, lịch tiêm và nhắc lịch thông minh<br />cho bạn và gia đình trong một dashboard y tế hiện đại.</p>
         </div>
         <div class="hero-visual">
@@ -1056,7 +1056,7 @@
             <div class="schedule-body">
                 <a class="schedule-state late" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-alarm"></i></span><span class="state-content"><strong>Quá hạn (@soMuiQuaHan)</strong>@if (lichTiemQuaHan.Count == 0){<p>Không có mũi quá hạn.</p>}else{<p>Cần cập nhật các mũi đã quá ngày dự kiến.</p><ul>@foreach (var lich in lichTiemQuaHan.Take(3)){<li><b>@lich.TenVaccine</b><span>@lich.TenMui - @lich.HoTenHoSo</span><em>Quá hạn</em><span>@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
                 <a class="schedule-state today" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-hourglass-split"></i></span><span class="state-content"><strong>Hôm nay (@soMuiHomNay)</strong>@if (lichTiemHomNay.Count == 0){<p>Hôm nay chưa có lịch tiêm.</p>}else{<p>Các mũi cần thực hiện trong hôm nay.</p><ul>@foreach (var lich in lichTiemHomNay.Take(3)){<li><b>@lich.TenVaccine</b><span>@lich.TenMui - @lich.HoTenHoSo</span><em>Hôm nay</em><span>@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
-                <a class="schedule-state upcoming" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-syringe"></i></span><span class="state-content"><strong>Sắp tới (@soMuiSapToi)</strong>@if (lichTiemSapToi.Count == 0){<p>Chưa có lịch sắp tới.</p>}else{<p>Các mũi tiêm sắp đến hạn.</p><ul>@foreach (var lich in lichTiemSapToi.Take(3)){<li><b>@lich.TenVaccine</b><span>@lich.TenMui - @lich.HoTenHoSo</span><em>Sắp tới</em><span>@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
+                <a class="schedule-state upcoming" href="/LichTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-calendar-check"></i></span><span class="state-content"><strong>Sắp tới (@soMuiSapToi)</strong>@if (lichTiemSapToi.Count == 0){<p>Chưa có lịch sắp tới.</p>}else{<p>Các mũi tiêm sắp đến hạn.</p><ul>@foreach (var lich in lichTiemSapToi.Take(3)){<li><b>@lich.TenVaccine</b><span>@lich.TenMui - @lich.HoTenHoSo</span><em>Sắp tới</em><span>@lich.NgayTiemDuKien.ToString("dd/MM/yyyy")</span></li>}</ul>}</span><i class="state-arrow bi bi-chevron-right"></i></a>
                 <a class="schedule-state completed" href="/LichSuTiem/ChonHoSo"><span class="state-icon"><i class="bi bi-check2-circle"></i></span><span class="state-content"><strong>Đã hoàn thành (@soMuiHoanThanh)</strong><p>Xem lại các mũi tiêm đã hoàn thành trong lịch sử tiêm chủng.</p></span><i class="state-arrow bi bi-chevron-right"></i></a>
             </div>
         </article>

@@ -1,39 +1,131 @@
-﻿@* Khu vực giao diện của view CapNhatDaTiem.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model LichTiem
+﻿@model LichTiem
 @{
-    ViewData["Title"] = "Cập nhật đã tiêm";
+    ViewData["Title"] = "Cập nhật trạng thái đã tiêm";
+    Layout = "_UserLayout";
     var ngayTiemThucTe = ViewBag.NgayTiemThucTe as string ?? DateTime.Today.ToString("yyyy-MM-dd");
     var ghiChu = ViewBag.GhiChu as string ?? string.Empty;
 }
 
-<h2>Cập nhật trạng thái đã tiêm</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/user-update-status.css" asp-append-version="true" />
+}
 
-<div class="card mb-3">
-    <div class="card-body">
-        <p><strong>Hồ sơ:</strong> @Model.HoTenHoSo</p>
-        <p><strong>Vaccine:</strong> @Model.TenVaccine</p>
-        <p><strong>Mũi tiêm:</strong> @Model.TenMui - Mũi @Model.SoMui</p>
-        <p><strong>Ngày tiêm dự kiến:</strong> @Model.NgayTiemDuKien.ToString("dd/MM/yyyy")</p>
-        <p><strong>Trạng thái hiện tại:</strong> @Model.TrangThai</p>
+<div class="user-update-vaccine-page">
+    <div class="user-update-container">
+        <header class="update-page-header">
+            <h1>Cập nhật trạng thái đã tiêm</h1>
+            <p>Cập nhật thông tin tiêm chủng theo thực tế</p>
+        </header>
+
+        <section class="update-info-card">
+            <div class="update-info-grid">
+                <div class="update-info-item">
+                    <div class="update-info-icon profile">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <div class="update-info-label">Hồ sơ</div>
+                        <div class="update-info-value">@Model.HoTenHoSo</div>
+                    </div>
+                </div>
+
+                <div class="update-info-item">
+                    <div class="update-info-icon vaccine">
+                        <i class="bi bi-shield-plus"></i>
+                    </div>
+                    <div>
+                        <div class="update-info-label">Vaccine</div>
+                        <div class="update-info-value">@Model.TenVaccine</div>
+                    </div>
+                </div>
+
+                <div class="update-info-item">
+                    <div class="update-info-icon dose">
+                        <i class="bi bi-syringe"></i>
+                    </div>
+                    <div>
+                        <div class="update-info-label">Mũi tiêm</div>
+                        <div class="update-info-value">@Model.TenMui - Mũi @Model.SoMui</div>
+                    </div>
+                </div>
+
+                <div class="update-info-item">
+                    <div class="update-info-icon date">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div>
+                        <div class="update-info-label">Ngày tiêm dự kiến</div>
+                        <div class="update-info-value">@Model.NgayTiemDuKien.ToString("dd/MM/yyyy")</div>
+                    </div>
+                </div>
+
+                <div class="update-info-item">
+                    <div class="update-info-icon status">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <div>
+                        <div class="update-info-label">Trạng thái hiện tại</div>
+                        <span class="update-status-badge not-injected">@Model.TrangThai</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="update-form-card">
+            <div class="update-form-title">
+                <span class="update-form-title-icon">
+                    <i class="bi bi-clipboard-data"></i>
+                </span>
+                <h2>Thông tin cập nhật</h2>
+            </div>
+
+            <form asp-action="CapNhatDaTiem" method="post" class="update-vaccine-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maLichTiem" value="@Model.MaLichTiem" />
+
+                <div class="update-field update-date-field">
+                    <label>Ngày tiêm thực tế <span>*</span></label>
+
+                    <div class="update-date-input-wrap">
+                        <input name="ngayTiemThucTe" type="date" class="update-input" value="@ngayTiemThucTe" required />
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                </div>
+
+                <div class="update-field">
+                    <label>Ghi chú</label>
+                    <textarea name="ghiChu" class="update-input update-textarea" maxlength="500" placeholder="Nhập ghi chú (nếu có)...">@ghiChu</textarea>
+                    <div class="update-text-counter">
+                        <span id="noteCount">0</span>/500
+                    </div>
+                </div>
+
+                <div class="update-actions">
+                    <button type="submit" class="update-submit-btn">
+                        <i class="bi bi-floppy"></i>
+                        Lưu cập nhật
+                    </button>
+
+                    <a asp-action="Index" asp-route-maHoSo="@Model.MaHoSo" class="update-back-btn">
+                        <i class="bi bi-arrow-left"></i>
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </section>
     </div>
 </div>
 
-@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-<form asp-action="CapNhatDaTiem" method="post" class="col-md-6">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="maLichTiem" value="@Model.MaLichTiem" />
-
-    <div class="mb-3">
-        <label class="form-label">Ngày tiêm thực tế</label>
-        <input name="ngayTiemThucTe" type="date" class="form-control" value="@ngayTiemThucTe" required />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Ghi chú</label>
-        <textarea name="ghiChu" class="form-control" rows="4">@ghiChu</textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Lưu cập nhật</button>
-    <a asp-action="Index" asp-route-maHoSo="@Model.MaHoSo" class="btn btn-secondary">Quay lại</a>
-</form>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var note = document.querySelector(".update-textarea");
+            var count = document.getElementById("noteCount");
+            if (note && count) {
+                function updateCount() { count.textContent = note.value.length; }
+                note.addEventListener("input", updateCount);
+                updateCount();
+            }
+        });
+    </script>
+}
