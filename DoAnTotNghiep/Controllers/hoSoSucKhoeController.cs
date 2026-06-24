@@ -27,6 +27,32 @@ namespace DoAnTotNghiep.Controllers
             this.taoLichTiemService = taoLichTiemService;
         }
 
+        // Helper: sinh lịch tiêm + lịch demo + đồng bộ notification
+        private void SinhLichVaDongBoThongBao(int maHoSo, int maTaiKhoan)
+        {
+            System.Console.WriteLine($"[CreateProfile] Bat dau sinh lich cho maHoSo={maHoSo}, maTaiKhoan={maTaiKhoan}");
+
+            // Bước 1: tạo lịch tiêm theo quy tắc chuẩn
+            var ketQua = taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
+            System.Console.WriteLine($"[CreateProfile] Da tao {ketQua.SoLichTiemDaTao} lich chuan, " +
+                $"phuHop={ketQua.SoMuiTiemPhuHop}/{ketQua.SoMuiTiemVaccine}");
+
+            // Bước 2: tạo lịch tiêm demo sắp đến hạn (hôm nay + 3 ngày) để test "Đến lịch"
+            var demoTao = taoLichTiemService.TaoLichTiemDemoSapToi(maHoSo);
+            if (demoTao > 0)
+            {
+                System.Console.WriteLine($"[CreateProfile] Da tao lich demo sap den han cho maHoSo={maHoSo}");
+            }
+            else
+            {
+                System.Console.WriteLine($"[CreateProfile] Lich demo da ton tai hoac khong the tao cho maHoSo={maHoSo}");
+            }
+
+            // Bước 3: đồng bộ notification
+            var soTB = thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan);
+            System.Console.WriteLine($"[CreateProfile] Da dong bo {soTB} thong bao cho maTaiKhoan={maTaiKhoan}");
+        }
+
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
         // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
         // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
@@ -82,6 +108,40 @@ namespace DoAnTotNghiep.Controllers
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
+            // Parse NgaySinh từ hidden input (YYYY-MM-DD) - model binder không tự parse được
+            var ngaySinhRaw = Request.Form["NgaySinh"].FirstOrDefault() ?? "";
+            if (string.IsNullOrWhiteSpace(ngaySinhRaw))
+            {
+                ModelState.AddModelError("NgaySinh", "Vui lòng nhập ngày sinh hợp lệ theo định dạng MM/DD/YYYY.");
+                ViewBag.ThongBao = "Vui lòng nhập ngày sinh hợp lệ.";
+                return View(hoSo);
+            }
+
+            if (!DateTime.TryParseExact(ngaySinhRaw, "yyyy-MM-dd",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out DateTime ngaySinhParsed))
+            {
+                ModelState.AddModelError("NgaySinh", "Ngày sinh không đúng định dạng YYYY-MM-DD.");
+                ViewBag.ThongBao = "Ngày sinh không hợp lệ.";
+                return View(hoSo);
+            }
+
+            if (ngaySinhParsed > DateTime.Today)
+            {
+                ModelState.AddModelError("NgaySinh", "Ngày sinh không được lớn hơn ngày hiện tại.");
+                ViewBag.ThongBao = "Ngày sinh không được lớn hơn ngày hiện tại.";
+                return View(hoSo);
+            }
+
+            if (ngaySinhParsed.Year < 1900)
+            {
+                ModelState.AddModelError("NgaySinh", "Năm sinh không hợp lệ.");
+                ViewBag.ThongBao = "Năm sinh không hợp lệ.";
+                return View(hoSo);
+            }
+
+            hoSo.NgaySinh = ngaySinhParsed;
+
             if (!KiemTraHopLe(hoSo)) return View(hoSo);
 
             hoSo.MaTaiKhoan = maTaiKhoan.Value;
@@ -94,9 +154,8 @@ namespace DoAnTotNghiep.Controllers
                 return View(hoSo);
             }
 
-            // Sau khi tạo hồ sơ, tự tạo lịch tiêm phù hợp rồi phát sinh thông báo cho lịch đã đến hạn/quá hạn.
-            taoLichTiemService.TaoLichTiemChoHoSo(maHoSoMoi);
-            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+            // Sau khi tạo hồ sơ: sinh lịch tiêm + lịch demo + đồng bộ thông báo
+            SinhLichVaDongBoThongBao(maHoSoMoi, maTaiKhoan.Value);
             TempData["ThongBao"] = "Thêm hồ sơ sức khỏe thành công";
             return RedirectToAction(nameof(Index));
         }
@@ -232,9 +291,8 @@ namespace DoAnTotNghiep.Controllers
             {
                 taiKhoanDAL.CapNhatHoTen(maTaiKhoan.Value, hoTen);
                 HttpContext.Session.SetString("HoTen", hoTen);
-                // Hồ sơ cá nhân đầu tiên cũng cần được tạo lịch và tạo thông báo nếu đã đến hạn.
-                taoLichTiemService.TaoLichTiemChoHoSo(maHoSoMoi);
-                thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+                // Hồ sơ cá nhân đầu tiên: sinh lịch tiêm + lịch demo + đồng bộ thông báo
+                SinhLichVaDongBoThongBao(maHoSoMoi, maTaiKhoan.Value);
                 TempData["ThongBao"] = "Cập nhật hồ sơ sức khỏe thành công";
                 return RedirectToAction("Index", "NguoiDung");
             }

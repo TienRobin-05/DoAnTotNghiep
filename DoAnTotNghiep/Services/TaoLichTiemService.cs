@@ -17,6 +17,118 @@ namespace DoAnTotNghiep.Services
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
+        // Tạo một lịch tiêm demo sắp đến hạn (hôm nay + 3 ngày) cho hồ sơ mới,
+        // dùng để test mục "Đến lịch".
+        // Nếu tất cả mũi đã có lịch, sẽ cập nhật mũi gần nhất thành ngày tương lai.
+        public int TaoLichTiemDemoSapToi(int maHoSo)
+        {
+            var hoSo = LayHoSoTheoMa(maHoSo);
+            if (hoSo == null) return 0;
+
+            var danhSachMuiTiem = LayDanhSachMuiTiemVaccine();
+            var ngayDemo = DateTime.Today.AddDays(3);
+
+            // Cố gắng tìm mũi phù hợp chưa có lịch
+            foreach (var mui in danhSachMuiTiem
+                .Where(m => KiemTraMuiTiemPhuHopVoiTuoi(hoSo.NgaySinh, m))
+                .OrderBy(m => m.MaVaccine).ThenBy(m => m.SoMui))
+            {
+                if (!KiemTraLichTiemDaTonTai(maHoSo, mui.MaMuiTiem))
+                {
+                    var ghiChu = "Lịch tiêm demo được tạo tự động để kiểm tra mục Đến lịch.";
+                    if (ThemLichTiemNeuChuaTonTai(maHoSo, mui.MaMuiTiem, ngayDemo, ghiChu))
+                    {
+                        System.Console.WriteLine($"[TaoLichTiemService] Tao moi lich demo maHoSo={maHoSo}, " +
+                            $"vaccine={mui.TenVaccine}, ngay={ngayDemo:yyyy-MM-dd}");
+                        return 1;
+                    }
+                }
+            }
+
+            // Nếu tất cả mũi đều đã có lịch, cập nhật lịch gần nhất thành ngày tương lai
+            var lichHienCo = LayDanhSachLichTheoHoSo(maHoSo);
+            var lichGanNhat = lichHienCo
+                .Where(l => l.TrangThai != "Đã tiêm")
+                .OrderByDescending(l => l.NgayTiemDuKien)
+                .FirstOrDefault();
+
+            if (lichGanNhat != null && lichGanNhat.NgayTiemDuKien.Date <= DateTime.Today)
+            {
+                const string sqlUpdate = @"
+UPDATE LichTiem
+SET ngayTiemDuKien = @NgayMoi,
+    ghiChu = N'Lịch được điều chỉnh để kiểm tra mục Đến lịch.'
+WHERE maLichTiem = @MaLichTiem
+AND trangThai <> N'Đã tiêm'";
+
+                using var ketNoi = new SqlConnection(chuoiKetNoi);
+                using var lenh = new SqlCommand(sqlUpdate, ketNoi);
+                lenh.Parameters.AddWithValue("@MaLichTiem", lichGanNhat.MaLichTiem);
+                lenh.Parameters.AddWithValue("@NgayMoi", ngayDemo);
+                ketNoi.Open();
+                var rows = lenh.ExecuteNonQuery();
+                if (rows > 0)
+                {
+                    System.Console.WriteLine($"[TaoLichTiemService] Cap nhat lich hien co thanh ngay tuong lai maLichTiem={lichGanNhat.MaLichTiem}, " +
+                        $"ngay={ngayDemo:yyyy-MM-dd}");
+                    return 1;
+                }
+            }
+
+            // Nếu vẫn không được, thử tạo lịch mới với vaccine bất kỳ (dùng luôn MuiTiem đầu danh sách)
+            var muiBatKy = danhSachMuiTiem.FirstOrDefault();
+            if (muiBatKy != null && !KiemTraLichTiemDaTonTai(maHoSo, muiBatKy.MaMuiTiem))
+            {
+                if (ThemLichTiemNeuChuaTonTai(maHoSo, muiBatKy.MaMuiTiem, ngayDemo,
+                    "Lịch tiêm demo tạo với vaccine bất kỳ."))
+                {
+                    System.Console.WriteLine($"[TaoLichTiemService] Tao lich demo vaccine bat ky maHoSo={maHoSo}, " +
+                        $"vaccine={muiBatKy.TenVaccine}");
+                    return 1;
+                }
+            }
+
+            System.Console.WriteLine($"[TaoLichTiemService] Khong the tao lich demo cho maHoSo={maHoSo}");
+            return 0;
+        }
+
+        // Lấy danh sách lịch tiêm của một hồ sơ (dùng cho debug)
+        public List<LichTiemDebug> LayDanhSachLichTheoHoSo(int maHoSo)
+        {
+            const string sql = @"
+SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
+       v.tenVaccine, mt.tenMui, mt.soMui
+FROM LichTiem lt
+INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
+WHERE lt.maHoSo = @MaHoSo
+ORDER BY lt.ngayTiemDuKien";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var result = new List<LichTiemDebug>();
+            while (doc.Read())
+            {
+                result.Add(new LichTiemDebug
+                {
+                    MaLichTiem = Convert.ToInt32(doc["maLichTiem"]),
+                    MaHoSo = Convert.ToInt32(doc["maHoSo"]),
+                    MaMuiTiem = Convert.ToInt32(doc["maMuiTiem"]),
+                    NgayTiemDuKien = Convert.ToDateTime(doc["ngayTiemDuKien"]),
+                    TrangThai = doc["trangThai"] == DBNull.Value ? "" : doc["trangThai"].ToString() ?? "",
+                    GhiChu = doc["ghiChu"] == DBNull.Value ? "" : doc["ghiChu"].ToString() ?? "",
+                    TenVaccine = doc["tenVaccine"] == DBNull.Value ? "" : doc["tenVaccine"].ToString() ?? "",
+                    TenMui = doc["tenMui"] == DBNull.Value ? "" : doc["tenMui"].ToString() ?? "",
+                    SoMui = Convert.ToInt32(doc["soMui"])
+                });
+            }
+            return result;
+        }
+
         // Mục đích: phương thức TaoLichTiemChoHoSo xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
@@ -26,6 +138,7 @@ namespace DoAnTotNghiep.Services
             var hoSo = LayHoSoTheoMa(maHoSo);
             if (hoSo == null)
             {
+                System.Console.WriteLine($"[TaoLichTiemService] Khong tim thay ho so maHoSo={maHoSo}");
                 return new KetQuaTaoLichTiem();
             }
 
@@ -35,11 +148,14 @@ namespace DoAnTotNghiep.Services
                 SoMuiTiemVaccine = danhSachMuiTiem.Count
             };
 
+            System.Console.WriteLine($"[TaoLichTiemService] Tao lich cho maHoSo={maHoSo}, ngaySinh={hoSo.NgaySinh:yyyy-MM-dd}, tongMuiTiem={danhSachMuiTiem.Count}");
+
             foreach (var nhomVaccine in danhSachMuiTiem.GroupBy(muiTiem => muiTiem.MaVaccine))
             {
                 TaoLichChoTungVaccine(maHoSo, hoSo.NgaySinh, nhomVaccine.OrderBy(muiTiem => muiTiem.SoMui), ketQua);
             }
 
+            System.Console.WriteLine($"[TaoLichTiemService] Ket qua: phuHop={ketQua.SoMuiTiemPhuHop}, daTao={ketQua.SoLichTiemDaTao}");
             return ketQua;
         }
 
@@ -677,6 +793,20 @@ WHERE NOT EXISTS (
             public int SoMuiTiemPhuHop { get; set; }
             public int SoLichTiemDaTao { get; set; }
             public List<int> MaMuiTiemPhuHop { get; set; } = new();
+        }
+
+        // Lớp debug dùng để trả về dữ liệu lịch tiêm
+        public class LichTiemDebug
+        {
+            public int MaLichTiem { get; set; }
+            public int MaHoSo { get; set; }
+            public int MaMuiTiem { get; set; }
+            public DateTime NgayTiemDuKien { get; set; }
+            public string TrangThai { get; set; } = "";
+            public string GhiChu { get; set; } = "";
+            public string TenVaccine { get; set; } = "";
+            public string TenMui { get; set; } = "";
+            public int SoMui { get; set; }
         }
     }
 }

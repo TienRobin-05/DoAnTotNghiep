@@ -18,9 +18,9 @@ namespace DoAnTotNghiep.DAL
             AND CAST(lt.ngayTiemDuKien AS DATE) < CAST(GETDATE() AS DATE) THEN N'qua-han'
         WHEN (lt.maLichTiem IS NULL OR ISNULL(lt.trangThai, N'') <> N'Đã tiêm')
             AND ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN N'qua-han'
-        WHEN lt.maLichTiem IS NOT NULL
-            AND ISNULL(lt.trangThai, N'') <> N'Đã tiêm'
-            AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, 2, CAST(GETDATE() AS DATE)) THEN N'den-lich'
+            WHEN lt.maLichTiem IS NOT NULL
+                AND ISNULL(lt.trangThai, N'') <> N'Đã tiêm'
+                AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, 3, CAST(GETDATE() AS DATE)) THEN N'den-lich'
         WHEN (lt.maLichTiem IS NULL OR ISNULL(lt.trangThai, N'') <> N'Đã tiêm')
             AND (
                 ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%'
@@ -401,6 +401,14 @@ AND daDoc = 0";
             }
 
             var danhSachLich = LayLichTiemDenHan(maTaiKhoan);
+            System.Console.WriteLine($"[ThongBao_DAL] Lay duoc {danhSachLich.Count} lich can xu ly cho maTaiKhoan={maTaiKhoan}");
+            foreach (var l in danhSachLich)
+            {
+                System.Console.WriteLine($"[ThongBao_DAL]   Lich maLichTiem={l.MaLichTiem}, hoSo={l.HoTenHoSo}, " +
+                    $"vaccine={l.TenVaccine}, ngay={l.NgayTiemDuKien:yyyy-MM-dd}, " +
+                    $"soNgay={(l.NgayTiemDuKien.Date - DateTime.Today).Days}");
+            }
+
             var soLichDenHanTheoHoSo = danhSachLich
                 .GroupBy(lich => lich.MaHoSo)
                 .ToDictionary(nhom => nhom.Key, nhom => nhom.Count());
@@ -412,6 +420,7 @@ AND daDoc = 0";
 
                 if (DaCoThongBaoChoLich(maTaiKhoan, lich.MaLichTiem, tieuDe))
                 {
+                    System.Console.WriteLine($"[ThongBao_DAL]   Bo qua (da co): maLichTiem={lich.MaLichTiem}, tieuDe={tieuDe}");
                     continue;
                 }
 
@@ -420,11 +429,14 @@ AND daDoc = 0";
                 var maThongBao = ThemThongBaoLichTiem(maTaiKhoan, lich.MaLichTiem, tieuDe, noiDung);
                 if (maThongBao > 0)
                 {
+                    System.Console.WriteLine($"[ThongBao_DAL]   Tao thong bao maThongBao={maThongBao}, tieuDe={tieuDe}, " +
+                        $"ngay={lich.NgayTiemDuKien:yyyy-MM-dd}, soNgay={(lich.NgayTiemDuKien.Date - DateTime.Today).Days}");
                     pushNotificationService.GuiThongBao(maTaiKhoan, maThongBao, tieuDe, noiDung);
                     soThongBaoDaTao++;
                 }
             }
 
+            System.Console.WriteLine($"[ThongBao_DAL] Tong cong da tao {soThongBaoDaTao} thong bao moi cho maTaiKhoan={maTaiKhoan}");
             return soThongBaoDaTao;
         }
 
@@ -671,6 +683,86 @@ AND maTaiKhoan = @MaTaiKhoan";
             return false;
         }
 
+        // Lấy tối đa N thông báo chưa đọc chưa từng được đẩy desktop
+        public List<DesktopPushNotification> LayThongBaoChuaDocChoDesktopPush(int maTaiKhoan, int soLuong)
+        {
+            DamBaoBangDesktopPushLog();
+            const string sql = @"
+SELECT TOP (@SoLuong)
+    tb.maThongBao, tb.tieuDe, tb.noiDung, tb.ngayGui
+FROM ThongBao tb
+WHERE tb.maTaiKhoan = @MaTaiKhoan
+AND tb.daDoc = 0
+AND NOT EXISTS (
+    SELECT 1
+    FROM NotificationDesktopPushLogs l
+    WHERE l.maTaiKhoan = tb.maTaiKhoan
+    AND l.maThongBao = tb.maThongBao
+)
+ORDER BY tb.ngayGui DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@SoLuong", soLuong);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+
+            var danhSach = new List<DesktopPushNotification>();
+            while (doc.Read())
+            {
+                danhSach.Add(new DesktopPushNotification
+                {
+                    Id = Convert.ToInt32(doc["maThongBao"]),
+                    Title = doc["tieuDe"] == DBNull.Value ? "" : doc["tieuDe"].ToString() ?? "",
+                    Message = doc["noiDung"] == DBNull.Value ? "" : doc["noiDung"].ToString() ?? "",
+                    CreatedAt = Convert.ToDateTime(doc["ngayGui"])
+                });
+            }
+            return danhSach;
+        }
+
+        // Đánh dấu các thông báo đã được đẩy desktop (chống trùng)
+        public void MarkDesktopPushed(int maTaiKhoan, List<int> notificationIds)
+        {
+            if (notificationIds == null || notificationIds.Count == 0) return;
+            DamBaoBangDesktopPushLog();
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            ketNoi.Open();
+            foreach (var id in notificationIds)
+            {
+                const string sql = @"
+IF NOT EXISTS (SELECT 1 FROM NotificationDesktopPushLogs WHERE maTaiKhoan = @MaTaiKhoan AND maThongBao = @MaThongBao)
+    INSERT INTO NotificationDesktopPushLogs(maTaiKhoan, maThongBao) VALUES(@MaTaiKhoan, @MaThongBao)";
+
+                using var lenh = new SqlCommand(sql, ketNoi);
+                lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+                lenh.Parameters.AddWithValue("@MaThongBao", id);
+                lenh.ExecuteNonQuery();
+            }
+        }
+
+        private void DamBaoBangDesktopPushLog()
+        {
+            const string sql = @"
+IF OBJECT_ID(N'dbo.NotificationDesktopPushLogs', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.NotificationDesktopPushLogs (
+        maLog INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_NotificationDesktopPushLogs PRIMARY KEY,
+        maTaiKhoan INT NOT NULL,
+        maThongBao INT NOT NULL,
+        pushedAt DATETIME NOT NULL CONSTRAINT DF_NotifDesktopPush_pushedAt DEFAULT GETDATE(),
+        CONSTRAINT UQ_NotifDesktopPush_UserNotif UNIQUE(maTaiKhoan, maThongBao)
+    );
+END;";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            lenh.ExecuteNonQuery();
+        }
+
         private class LichTiemCanThongBao
         {
             public int MaLichTiem { get; set; }
@@ -686,6 +778,15 @@ AND maTaiKhoan = @MaTaiKhoan";
             public int? DoTuoiKhuyenNghi { get; set; }
             public string DonViTuoi { get; set; } = string.Empty;
             public DateTime NgayTiemDuKien { get; set; }
+        }
+
+        // Model cho desktop push notification
+        public class DesktopPushNotification
+        {
+            public int Id { get; set; }
+            public string Title { get; set; } = "";
+            public string Message { get; set; } = "";
+            public DateTime CreatedAt { get; set; }
         }
     }
 }

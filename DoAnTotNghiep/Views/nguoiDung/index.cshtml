@@ -1026,7 +1026,7 @@
         </div>
         <div class="reminder-card">
             <a class="reminder-card-link" href="/LichTiem/ChonHoSo" aria-label="Xem lịch tiêm"></a>
-            <div class="reminder-head"><div class="reminder-title"><i class="bi bi-bell-fill"></i><span>Tự động nhắc lịch</span></div><label class="switch" for="tuDongNhacLichSwitch" aria-label="Tự động nhắc lịch"><input type="checkbox" id="tuDongNhacLichSwitch" checked /><span aria-hidden="true"></span></label></div>
+            <div class="reminder-head"><div class="reminder-title"><i class="bi bi-bell-fill"></i><span>Tự động nhắc lịch</span></div><label class="switch" for="tuDongNhacLichSwitch" aria-label="Tự động nhắc lịch"><input type="checkbox" id="tuDongNhacLichSwitch" @(ViewBag.PushNotificationEnabled == true ? "checked" : "") /><span aria-hidden="true"></span></label></div>
             <div class="reminder-date"><i class="bi bi-calendar-event"></i><span>@ngayHienTai</span><i class="reminder-arrow bi bi-arrow-right-short"></i></div>
         </div>
     </section>

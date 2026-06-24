@@ -1,191 +1,263 @@
 (() => {
-    const checkbox = document.getElementById("btnBatThongBao");
-    if (!checkbox) return;
+    var toggle = document.getElementById("tuDongNhacLichSwitch");
 
     if (!window.isSecureContext || !("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-        checkbox.checked = false;
-        checkbox.disabled = true;
+        if (toggle) { toggle.checked = false; toggle.disabled = true; }
         return;
     }
 
-    capNhatTrangThaiBanDau().catch(() => {
-        checkbox.checked = false;
-        checkbox.disabled = Notification.permission === "denied";
-    });
+    // ===== KHI VAO APP: TU DONG DAY THONG BAO CHUA DOC RA DESKTOP =====
+    var desktopPushStarted = false;
 
-    checkbox.addEventListener("change", async () => {
-        const muonBatThongBao = checkbox.checked;
-        checkbox.disabled = true;
+    async function initDesktopUnreadNotifications() {
+        if (desktopPushStarted) return;
+        desktopPushStarted = true;
 
         try {
-            if (muonBatThongBao) {
-                await batThongBao();
-                checkbox.checked = true;
-                alert("Đã bật tự động nhắc lịch.");
-            } else {
-                await tatThongBao();
-                checkbox.checked = false;
-                alert("Đã tắt tự động nhắc lịch.");
+            var pushRes = await fetch("/api/reminders/push-enabled", { credentials: "include" });
+            if (!pushRes.ok) return;
+            var pushSetting = await pushRes.json();
+            if (!pushSetting.enabled) {
+                console.log("[DesktopPush] User chua bat tu dong nhac lich.");
+                return;
+            }
+
+            if (Notification.permission !== "granted") {
+                console.log("[DesktopPush] Chua cap quyen notification.");
+                return;
+            }
+
+            var registration = await navigator.serviceWorker.ready;
+
+            var unreadRes = await fetch("/api/notifications/unread-for-push", { credentials: "include" });
+            if (!unreadRes.ok) return;
+            var unreadData = await unreadRes.json();
+            var items = Array.isArray(unreadData.items) ? unreadData.items : [];
+
+            if (items.length === 0) {
+                console.log("[DesktopPush] Khong co thong bao chua doc can day.");
+                return;
+            }
+
+            console.log("[DesktopPush] Dang day " + items.length + " thong bao chua doc ra desktop...");
+
+            var pushedIds = [];
+
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                await showDesktopNotification(registration, item);
+                pushedIds.push(item.id);
+                await wait(700);
+            }
+
+            if (pushedIds.length > 0) {
+                await fetch("/api/notifications/mark-desktop-pushed", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ notificationIds: pushedIds })
+                });
+                console.log("[DesktopPush] Da day " + pushedIds.length + " thong bao ra desktop.");
             }
         } catch (error) {
-            checkbox.checked = !muonBatThongBao;
-            alert(`Lỗi khi cập nhật nhắc lịch: ${layThongBaoLoi(error)}`);
+            console.error("[DesktopPush] Loi:", error);
+        }
+    }
+
+    async function showDesktopNotification(registration, item) {
+        var title = "Pharmacy City";
+        var body = (item.title || "Thong bao") + "\n" + (item.message || "");
+        var tag = "notif-" + item.id;
+
+        try {
+            await registration.showNotification(title, {
+                body: body,
+                icon: "/images/logo/pharmacy-favicon.png",
+                badge: "/images/logo/pharmacy-favicon.png",
+                tag: tag,
+                renotify: true,
+                requireInteraction: false,
+                data: {
+                    url: item.url || "/ThongBao/Index",
+                    notificationId: item.id,
+                    category: item.category
+                }
+            });
+        } catch (e) {
+            console.warn("[DesktopPush] showNotification loi:", e);
+        }
+    }
+
+    function wait(ms) {
+        return new Promise(function (resolve) { setTimeout(resolve, ms); });
+    }
+
+    // Tu dong chay khi DOM ready
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initDesktopUnreadNotifications);
+    } else {
+        initDesktopUnreadNotifications();
+    }
+
+    // ===== CONG TAC BAT/TAT TREN TRANG CHU =====
+    if (!toggle) return;
+
+    capNhatTrangThaiBanDau().catch(function () {
+        toggle.checked = false;
+        toggle.disabled = Notification.permission === "denied";
+    });
+
+    toggle.addEventListener("change", async function () {
+        var muonBat = toggle.checked;
+        toggle.disabled = true;
+
+        try {
+            if (muonBat) {
+                await batThongBao();
+                toggle.checked = true;
+            } else {
+                await tatThongBao();
+                toggle.checked = false;
+            }
+        } catch (error) {
+            toggle.checked = !muonBat;
+            alert("Loi khi cap nhat thong bao: " + layThongBaoLoi(error));
         } finally {
-            checkbox.disabled = Notification.permission === "denied";
+            toggle.disabled = Notification.permission === "denied";
         }
     });
 
     async function capNhatTrangThaiBanDau() {
-        checkbox.checked = false;
-        checkbox.disabled = true;
+        toggle.checked = false;
+        toggle.disabled = true;
+
+        try {
+            var res = await fetch("/api/reminders/push-enabled", { credentials: "include" });
+            if (res.ok) {
+                var data = await res.json();
+                toggle.checked = data.enabled === true;
+            }
+        } catch (e) {
+            console.log("[Push] Khong lay duoc push setting:", e);
+        }
 
         if (Notification.permission === "denied") {
-            checkbox.disabled = true;
+            toggle.checked = false;
+            toggle.disabled = true;
             return;
         }
 
-        if (Notification.permission === "granted") {
-            const registration = await layServiceWorkerDangHoatDong();
-            const subscription = await registration.pushManager.getSubscription();
-            checkbox.checked = !!subscription;
-
-            if (subscription) {
-                await luuSubscription(subscription);
-            }
-        }
-
-        checkbox.disabled = false;
+        toggle.disabled = false;
     }
 
     async function batThongBao() {
-        const permission = await Notification.requestPermission();
+        if (Notification.permission === "denied") {
+            throw new Error("Trinh duyet da chan thong bao. Hay vao Settings > Privacy > Notifications de cho phep.");
+        }
+
+        var permission = Notification.permission;
+
+        if (permission === "default") {
+            permission = await Notification.requestPermission();
+        }
+
         if (permission !== "granted") {
-            throw new Error("Bạn cần cho phép thông báo trong trình duyệt.");
+            throw new Error("Ban chua cho phep thong bao. Hay chon Allow trong hop thoai.");
         }
 
-        const publicKeyResponse = await fetch("/Push/PublicKey");
-        if (!publicKeyResponse.ok) {
-            throw new Error("Không lấy được khóa đăng ký thông báo.");
+        console.log("[Push] Notification.permission:", permission);
+
+        var publicKeyRes = await fetch("/Push/PublicKey");
+        if (!publicKeyRes.ok) {
+            throw new Error("Khong lay duoc khoa dang ky thong bao.");
         }
 
-        const publicKeyData = await publicKeyResponse.json();
+        var publicKeyData = await publicKeyRes.json();
         if (!publicKeyData.publicKey) {
-            throw new Error("Máy chủ chưa cấu hình khóa Web Push.");
+            throw new Error("May chu chua cau hinh khoa Web Push.");
         }
 
-        const registration = await layServiceWorkerDangHoatDong();
-        const applicationServerKey = chuyenBase64UrlThanhUint8Array(publicKeyData.publicKey);
+        console.log("[Push] Registering service worker...");
 
-        let subscription = await registration.pushManager.getSubscription();
-        if (!subscription) {
-            subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey
-            });
-        }
-
-        await luuSubscription(subscription);
-    }
-
-    async function layServiceWorkerDangHoatDong() {
-        const registration = await navigator.serviceWorker.register("/push-service-worker.js", {
+        var registration = await navigator.serviceWorker.register("/push-service-worker.js", {
             scope: "/",
             updateViaCache: "none"
         });
 
-        await registration.update();
+        await navigator.serviceWorker.ready;
 
-        if (registration.active) {
-            return registration;
-        }
+        console.log("[Push] Service worker registered");
 
-        const worker = registration.installing || registration.waiting;
-        if (worker) {
-            await doiServiceWorkerActive(worker);
-        }
+        var applicationServerKey = urlBase64ToUint8Array(publicKeyData.publicKey);
 
-        return await navigator.serviceWorker.ready;
-    }
+        var subscription = await registration.pushManager.getSubscription();
 
-    function doiServiceWorkerActive(worker) {
-        return new Promise((resolve, reject) => {
-            if (worker.state === "activated") {
-                resolve();
-                return;
-            }
-
-            const timeout = setTimeout(() => reject(new Error("Service Worker chưa sẵn sàng. Hãy tải lại trang và thử lại.")), 10000);
-
-            worker.addEventListener("statechange", () => {
-                if (worker.state === "activated") {
-                    clearTimeout(timeout);
-                    resolve();
-                }
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
             });
+        }
+
+        console.log("[Push] Subscription:", subscription);
+
+        var subscribeRes = await fetch("/Push/DangKy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(subscription)
         });
+
+        if (!subscribeRes.ok) {
+            throw new Error("Khong luu duoc push subscription. Ma loi: " + subscribeRes.status);
+        }
+
+        console.log("[Push] Subscribe API response OK");
+
+        var settingRes = await fetch("/api/reminders/push-enabled", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ enabled: true })
+        });
+
+        if (!settingRes.ok) {
+            throw new Error("Khong luu duoc trang thai bat nhac lich.");
+        }
+
+        console.log("[Push] Da bat thong bao day.");
     }
 
     async function tatThongBao() {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-
-        if (!subscription) {
-            return;
-        }
-
-        const response = await fetch("/Push/HuyDangKy", {
+        var settingRes = await fetch("/api/reminders/push-enabled", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(subscription)
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ enabled: false })
         });
 
-        if (!response.ok && response.status !== 401) {
-            throw new Error(`Không hủy được đăng ký thông báo. Mã lỗi: ${response.status}`);
+        if (!settingRes.ok) {
+            throw new Error("Khong luu duoc trang thai tat nhac lich.");
         }
 
-        await subscription.unsubscribe();
-    }
-
-    async function luuSubscription(subscription) {
-        const response = await fetch("/Push/DangKy", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(subscription)
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error("Vui lòng đăng nhập.");
-            }
-
-            throw new Error(`Không lưu được đăng ký thông báo. Mã lỗi: ${response.status}`);
-        }
+        console.log("[Push] Da tat thong bao day.");
     }
 
     function layThongBaoLoi(error) {
-        const noiDungLoi = error?.message || error?.name || "Lỗi không xác định";
-
-        if (noiDungLoi.toLowerCase().includes("push service")) {
-            return "Trình duyệt đang chặn dịch vụ Push. Hãy thử bằng Chrome/Edge, hoặc bật dịch vụ Push Messaging trong Brave.";
+        var msg = error?.message || error?.name || "Loi khong xac dinh";
+        if (msg.toLowerCase().includes("push service")) {
+            return "Trinh duyet dang chan dich vu Push. Hay thu bang Chrome/Edge.";
         }
-
-        return noiDungLoi;
+        return msg;
     }
 
-    function chuyenBase64UrlThanhUint8Array(base64Url) {
-        const padding = "=".repeat((4 - base64Url.length % 4) % 4);
-        const base64 = (base64Url + padding).replace(/-/g, "+").replace(/_/g, "/");
-        const rawData = window.atob(base64);
-        const output = new Uint8Array(rawData.length);
-
-        for (let i = 0; i < rawData.length; i++) {
-            output[i] = rawData.charCodeAt(i);
+    function urlBase64ToUint8Array(base64String) {
+        var padding = "=".repeat((4 - base64String.length % 4) % 4);
+        var base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+        var rawData = window.atob(base64);
+        var outputArray = new Uint8Array(rawData.length);
+        for (var i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
         }
-
-        return output;
+        return outputArray;
     }
 })();

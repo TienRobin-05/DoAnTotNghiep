@@ -1,31 +1,25 @@
-self.addEventListener("install", event => {
-    event.waitUntil(self.skipWaiting());
-});
-
-self.addEventListener("activate", event => {
-    event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener("push", event => {
+self.addEventListener("push", function (event) {
     if (!event.data) return;
 
     const data = event.data.json();
 
     const title = data.title || "Pharmacy City";
+
     const options = {
         body: data.body || "",
         icon: data.icon || "/images/logo/pharmacy-favicon.png",
         badge: data.badge || "/images/logo/pharmacy-favicon.png",
         data: data.data || {},
         tag: data.tag || "pharmacy-city-notification",
-        renotify: true,
-        requireInteraction: false
+        renotify: true
     };
 
-    event.waitUntil(self.registration.showNotification(title, options));
+    event.waitUntil(
+        self.registration.showNotification(title, options)
+    );
 });
 
-self.addEventListener("notificationclick", event => {
+self.addEventListener("notificationclick", function (event) {
     event.notification.close();
 
     const urlToOpen = event.notification.data?.url || "/ThongBao/Index";

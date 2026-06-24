@@ -551,10 +551,42 @@ END;
 IF COL_LENGTH(N'dbo.TaiKhoan', N'LyDoXoa') IS NULL
 BEGIN
     ALTER TABLE dbo.TaiKhoan ADD LyDoXoa NVARCHAR(255) NULL;
+END;
+
+IF COL_LENGTH(N'dbo.TaiKhoan', N'PushNotificationEnabled') IS NULL
+BEGIN
+    ALTER TABLE dbo.TaiKhoan
+    ADD PushNotificationEnabled BIT NOT NULL CONSTRAINT DF_TaiKhoan_PushNotif DEFAULT 0 WITH VALUES;
 END;";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            lenh.ExecuteNonQuery();
+        }
+
+        public bool GetPushNotificationEnabled(int maTaiKhoan)
+        {
+            DamBaoCotDonDepTaiKhoan();
+            const string sql = "SELECT ISNULL(PushNotificationEnabled, 0) FROM TaiKhoan WHERE maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            ketNoi.Open();
+            var result = lenh.ExecuteScalar();
+            return result != null && result != DBNull.Value && Convert.ToBoolean(result);
+        }
+
+        public void SetPushNotificationEnabled(int maTaiKhoan, bool enabled)
+        {
+            DamBaoCotDonDepTaiKhoan();
+            const string sql = "UPDATE TaiKhoan SET PushNotificationEnabled = @Enabled WHERE maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@Enabled", enabled);
             ketNoi.Open();
             lenh.ExecuteNonQuery();
         }
