@@ -1,17 +1,207 @@
-﻿@* Khu vực giao diện của view Edit.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
-@model HoSoSucKhoe
+﻿@model HoSoSucKhoe
 @{
     ViewData["Title"] = "Sửa hồ sơ sức khỏe";
 }
 
-<h1 class="user-page-title">Sửa hồ sơ sức khỏe</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/health-profile-edit.css" asp-append-version="true" />
+}
 
-@* Khu vực form cho phép người dùng nhập dữ liệu và gửi request về Controller để xử lý. *@
-<form method="post" class="col-md-7">
-    @Html.AntiForgeryToken()
-    <input asp-for="MaHoSo" type="hidden" />
-    <partial name="_FormHoSo" model="Model" />
-    <button type="submit" class="btn btn-primary">Cập nhật</button>
-    <a asp-action="Index" class="btn btn-link">Quay lại</a>
-</form>
+<div class="edit-health-profile-page">
+    <section class="edit-health-hero">
+        <div class="decor-edit-shield" aria-hidden="true"></div>
+        <div class="decor-edit-dots" aria-hidden="true"></div>
+
+        <div class="edit-health-title">
+            <h1>Sửa hồ sơ sức khỏe</h1>
+            <p>Cập nhật thông tin sức khỏe cá nhân để chúng tôi hiểu bạn hơn và phục vụ tốt hơn.</p>
+        </div>
+    </section>
+
+    <section class="edit-health-form-section">
+        <form method="post" class="edit-health-form-card">
+            @Html.AntiForgeryToken()
+            <input asp-for="MaHoSo" type="hidden" />
+
+            @if (ViewBag.ThongBao != null)
+            {
+                <div class="alert alert-danger" style="margin-bottom:18px;">@ViewBag.ThongBao</div>
+            }
+
+            <div class="edit-form-grid">
+                <div class="edit-form-group">
+                    <label asp-for="HoTen">Họ tên</label>
+                    <div class="edit-input-wrap">
+                        <i class="bi bi-person-fill edit-field-icon-left"></i>
+                        <input asp-for="HoTen" class="edit-health-input" placeholder="Nhập họ và tên" />
+                    </div>
+                    <span asp-validation-for="HoTen" class="text-danger"></span>
+                </div>
+
+                <div class="edit-form-group">
+                    <label>Ngày sinh</label>
+                    <div class="edit-input-wrap birth-date-wrap">
+                        <i class="bi bi-calendar3 edit-field-icon-left"></i>
+
+                        <input type="text" id="birthDateDisplay" inputmode="numeric" autocomplete="bday"
+                               placeholder="mm/dd/yyyy" maxlength="10" class="edit-health-input" />
+
+                        <button type="button" class="calendar-picker-btn" id="calendarPickerBtn" aria-label="Chọn ngày sinh">
+                            <i class="bi bi-calendar-week" style="font-size:16px;"></i>
+                        </button>
+
+                        <input type="date" id="hiddenDatePicker" class="hidden-date-picker" />
+                        <input asp-for="NgaySinh" type="hidden" id="ngaySinhHidden" />
+                    </div>
+                    <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                </div>
+
+                <div class="edit-form-group">
+                    <label asp-for="GioiTinh">Giới tính</label>
+                    <div class="edit-input-wrap">
+                        <i class="bi bi-gender-ambiguous edit-field-icon-left"></i>
+                        <select asp-for="GioiTinh" class="edit-health-select">
+                            <option value="">-- Chọn giới tính --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                        <i class="bi bi-chevron-down edit-field-icon-right"></i>
+                    </div>
+                    <span asp-validation-for="GioiTinh" class="text-danger"></span>
+                </div>
+
+                <div class="edit-form-row-2">
+                    <div class="edit-form-group">
+                        <label asp-for="ChieuCao">Chiều cao (cm)</label>
+                        <div class="edit-input-wrap">
+                            <i class="bi bi-rulers edit-field-icon-left"></i>
+                            <input asp-for="ChieuCao" type="number" step="0.1" class="edit-health-input" placeholder="Nhập chiều cao" />
+                        </div>
+                        <span asp-validation-for="ChieuCao" class="text-danger"></span>
+                    </div>
+
+                    <div class="edit-form-group">
+                        <label asp-for="CanNang">Cân nặng (kg)</label>
+                        <div class="edit-input-wrap">
+                            <i class="bi bi-droplet-half edit-field-icon-left"></i>
+                            <input asp-for="CanNang" type="number" step="0.1" class="edit-health-input" placeholder="Nhập cân nặng" />
+                        </div>
+                        <span asp-validation-for="CanNang" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="edit-form-group">
+                    <label asp-for="TienSuBenh">Tiền sử bệnh</label>
+                    <div class="edit-input-wrap textarea">
+                        <i class="bi bi-clipboard2-pulse edit-field-icon-left"></i>
+                        <textarea asp-for="TienSuBenh" class="edit-health-textarea" placeholder="Nhập tiền sử bệnh (nếu có)"></textarea>
+                    </div>
+                </div>
+
+                <div class="edit-form-group">
+                    <label asp-for="DiUng">Dị ứng</label>
+                    <div class="edit-input-wrap textarea">
+                        <i class="bi bi-shield-exclamation edit-field-icon-left"></i>
+                        <textarea asp-for="DiUng" class="edit-health-textarea" placeholder="Nhập dị ứng (nếu có)"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-form-actions">
+                <button type="submit" class="btn-update-profile">
+                    <i class="bi bi-floppy"></i>
+                    Cập nhật
+                </button>
+                <a asp-action="Index" class="btn-back-profile">
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại
+                </a>
+            </div>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var display = document.getElementById("birthDateDisplay");
+            var hidden = document.getElementById("ngaySinhHidden");
+            var picker = document.getElementById("hiddenDatePicker");
+            var pickerBtn = document.getElementById("calendarPickerBtn");
+
+            if (!display || !hidden || !picker) return;
+
+            function digits(v) { return v.replace(/\D/g, "").slice(0, 8); }
+
+            function formatToMmDdYyyy(v) {
+                var d = digits(v);
+                if (d.length <= 2) return d;
+                if (d.length <= 4) return d.slice(0, 2) + "/" + d.slice(2);
+                return d.slice(0, 2) + "/" + d.slice(2, 4) + "/" + d.slice(4);
+            }
+
+            function mmDdYyyyToIso(v) {
+                var d = digits(v);
+                if (d.length !== 8) return "";
+                return d.slice(4) + "-" + d.slice(0, 2) + "-" + d.slice(2, 4);
+            }
+
+            function isoToMmDdYyyy(v) {
+                if (!v) return "";
+                var parts = v.split("-");
+                if (parts.length !== 3) return "";
+                return parts[1] + "/" + parts[2] + "/" + parts[0];
+            }
+
+            function isValid(v) {
+                var d = digits(v);
+                if (d.length !== 8) return false;
+                var m = parseInt(d.slice(0, 2), 10);
+                var day = parseInt(d.slice(2, 4), 10);
+                var y = parseInt(d.slice(4), 10);
+                if (m < 1 || m > 12 || day < 1 || day > 31 || y < 1900) return false;
+                var curY = new Date().getFullYear();
+                if (y > curY) return false;
+                var date = new Date(y, m - 1, day);
+                if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== day) return false;
+                var today = new Date(); today.setHours(0, 0, 0, 0);
+                if (date > today) return false;
+                return true;
+            }
+
+            display.addEventListener("input", function () {
+                var fmt = formatToMmDdYyyy(this.value);
+                this.value = fmt;
+                hidden.value = mmDdYyyyToIso(fmt);
+            });
+
+            display.addEventListener("blur", function () {
+                if (!this.value) return;
+                if (!isValid(this.value)) { this.value = ""; hidden.value = ""; }
+            });
+
+            if (pickerBtn) {
+                pickerBtn.addEventListener("click", function () {
+                    if (typeof picker.showPicker === "function") picker.showPicker();
+                    else picker.click();
+                });
+            }
+
+            picker.addEventListener("change", function () {
+                if (!this.value) return;
+                var displayVal = isoToMmDdYyyy(this.value);
+                if (displayVal && isValid(displayVal)) {
+                    display.value = displayVal;
+                    hidden.value = this.value;
+                }
+            });
+
+            if (hidden.value) {
+                display.value = isoToMmDdYyyy(hidden.value);
+            }
+
+            picker.max = new Date().toISOString().split("T")[0];
+        });
+    </script>
+}

@@ -77,6 +77,38 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TaiKhoan_SoDienThoai')
     CREATE UNIQUE NONCLUSTERED INDEX IX_TaiKhoan_SoDienThoai ON TaiKhoan(soDienThoai) WHERE soDienThoai IS NOT NULL AND soDienThoai <> ''", ketNoi);
             kiemTra.ExecuteNonQuery();
         }
+
+        // T?o VAPID keys n?u chua co
+        var publicKey = config["WebPush:PublicKey"] ?? "";
+        var privateKey = config["WebPush:PrivateKey"] ?? "";
+        if (string.IsNullOrWhiteSpace(publicKey) || string.IsNullOrWhiteSpace(privateKey))
+        {
+            try
+            {
+                var vapidKeys = WebPush.VapidHelper.GenerateVapidKeys();
+                var configPath = Path.Combine(builder.Environment.ContentRootPath, "appsettings.json");
+                if (File.Exists(configPath))
+                {
+                    var json = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(File.ReadAllText(configPath));
+                    if (json != null && json.ContainsKey("WebPush"))
+                    {
+                        var webPush = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json["WebPush"].ToString() ?? "{}");
+                        if (webPush != null)
+                        {
+                            webPush["PublicKey"] = vapidKeys.PublicKey;
+                            webPush["PrivateKey"] = vapidKeys.PrivateKey;
+                            json["WebPush"] = webPush;
+                            File.WriteAllText(configPath, System.Text.Json.JsonSerializer.Serialize(json, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                            app.Logger.LogInformation("Da tao VAPID keys va cap nhat vao appsettings.json");
+                        }
+                    }
+                }
+            }
+            catch (Exception vapidEx)
+            {
+                app.Logger.LogWarning(vapidEx, "Khong tao duoc VAPID keys. Co the thu cong bang lenh: dotnet user-secrets set WebPush:PublicKey <key>");
+            }
+        }
     }
     catch (Exception ex)
     {

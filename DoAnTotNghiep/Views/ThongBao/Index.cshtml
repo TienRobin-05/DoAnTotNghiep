@@ -504,6 +504,21 @@
     </footer>
 </main>
 
+<div style="max-width:980px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap;">
+    <form method="post" action="@Url.Action("TestUpcomingReminder", "NotificationTest")" style="margin:0;">
+        @Html.AntiForgeryToken()
+        <button type="submit" style="height:40px;border-radius:8px;border:1px solid #2563eb;background:white;color:#2563eb;font-weight:800;padding:0 16px;cursor:pointer;font-size:13px;">
+            <i class="bi bi-megaphone"></i> Tạo thông báo đến lịch
+        </button>
+    </form>
+    <form method="post" action="@Url.Action("TestPush", "NotificationTest")" style="margin:0;">
+        @Html.AntiForgeryToken()
+        <button type="submit" style="height:40px;border-radius:8px;border:1px solid #16a34a;background:white;color:#16a34a;font-weight:800;padding:0 16px;cursor:pointer;font-size:13px;">
+            <i class="bi bi-broadcast"></i> Gửi thử push laptop
+        </button>
+    </form>
+</div>
+
 <script>
     (function () {
         if (window.__notificationMarkAllBound) return;

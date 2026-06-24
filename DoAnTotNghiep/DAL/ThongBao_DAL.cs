@@ -36,8 +36,8 @@ namespace DoAnTotNghiep.DAL
             "Quá hạn lịch tiêm"
         };
         private const int GioGuiThongBaoNhacLich = 0;
-        private const int SoNgayNhacTruoc = 2;
-        private const int SoNgayGiuThongBaoNhacLich = 3;
+        private const int SoNgayNhacTruoc = 3;
+        private const int SoNgayGiuThongBaoNhacLich = 5;
         private readonly PushNotificationService pushNotificationService;
 
         public ThongBao_DAL(IConfiguration configuration, PushNotificationService pushNotificationService)

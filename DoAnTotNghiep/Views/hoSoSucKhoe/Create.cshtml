@@ -46,8 +46,9 @@
                     <label asp-for="NgaySinh">Ngày sinh</label>
                     <div class="input-wrap">
                         <i class="bi bi-calendar3 field-icon-left"></i>
-                        <input asp-for="NgaySinh" type="date" class="health-input" />
+                        <input type="text" id="ngaySinhDisplay" inputmode="numeric" autocomplete="bday" placeholder="mm/dd/yyyy" maxlength="10" class="health-input" />
                         <i class="bi bi-calendar-week field-icon-right"></i>
+                        <input asp-for="NgaySinh" type="hidden" id="ngaySinhHidden" />
                     </div>
                     <span asp-validation-for="NgaySinh" class="text-danger"></span>
                 </div>
@@ -120,3 +121,66 @@
     <div class="leaf-left" aria-hidden="true"><i class="bi bi-flower2"></i></div>
     <div class="leaf-right" aria-hidden="true"><i class="bi bi-flower2"></i></div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var display = document.getElementById("ngaySinhDisplay");
+            var hidden = document.getElementById("ngaySinhHidden");
+
+            if (!display || !hidden) return;
+
+            function onlyDigits(v) {
+                return v.replace(/\D/g, "").slice(0, 8);
+            }
+
+            function formatBirthDate(v) {
+                var d = onlyDigits(v);
+                if (d.length <= 2) return d;
+                if (d.length <= 4) return d.slice(0, 2) + "/" + d.slice(2);
+                return d.slice(0, 2) + "/" + d.slice(2, 4) + "/" + d.slice(4);
+            }
+
+            function displayToIso(v) {
+                var d = onlyDigits(v);
+                if (d.length !== 8) return "";
+                return d.slice(4) + "-" + d.slice(0, 2) + "-" + d.slice(2, 4);
+            }
+
+            function isValid(v) {
+                var d = onlyDigits(v);
+                if (d.length !== 8) return false;
+                var month = parseInt(d.slice(0, 2), 10);
+                var day = parseInt(d.slice(2, 4), 10);
+                var year = parseInt(d.slice(4), 10);
+                if (month < 1 || month > 12) return false;
+                if (day < 1 || day > 31) return false;
+                var currentYear = new Date().getFullYear();
+                if (year < 1900 || year > currentYear) return false;
+                var date = new Date(year, month - 1, day);
+                return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+            }
+
+            display.addEventListener("input", function () {
+                var formatted = formatBirthDate(this.value);
+                this.value = formatted;
+                hidden.value = displayToIso(formatted);
+            });
+
+            display.addEventListener("blur", function () {
+                if (!this.value) return;
+                if (!isValid(this.value)) {
+                    this.value = "";
+                    hidden.value = "";
+                }
+            });
+
+            if (hidden.value) {
+                var parts = hidden.value.split("-");
+                if (parts.length === 3) {
+                    display.value = parts[1] + "/" + parts[2] + "/" + parts[0];
+                }
+            }
+        });
+    </script>
+}

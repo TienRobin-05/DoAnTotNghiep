@@ -1,0 +1,299 @@
+/* Pharmacy City - Edit Health Profile Page */
+.edit-health-profile-page {
+    position: relative;
+    min-height: calc(100vh - 72px);
+    background: linear-gradient(180deg, #eef6ff 0%, #f8fbff 100%);
+    overflow: hidden;
+}
+
+.edit-health-hero {
+    position: relative;
+    height: 230px;
+    background: radial-gradient(circle at 82% 18%, rgba(13, 110, 253, 0.12), transparent 20%),
+                linear-gradient(135deg, #eef7ff 0%, #dceeff 58%, #f3f9ff 100%);
+    overflow: hidden;
+}
+
+.edit-health-title {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding-top: 44px;
+}
+
+.edit-health-title h1 {
+    margin: 0;
+    color: #0b376d;
+    font-size: 42px;
+    line-height: 1.1;
+    font-weight: 850;
+    letter-spacing: -0.03em;
+}
+
+.edit-health-title p {
+    margin: 12px auto 0;
+    max-width: 470px;
+    color: #35516f;
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 500;
+}
+
+.edit-health-form-section {
+    position: relative;
+    z-index: 5;
+    width: min(820px, calc(100% - 40px));
+    margin: -68px auto 36px;
+}
+
+.edit-health-form-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #dbe8f6;
+    border-radius: 14px;
+    box-shadow: 0 22px 55px rgba(35, 89, 145, 0.14);
+    padding: 30px 36px;
+}
+
+.edit-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+.edit-form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+.edit-form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #0d2748;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.edit-input-wrap {
+    position: relative;
+}
+
+.edit-field-icon-left {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0d6efd;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.edit-field-icon-right {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0d376d;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.edit-input-wrap.textarea .edit-field-icon-left {
+    top: 17px;
+    transform: none;
+}
+
+.edit-health-input,
+.edit-health-select,
+.edit-health-textarea {
+    width: 100%;
+    border: 1px solid #cddbea;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #0e2542;
+    font-size: 14px;
+    font-weight: 500;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.edit-health-input,
+.edit-health-select {
+    height: 42px;
+    padding: 0 44px;
+}
+
+.edit-health-textarea {
+    min-height: 74px;
+    padding: 13px 44px;
+    resize: none;
+    line-height: 1.5;
+}
+
+.edit-health-input:focus,
+.edit-health-select:focus,
+.edit-health-textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.13);
+}
+
+.edit-health-input::placeholder,
+.edit-health-textarea::placeholder {
+    color: #91a3b8;
+}
+
+/* Birth date specific */
+.birth-date-wrap .edit-health-input {
+    padding-right: 50px;
+}
+
+.calendar-picker-btn {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    transform: translateY(-50%);
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #0d376d;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.calendar-picker-btn:hover {
+    background: #edf5ff;
+    color: #0d6efd;
+}
+
+.hidden-date-picker {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+/* Buttons */
+.edit-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.btn-update-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #006dff 0%, #005be0 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 750;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0, 109, 255, 0.22);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn-update-profile:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 25px rgba(0, 109, 255, 0.28);
+}
+
+.btn-back-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 22px;
+    border: 1px solid #cddbea;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #0d6efd;
+    font-size: 14px;
+    font-weight: 750;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.btn-back-profile:hover {
+    background: #f4f9ff;
+    border-color: #9fc5f8;
+    color: #0d6efd;
+}
+
+.text-danger {
+    display: block;
+    margin-top: 6px;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Decorations */
+.decor-edit-shield {
+    position: absolute;
+    left: 95px;
+    top: 45px;
+    width: 120px;
+    height: 138px;
+    border: 7px solid rgba(13, 110, 253, 0.14);
+    border-radius: 34px 34px 68px 68px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.decor-edit-shield::before,
+.decor-edit-shield::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background: rgba(13, 110, 253, 0.18);
+    border-radius: 7px;
+    transform: translate(-50%, -50%);
+}
+
+.decor-edit-shield::before { width: 58px; height: 17px; }
+.decor-edit-shield::after { width: 17px; height: 58px; }
+
+.decor-edit-dots {
+    position: absolute;
+    right: 250px;
+    bottom: 45px;
+    width: 110px;
+    height: 55px;
+    background-image: radial-gradient(rgba(13, 110, 253, 0.18) 2px, transparent 2px);
+    background-size: 18px 16px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .edit-health-hero { height: 220px; }
+    .edit-health-title { padding-top: 32px; }
+    .edit-health-title h1 { font-size: 32px; }
+    .edit-health-title p { font-size: 14px; max-width: 340px; }
+    .edit-health-form-section { width: calc(100% - 28px); margin-top: -60px; }
+    .edit-health-form-card { padding: 24px 20px; }
+    .edit-form-row-2 { grid-template-columns: 1fr; gap: 18px; }
+    .edit-form-actions { flex-direction: column; align-items: stretch; }
+    .btn-update-profile, .btn-back-profile { width: 100%; }
+    .decor-edit-shield, .decor-edit-dots { opacity: 0.18; }
+}
