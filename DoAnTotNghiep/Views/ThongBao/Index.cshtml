@@ -383,11 +383,10 @@
         </div>
 
         <div class="my-notifications-tools">
-            <form asp-action="Index" method="get" class="notification-search" role="search">
-                <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+            <div class="notification-search" role="search">
                 <i class="bi bi-search" aria-hidden="true"></i>
-                <input name="tuKhoa" value="@Model.TuKhoa" placeholder="Tìm nội dung thông báo..." aria-label="Tìm nội dung thông báo" data-live-search />
-            </form>
+                <input id="notificationSearch" value="@Model.TuKhoa" placeholder="Tìm nội dung thông báo..." aria-label="Tìm nội dung thông báo" />
+            </div>
 
             <form asp-action="DanhDauTatCaDaDoc" method="post" class="mark-all-read-form">
                 @Html.AntiForgeryToken()
@@ -483,19 +482,17 @@
         });
     })();
     (function() {
-        var timer = null;
-        document.querySelectorAll("[data-live-search]").forEach(function(el) {
-            el.addEventListener("input", function() {
-                clearTimeout(timer);
-                var form = el.closest("form");
-                if (!form) return;
-                timer = setTimeout(function() {
-                    var url = new URL(window.location.href, window.location.origin);
-                    url.searchParams.set("tuKhoa", this.value);
-                    url.searchParams.delete("trang");
-                    window.location.href = url.toString();
-                }, 300);
+        var input = document.getElementById("notificationSearch");
+        var cards = document.querySelectorAll(".notification-item-card");
+        if (!input || !cards.length) return;
+        function normalize(v) { return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").trim(); }
+        function filter() {
+            var kw = normalize(input.value);
+            cards.forEach(function(c) {
+                var match = kw === "" || normalize(c.getAttribute("data-search")||"").includes(kw);
+                c.style.display = match ? "" : "none";
             });
-        });
+        }
+        input.addEventListener("input", filter);
     })();
 </script>

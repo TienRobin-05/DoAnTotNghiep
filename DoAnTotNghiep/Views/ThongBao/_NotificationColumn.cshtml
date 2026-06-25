@@ -28,7 +28,7 @@
             <div class="notification-column-list">
             @foreach (var item in items)
             {
-                <article class="notification-item-card @(item.DaDoc ? "is-read" : "is-unread")">
+                <article class="notification-item-card @(item.DaDoc ? "is-read" : "is-unread")" data-search="@item.TieuDe @item.NoiDung @item.HoTenHoSo @item.MaThongBao">
                     <span class="notification-item-icon"><i class="bi @icon" aria-hidden="true"></i></span>
                     <div class="notification-item-body">
                         <a asp-action="Details" asp-route-maThongBao="@item.MaThongBao" class="notification-item-title">@item.TieuDe</a>

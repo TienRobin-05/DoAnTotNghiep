@@ -1059,7 +1059,7 @@ Tôi vừa tiêm vaccine cúm hôm qua, tối hôm đó tôi bị sốt nhẹ 37
             .replaceAll('"', '&quot;')
             .replaceAll("'", '&#039;');
 
-        const normalize = (value) => String(value ?? '').toLowerCase();
+        const normalize = (value) => String(value ?? '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
 
         const setVaccineState = ({ loading = false, error = false } = {}) => {
             if (vaccineLoading) vaccineLoading.hidden = !loading;

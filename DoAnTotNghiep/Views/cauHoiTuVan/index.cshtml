@@ -321,6 +321,7 @@
                                         data-title="@item.Question"
                                         data-answer="@item.Content"
                                         data-topic="@item.Topic"
+                                        data-search="@item.Question @item.Topic"
                                         data-updated="@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? item.CreatedAt.ToString("dd/MM/yyyy HH:mm"))">
                                     <span class="consult-question-icon"><i class="bi bi-lightning-charge-fill"></i></span>
                                     <span class="consult-question-text">
@@ -2496,10 +2497,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (searchInput) {
         searchInput.addEventListener("input", function () {
-            var q = searchInput.value.toLowerCase().trim();
+            var keyword = (searchInput.value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").trim();
             document.querySelectorAll(".quick-question-card").forEach(function (card) {
-                var text = ((card.getAttribute("data-question") || "") + " " + (card.getAttribute("data-topic") || "")).toLowerCase();
-                card.style.display = text.includes(q) ? "" : "none";
+                var text = ((card.getAttribute("data-question") || "") + " " + (card.getAttribute("data-topic") || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+                card.style.display = text.includes(keyword) ? "" : "none";
             });
         });
     }
@@ -2598,10 +2599,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (searchInput) {
         searchInput.addEventListener("input", function () {
-            var q = searchInput.value.toLowerCase().trim();
+            var keyword = (searchInput.value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").trim();
             document.querySelectorAll("#quickQuestionList .consult-question-item").forEach(function (card) {
-                var text = ((card.dataset.title || "") + " " + (card.dataset.topic || "")).toLowerCase();
-                card.style.display = text.includes(q) ? "" : "none";
+                var text = ((card.dataset.search || card.dataset.title || "") + " " + (card.dataset.topic || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+                card.style.display = text.includes(keyword) ? "" : "none";
             });
         });
     }

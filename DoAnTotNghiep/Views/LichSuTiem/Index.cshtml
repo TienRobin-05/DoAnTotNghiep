@@ -13,10 +13,8 @@
     <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
 </div>
 
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
 @if (Model.Count == 0)
 {
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
     <div class="empty-state empty-action">
         <div>
             <strong>Chưa có lịch sử tiêm</strong>
@@ -27,8 +25,14 @@
 }
 else
 {
+    <div style="margin-bottom:14px;">
+        <div style="position:relative;max-width:360px;">
+            <i class="bi bi-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;"></i>
+            <input id="lichSuSearch" type="search" placeholder="Tìm kiếm vaccine, mũi tiêm..." style="width:100%;height:42px;border:1px solid #dbe7f5;border-radius:10px;padding:0 14px 0 40px;outline:none;" />
+        </div>
+    </div>
+
     <section class="list-card">
-    @* Khu vực bảng dùng để hiển thị danh sách dữ liệu theo từng cột, giúp người dùng dễ theo dõi và thao tác. *@
     <table class="table list-table">
         <thead>
             <tr>
@@ -41,10 +45,10 @@ else
             </tr>
         </thead>
         <tbody>
-        @* Vòng lặp bên dưới duyệt danh sách dữ liệu do Controller truyền sang để hiển thị từng dòng/từng mục trên giao diện. *@
         @foreach (var item in Model)
         {
-            <tr>
+            var searchText = $"{item.TenVaccine} {item.TenMui} {item.HoTenHoSo} Mũi {item.SoMui}";
+            <tr data-search="@searchText">
                 <td>
                     <div class="item-title table-main-text">@item.TenVaccine</div>
                     <div class="item-meta table-sub-text">@item.HoTenHoSo</div>
@@ -61,5 +65,27 @@ else
         }
         </tbody>
     </table>
+    <div id="lichSuSearchEmpty" style="display:none;text-align:center;padding:24px;color:#64748b;font-weight:700;">Không tìm thấy lịch sử phù hợp.</div>
     </section>
 }
+
+<script>
+(function() {
+    var input = document.getElementById("lichSuSearch");
+    var rows = document.querySelectorAll("table tbody tr[data-search]");
+    var empty = document.getElementById("lichSuSearchEmpty");
+    if (!input || !rows.length) return;
+    function normalize(v) { return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").trim(); }
+    function filter() {
+        var kw = normalize(input.value);
+        var count = 0;
+        rows.forEach(function(r) {
+            var match = kw === "" || normalize(r.getAttribute("data-search")||"").includes(kw);
+            r.style.display = match ? "" : "none";
+            if (match) count++;
+        });
+        if (empty) empty.style.display = count === 0 ? "" : "none";
+    }
+    input.addEventListener("input", filter);
+})();
+</script>

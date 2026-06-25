@@ -505,7 +505,7 @@
             </div>
         </header>
 
-        <form asp-action="TraCuu" method="get" class="vaccine-lookup-toolbar" role="search">
+        <div class="vaccine-lookup-toolbar" role="search">
             <div class="vaccine-search-field">
                 <i class="bi bi-search" aria-hidden="true"></i>
                 <input id="tuKhoa"
@@ -513,14 +513,13 @@
                        value="@tuKhoa"
                        class="vaccine-search-input"
                        placeholder="Tìm tên hoặc nhóm vaccine"
-                       aria-label="Tìm tên hoặc nhóm vaccine"
-                       data-live-search />
+                       aria-label="Tìm tên hoặc nhóm vaccine" />
             </div>
             <a asp-action="TraCuu" class="vaccine-lookup-button vaccine-lookup-reset">
                 <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
                 Làm mới
             </a>
-        </form>
+        </div>
 
         <section class="vaccine-lookup-card" aria-label="Danh sách vaccine">
             @if (Model.Vaccines.Count == 0)
@@ -550,7 +549,8 @@
                         @foreach (var item in Model.Vaccines)
                         {
                             var iconVaccine = GetVaccineIcon(item.TenVaccine, item.NhomVaccine);
-                            <tr>
+                            var searchText = $"{item.TenVaccine} {item.NhomVaccine} {item.MaVaccine}";
+                            <tr data-search="@searchText">
                                 <td data-label="Vaccine">
                                     <div class="vaccine-identity">
                                         <span class="vaccine-row-icon"><i class="bi @iconVaccine" aria-hidden="true"></i></span>
@@ -576,8 +576,38 @@
                         }
                     </tbody>
                 </table>
+                <div id="vaccineSearchEmpty" class="vaccine-lookup-empty" style="display:none;">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <strong>Không tìm thấy vaccine phù hợp</strong>
+                    <span>Thử nhập từ khóa khác.</span>
+                </div>
             }
         </section>
+        <script>
+            (function() {
+                var input = document.getElementById("tuKhoa");
+                var rows = document.querySelectorAll(".vaccine-lookup-table tbody tr[data-search]");
+                var empty = document.getElementById("vaccineSearchEmpty");
+                if (!input || !rows.length) return;
+                
+                function normalize(v) {
+                    return String(v || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").trim();
+                }
+                
+                function filter() {
+                    var kw = normalize(input.value);
+                    var count = 0;
+                    rows.forEach(function(r) {
+                        var match = kw === "" || normalize(r.getAttribute("data-search") || "").includes(kw);
+                        r.style.display = match ? "" : "none";
+                        if (match) count++;
+                    });
+                    if (empty) empty.style.display = count === 0 ? "" : "none";
+                }
+                
+                input.addEventListener("input", filter);
+            })();
+        </script>
     </main>
 }
 else
