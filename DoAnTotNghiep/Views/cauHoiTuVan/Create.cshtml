@@ -100,19 +100,6 @@ Tôi vừa tiêm vaccine cúm hôm qua, tối hôm đó tôi bị sốt nhẹ 37
             </main>
 
             <aside class="create-sidebar">
-                <section class="side-card quick-card">
-                    <h2>Câu hỏi nhanh</h2>
-                    <p>Chọn câu hỏi có sẵn do quản trị viên cung cấp để gửi nhanh các thắc mắc phổ biến.</p>
-                    <button type="button" class="quick-open-button" data-open-quick>
-                        <i class="bi bi-lightning-charge-fill"></i>
-                        <span>Chọn câu hỏi nhanh</span>
-                    </button>
-                    <div class="quick-preview-list" data-quick-preview-list>
-                        <p class="quick-inline-state" data-quick-preview-loading>Đang tải câu hỏi nhanh...</p>
-                        <p class="quick-inline-state" data-quick-preview-empty hidden>Hiện chưa có câu hỏi nhanh.</p>
-                    </div>
-                </section>
-
                 <section class="side-card tip-card">
                     <h2>Lưu ý trước khi gửi</h2>
                     <div class="tip-list">
@@ -132,45 +119,6 @@ Tôi vừa tiêm vaccine cúm hôm qua, tối hôm đó tôi bị sốt nhẹ 37
                 </section>
             </aside>
         </div>
-    </div>
-</div>
-
-<div class="quick-modal" data-quick-modal hidden>
-    <div class="quick-dialog" role="dialog" aria-modal="true" aria-labelledby="quickModalTitle">
-        <button type="button" class="modal-close" data-close-quick aria-label="Đóng">
-            <i class="bi bi-x-lg"></i>
-        </button>
-
-        <header class="modal-head">
-            <h2 id="quickModalTitle">Câu hỏi nhanh</h2>
-            <p>Danh sách câu hỏi phổ biến do quản trị viên cung cấp</p>
-        </header>
-
-        <label class="modal-search" aria-label="Tìm kiếm câu hỏi nhanh">
-            <i class="bi bi-search"></i>
-            <input type="search" placeholder="Tìm kiếm câu hỏi nhanh..." data-quick-search />
-        </label>
-
-        <div class="quick-state quick-loading" data-quick-loading hidden>
-            <span></span><span></span><span></span>
-        </div>
-
-        <div class="quick-list" data-quick-list></div>
-
-        <p class="quick-empty" data-quick-empty hidden>Không tìm thấy câu hỏi phù hợp.</p>
-        <p class="quick-error" data-quick-error hidden>Không thể tải danh sách câu hỏi nhanh. Vui lòng thử lại.</p>
-
-        <div class="quick-info-strip">
-            <i class="bi bi-info-circle"></i>
-            <span>Khi bạn chọn, câu hỏi sẽ được gửi ngay đến dược sĩ tư vấn.</span>
-        </div>
-
-        <footer class="modal-actions">
-            <button type="button" class="btn-primary-action" data-send-quick disabled>
-                <i class="bi bi-send"></i>
-                <span>Chọn và gửi câu hỏi</span>
-            </button>
-        </footer>
     </div>
 </div>
 

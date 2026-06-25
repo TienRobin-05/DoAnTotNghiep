@@ -297,51 +297,10 @@
                 <a asp-action="Create" class="consult-create-btn"><i class="bi bi-plus-lg"></i>Tạo câu hỏi mới</a>
             </header>
 
-            <div class="consult-tabs">
-                <button type="button" class="consult-tab active" data-mode="quick"><i class="bi bi-lightning-charge"></i>Câu hỏi nhanh</button>
-                <button type="button" class="consult-tab" data-mode="mine"><i class="bi bi-person-circle"></i>Câu hỏi của bạn</button>
-            </div>
-
             <div class="consult-layout">
-                <aside class="consult-left-panel">
-                    <section class="consult-list-card">
-                        <div class="consult-card-heading">
-                            <h2>Câu hỏi nhanh</h2>
-                            <p>Chọn câu hỏi để xem câu trả lời chi tiết</p>
-                        </div>
-                        <div class="consult-search">
-                            <input id="quickQuestionSearch" type="text" placeholder="Tìm kiếm câu hỏi..." />
-                            <i class="bi bi-search"></i>
-                        </div>
-                        <div class="consult-question-list" id="quickQuestionList">
-                            @foreach (var item in quickQuestions.Take(5))
-                            {
-                                <button type="button" class="consult-question-item js-select-consult-item"
-                                        data-type="quick"
-                                        data-title="@item.Question"
-                                        data-answer="@item.Content"
-                                        data-topic="@item.Topic"
-                                        data-search="@item.Question @item.Topic"
-                                        data-updated="@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? item.CreatedAt.ToString("dd/MM/yyyy HH:mm"))">
-                                    <span class="consult-question-icon"><i class="bi bi-lightning-charge-fill"></i></span>
-                                    <span class="consult-question-text">
-                                        <strong>@item.Question</strong>
-                                        <small>@item.Topic</small>
-                                    </span>
-                                    <i class="bi bi-chevron-right"></i>
-                                </button>
-                            }
-                        </div>
-                        @if (quickQuestions.Count > 5)
-                        {
-                            <button type="button" class="consult-more-btn">Xem thêm câu hỏi <i class="bi bi-chevron-down"></i></button>
-                        }
-                    </section>
-                </aside>
-
                 <main class="consult-answer-panel">
                     <section class="consult-main-card" id="answerCard">
-                        <div class="consult-answer-badge" id="answerBadge"><i class="bi bi-lightning-charge"></i><span>Nguồn: Câu hỏi nhanh</span></div>
+                        <div class="consult-answer-badge" id="answerBadge"><i class="bi bi-chat-dots"></i><span>Câu hỏi tư vấn</span></div>
                         <h2 id="answerTitle">Chọn câu hỏi để xem câu trả lời</h2>
                         <div class="consult-answer-meta" id="answerMeta"></div>
                         <div class="consult-info-note" id="answerHighlight"><i class="bi bi-info-circle"></i><span>Thông tin mang tính tham khảo.</span></div>

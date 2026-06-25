@@ -32,7 +32,6 @@ BEGIN TRY
     SELECT N'MuiTiemVaccine', COUNT(*) FROM dbo.MuiTiemVaccine UNION ALL
     SELECT N'Vaccine', COUNT(*) FROM dbo.Vaccine UNION ALL
     SELECT N'PushSubscription', COUNT(*) FROM dbo.PushSubscription UNION ALL
-    SELECT N'QuickQuestion', COUNT(*) FROM dbo.QuickQuestion UNION ALL
     SELECT N'TaiKhoan', COUNT(*) FROM dbo.TaiKhoan;
 
     DELETE FROM dbo.LichSuTiem;
@@ -44,7 +43,6 @@ BEGIN TRY
     DELETE FROM dbo.MuiTiemVaccine;
     DELETE FROM dbo.Vaccine;
     DELETE FROM dbo.PushSubscription;
-    DELETE FROM dbo.QuickQuestion;
     DELETE FROM dbo.TaiKhoan;
 
     DBCC CHECKIDENT ('dbo.LichSuTiem', RESEED, 0) WITH NO_INFOMSGS;
@@ -56,7 +54,6 @@ BEGIN TRY
     DBCC CHECKIDENT ('dbo.MuiTiemVaccine', RESEED, 0) WITH NO_INFOMSGS;
     DBCC CHECKIDENT ('dbo.Vaccine', RESEED, 0) WITH NO_INFOMSGS;
     DBCC CHECKIDENT ('dbo.PushSubscription', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.QuickQuestion', RESEED, 0) WITH NO_INFOMSGS;
     DBCC CHECKIDENT ('dbo.TaiKhoan', RESEED, 0) WITH NO_INFOMSGS;
 
     INSERT INTO dbo.TaiKhoan(hoTen, email, matKhau, soDienThoai, vaiTro, trangThai, ngayTao, LanDangNhapCuoi, DaXoa, NgayXoaMem, LyDoXoa)
