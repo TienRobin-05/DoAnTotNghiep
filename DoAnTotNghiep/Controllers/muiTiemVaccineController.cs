@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Lớp MuiTiemVaccineController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
     public class MuiTiemVaccineController : Controller
     {
         private readonly MuiTiemVaccine_DAL muiTiemVaccineDAL;

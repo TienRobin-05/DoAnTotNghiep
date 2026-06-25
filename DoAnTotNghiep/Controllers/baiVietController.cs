@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Controller tương thích cho đường dẫn bài viết cũ, chuyển về luồng BaiVietCamNang/AdminBaiViet hiện tại.
-    /// </summary>
     public class baiVietController : Controller
     {
         public IActionResult index()

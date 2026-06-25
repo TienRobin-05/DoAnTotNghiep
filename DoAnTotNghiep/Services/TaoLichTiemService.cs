@@ -5,9 +5,6 @@ using System.Text;
 
 namespace DoAnTotNghiep.Services
 {
-    /// <summary>
-    /// Lớp TaoLichTiemService chứa nghiệp vụ dùng chung, giúp Controller/DAL tách riêng phần xử lý phức tạp khỏi luồng request chính.
-    /// </summary>
     public class TaoLichTiemService
     {
         private readonly string chuoiKetNoi;
@@ -129,10 +126,6 @@ ORDER BY lt.ngayTiemDuKien";
             return result;
         }
 
-        // Mục đích: phương thức TaoLichTiemChoHoSo xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
-        // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
-        // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
-        // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
         public KetQuaTaoLichTiem TaoLichTiemChoHoSo(int maHoSo)
         {
             var hoSo = LayHoSoTheoMa(maHoSo);
@@ -248,10 +241,6 @@ ORDER BY lt.ngayTiemDuKien";
             }
         }
 
-        // Mục đích: phương thức LayHoSoTheoMa xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
-        // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
-        // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
-        // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
         private HoSoTaoLich? LayHoSoTheoMa(int maHoSo)
         {
             const string sql = @"SELECT maHoSo, ngaySinh
@@ -409,10 +398,6 @@ AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien";
             return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức KiemTraLichTiemDaTonTai xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
-        // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
-        // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
-        // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
         private bool KiemTraLichTiemDaTonTai(int maHoSo, int maMuiTiem)
         {
             const string sql = @"SELECT COUNT(*)
@@ -684,10 +669,6 @@ WHERE NOT EXISTS (
             return builder.ToString().Normalize(NormalizationForm.FormC);
         }
 
-        // Mục đích: phương thức ChuanHoaDonViTuoi xử lý nghiệp vụ trung gian để Controller có thể tái sử dụng mà không lặp code.
-        // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
-        // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
-        // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
         private static string ChuanHoaDonViTuoi(string donViTuoi)
         {
             return DonViTuoiHelper.ChuanHoa(donViTuoi);
@@ -731,18 +712,12 @@ WHERE NOT EXISTS (
             return Math.Max(0, soNam);
         }
 
-        /// <summary>
-        /// Lớp HoSoTaoLich chứa nghiệp vụ dùng chung, giúp Controller/DAL tách riêng phần xử lý phức tạp khỏi luồng request chính.
-        /// </summary>
         private class HoSoTaoLich
         {
             public int MaHoSo { get; set; }
             public DateTime NgaySinh { get; set; }
         }
 
-        /// <summary>
-        /// Lớp MuiTiemTaoLich chứa nghiệp vụ dùng chung, giúp Controller/DAL tách riêng phần xử lý phức tạp khỏi luồng request chính.
-        /// </summary>
         private class MuiTiemTaoLich
         {
             public int MaMuiTiem { get; set; }
@@ -777,9 +752,6 @@ WHERE NOT EXISTS (
             public string GhiChu { get; set; } = string.Empty;
         }
 
-        /// <summary>
-        /// Kết quả trả về sau khi tự động tạo lịch tiêm để Controller hiển thị thông báo phù hợp.
-        /// </summary>
         public class KetQuaTaoLichTiem
         {
             public int SoMuiTiemVaccine { get; set; }

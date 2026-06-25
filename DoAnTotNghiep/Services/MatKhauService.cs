@@ -2,9 +2,6 @@ using System.Security.Cryptography;
 
 namespace DoAnTotNghiep.Services
 {
-    /// <summary>
-    /// Helper hash/verify mat khau bang PBKDF2, khong phu thuoc schema ngoai cot matKhau hien co.
-    /// </summary>
     public static class MatKhauService
     {
         private const int KichThuocSalt = 16;

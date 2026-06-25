@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Lớp ThongKeController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
     public class ThongKeController : Controller
     {
         private readonly ThongKe_DAL thongKeDAL;

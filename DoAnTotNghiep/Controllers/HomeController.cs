@@ -4,9 +4,6 @@ using System.Diagnostics;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Lớp HomeController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
     public class HomeController : Controller
     {
         // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

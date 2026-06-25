@@ -3,9 +3,6 @@ using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.DAL
 {
-    /// <summary>
-    /// Lớp ThongKe_DAL chịu trách nhiệm truy cập dữ liệu cho chức năng liên quan, bao gồm mở kết nối SQL Server, truyền tham số an toàn và chuyển dữ liệu database thành model.
-    /// </summary>
     public class ThongKe_DAL
     {
         private readonly string chuoiKetNoi;

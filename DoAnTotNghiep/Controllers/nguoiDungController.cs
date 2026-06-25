@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
+   
     /// Lớp NguoiDungController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
+
     public class NguoiDungController : Controller
     {
         private readonly ThongBao_DAL thongBaoDAL;

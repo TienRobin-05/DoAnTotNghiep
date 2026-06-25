@@ -3,9 +3,6 @@ using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.DAL
 {
-    /// <summary>
-    /// Lớp LichTiem_DAL chịu trách nhiệm truy cập dữ liệu cho chức năng liên quan, bao gồm mở kết nối SQL Server, truyền tham số an toàn và chuyển dữ liệu database thành model.
-    /// </summary>
     public class LichTiem_DAL
     {
         private readonly string chuoiKetNoi;
@@ -32,16 +29,12 @@ INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE lt.maHoSo = @MaHoSo AND hs.maTaiKhoan = @MaTaiKhoan
 ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
             var danhSach = new List<LichTiem>();
             while (doc.Read())
             {
@@ -120,13 +113,10 @@ AND ISNULL(trangThai, N'') <> N'Đã tiêm'";
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM LichTiem WHERE maHoSo = @MaHoSo";
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
+                        ketNoi.Open();
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
@@ -140,19 +130,15 @@ AND ISNULL(trangThai, N'') <> N'Đã tiêm'";
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"INSERT INTO LichTiem(maHoSo, maMuiTiem, ngayTiemDuKien, trangThai, ghiChu)
 VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", lich.MaHoSo);
             lenh.Parameters.AddWithValue("@MaMuiTiem", lich.MaMuiTiem);
             lenh.Parameters.AddWithValue("@NgayTiemDuKien", lich.NgayTiemDuKien.Date);
             lenh.Parameters.AddWithValue("@TrangThai", lich.TrangThai);
             lenh.Parameters.AddWithValue("@GhiChu", string.IsNullOrWhiteSpace(lich.GhiChu) ? DBNull.Value : lich.GhiChu);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
-            return lenh.ExecuteNonQuery() > 0;
+                        ketNoi.Open();
+                        return lenh.ExecuteNonQuery() > 0;
         }
 
         // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -170,15 +156,11 @@ INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
 INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE lt.maLichTiem = @MaLichTiem";
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocLichTiem(doc) : null;
         }
 
@@ -199,17 +181,13 @@ INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE lt.maLichTiem = @MaLichTiem
 AND hs.maTaiKhoan = @MaTaiKhoan";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
 
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocLichTiem(doc) : null;
         }
 
@@ -223,17 +201,13 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "UPDATE LichTiem SET trangThai = @TrangThai WHERE maLichTiem = @MaLichTiem";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
             lenh.Parameters.AddWithValue("@TrangThai", "Đã tiêm");
 
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
-            return lenh.ExecuteNonQuery() > 0;
+                        ketNoi.Open();
+                        return lenh.ExecuteNonQuery() > 0;
         }
 
         public bool CapNhatDaTiemVaGhiLichSu(LichSuTiem lichSu, int maTaiKhoan)
@@ -398,16 +372,12 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "UPDATE LichTiem SET trangThai = @TrangThai WHERE maLichTiem = @MaLichTiem";
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
             lenh.Parameters.AddWithValue("@TrangThai", trangThai);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
-            return lenh.ExecuteNonQuery() > 0;
+                        ketNoi.Open();
+                        return lenh.ExecuteNonQuery() > 0;
         }
 
         // Mục đích: phương thức KiemTraLichTonTai thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -419,14 +389,11 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM LichTiem WHERE maHoSo = @MaHoSo AND maMuiTiem = @MaMuiTiem";
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
             lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiem);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
+                        ketNoi.Open();
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 

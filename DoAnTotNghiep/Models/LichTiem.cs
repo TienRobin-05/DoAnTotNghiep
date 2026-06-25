@@ -1,8 +1,5 @@
 ﻿namespace DoAnTotNghiep.Models
 {
-    /// <summary>
-    /// Lớp LichTiem là model dùng để lưu trữ dữ liệu trao đổi giữa Controller, DAL và View trong hệ thống.
-    /// </summary>
     public class LichTiem
     {
         // Thuộc tính MaLichTiem lưu một phần thông tin của đối tượng model. Dữ liệu này được dùng khi đọc/ghi database, truyền sang Controller hoặc hiển thị ra View.

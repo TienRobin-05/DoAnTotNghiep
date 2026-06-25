@@ -5,9 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Lớp LichTiemController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
     public class LichTiemController : Controller
     {
         private readonly LichTiem_DAL lichTiemDAL;

@@ -3,9 +3,6 @@ using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.DAL
 {
-    /// <summary>
-    /// Lớp HoSoSucKhoe_DAL chịu trách nhiệm truy cập dữ liệu cho chức năng liên quan, bao gồm mở kết nối SQL Server, truyền tham số an toàn và chuyển dữ liệu database thành model.
-    /// </summary>
     public class HoSoSucKhoe_DAL
     {
         private readonly string chuoiKetNoi;
@@ -24,13 +21,10 @@ namespace DoAnTotNghiep.DAL
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM HoSoSucKhoe WHERE maTaiKhoan = @MaTaiKhoan";
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
+                        ketNoi.Open();
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
@@ -57,15 +51,11 @@ FROM HoSoSucKhoe
 WHERE maTaiKhoan = @MaTaiKhoan
 ORDER BY ngayTao DESC";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
 
             var danhSach = new List<HoSoSucKhoe>();
             while (doc.Read())
@@ -98,15 +88,11 @@ ORDER BY ngayTao DESC";
 FROM HoSoSucKhoe
 WHERE maHoSo = @MaHoSo";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocHoSo(doc) : null;
         }
 
@@ -133,16 +119,12 @@ FROM HoSoSucKhoe
 WHERE maHoSo = @MaHoSo
 AND maTaiKhoan = @MaTaiKhoan";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocHoSo(doc) : null;
         }
 
@@ -179,15 +161,11 @@ VALUES
     @NgayTao
 )";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             GanThamSoHoSo(lenh, hs);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
-            return lenh.ExecuteNonQuery() > 0;
+                        ketNoi.Open();
+                        return lenh.ExecuteNonQuery() > 0;
         }
 
         // Thêm hồ sơ và trả về maHoSo mới để controller có thể tạo lịch tiêm/thông báo ngay sau khi lưu.
@@ -404,15 +382,11 @@ FROM HoSoSucKhoe
 WHERE maTaiKhoan = @MaTaiKhoan
 ORDER BY ngayTao ASC";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
-            using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
-            using var lenh = new SqlCommand(sql, ketNoi);
+                        using var ketNoi = new SqlConnection(chuoiKetNoi);
+                        using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
-            ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
-            using var doc = lenh.ExecuteReader();
+                        ketNoi.Open();
+                        using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocHoSo(doc) : null;
         }
 

@@ -38,10 +38,6 @@ namespace DoAnTotNghiep.Controllers
             return maTaiKhoan.Value;
         }
 
-        /// <summary>
-        /// API debug: xem danh sách lịch tiêm của hồ sơ
-        /// GET /Debug/GetSchedules?maHoSo=16
-        /// </summary>
         [HttpGet]
         public IActionResult GetSchedules(int maHoSo)
         {
@@ -75,10 +71,6 @@ namespace DoAnTotNghiep.Controllers
             });
         }
 
-        /// <summary>
-        /// API debug: tạo lịch tiêm demo sắp đến hạn (hôm nay + 3 ngày)
-        /// POST /Debug/CreateDemoUpcomingSchedule?maHoSo=16
-        /// </summary>
         [HttpPost]
         public IActionResult CreateDemoUpcomingSchedule(int maHoSo)
         {
@@ -115,10 +107,6 @@ namespace DoAnTotNghiep.Controllers
             });
         }
 
-        /// <summary>
-        /// API debug: test push notification ra laptop
-        /// POST /Debug/TestPush
-        /// </summary>
         [HttpPost]
         public IActionResult TestPush()
         {

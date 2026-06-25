@@ -7,9 +7,6 @@ using System.Text.RegularExpressions;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Lớp TaiKhoanController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
     public class TaiKhoanController : Controller
     {
         private readonly TaiKhoan_DAL taiKhoanDAL;

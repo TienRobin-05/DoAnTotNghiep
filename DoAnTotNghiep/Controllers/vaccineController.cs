@@ -6,9 +6,6 @@ using Microsoft.Data.SqlClient;
 
 namespace DoAnTotNghiep.Controllers
 {
-    /// <summary>
-    /// Lớp VaccineController là controller tiếp nhận request từ trình duyệt, gọi các lớp DAL hoặc service cần thiết và trả về View/Redirect phù hợp cho người dùng.
-    /// </summary>
     public class VaccineController : Controller
     {
         private readonly Vaccine_DAL vaccineDAL;

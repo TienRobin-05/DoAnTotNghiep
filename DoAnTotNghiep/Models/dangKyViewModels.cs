@@ -2,9 +2,6 @@
 
 namespace DoAnTotNghiep.Models
 {
-    /// <summary>
-    /// Lớp dangKyViewModels là model dùng để lưu trữ dữ liệu trao đổi giữa Controller, DAL và View trong hệ thống.
-    /// </summary>
     public class dangKyViewModels
     {
         [Required(ErrorMessage = "Vui lòng nhập họ tên")]

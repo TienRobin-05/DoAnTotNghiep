@@ -37,7 +37,6 @@ builder.Services.AddScoped<LichSuTiem_DAL>();
 builder.Services.AddScoped<ThongBao_DAL>();
 builder.Services.AddScoped<PushSubscription_DAL>();
 builder.Services.AddScoped<CauHoiTuVan_DAL>();
-builder.Services.AddScoped<QuickQuestion_DAL>();
 builder.Services.AddScoped<BaiVietCamNang_DAL>();
 builder.Services.AddScoped<ThongKe_DAL>();
 builder.Services.AddScoped<TaoLichTiemService>();
@@ -53,7 +52,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         scope.ServiceProvider.GetRequiredService<PushSubscription_DAL>().KhoiTaoBangNeuChuaCo();
-        scope.ServiceProvider.GetRequiredService<QuickQuestion_DAL>().KhoiTaoBangNeuChuaCo();
         scope.ServiceProvider.GetRequiredService<BaiVietCamNang_DAL>().KhoiTaoMoRongNeuCan();
     }
     catch (Exception ex)

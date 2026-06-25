@@ -1481,6 +1481,22 @@
                     });
 
                     menu.classList.toggle("open");
+
+                    // Kiểm tra nếu dropdown bị khuất phía dưới thì đổi hướng lên trên
+                    if (menu.classList.contains("open")) {
+                        var dropdown = menu.querySelector(".table-more-dropdown");
+                        if (dropdown) {
+                            var rect = dropdown.getBoundingClientRect();
+                            var bottomSpace = window.innerHeight - rect.bottom;
+                            if (bottomSpace < 0) {
+                                menu.classList.add("dropup");
+                            } else {
+                                menu.classList.remove("dropup");
+                            }
+                        }
+                    } else {
+                        menu.classList.remove("dropup");
+                    }
                 });
             });
 

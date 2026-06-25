@@ -2,9 +2,6 @@ using DoAnTotNghiep.DAL;
 
 namespace DoAnTotNghiep.Services
 {
-    /// <summary>
-    /// Lớp tương thích cho các nơi còn dùng service; nghiệp vụ tạo thông báo nằm trong ThongBao_DAL.
-    /// </summary>
     public class ThongBaoNhacLichService
     {
         private readonly ThongBao_DAL thongBaoDAL;

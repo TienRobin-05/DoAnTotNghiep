@@ -38,7 +38,7 @@
         new { TieuDe = "Phụ nữ đang mang thai có tiêm được vaccine cúm không?", MoTa = "Vợ tôi đang mang thai 20 tuần, có nên tiêm vaccine cúm vào mùa cúm không?", ThoiGian = "30/05/2026 11:06", TrangThai = "Đã trả lời", Kieu = "answered", Icon = "bi-heart-pulse", Active = false }
     };
 
-    var quickQuestions = ViewBag.QuickQuestions as List<QuickQuestion> ?? new List<QuickQuestion>();
+    var quickQuestions = new List<dynamic>();
     var firstQuestion = Model.FirstOrDefault();
     var hasOfficialAnswer = firstQuestion != null && !string.IsNullOrWhiteSpace(firstQuestion.CauTraLoi);
     var questionCode = firstQuestion != null ? $"HQ-{firstQuestion.NgayGui:yyyyMMdd}-{firstQuestion.MaCauHoi:00000}" : "";
