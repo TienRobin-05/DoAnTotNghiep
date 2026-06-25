@@ -45,16 +45,11 @@ namespace DoAnTotNghiep.Controllers
             return View(danhSachHoSo);
         }
 
-        // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Index(int maHoSo, string? trangThai)
+        public IActionResult Index(int maHoSo, string? hienThi)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
-            // Chỉ cho user xem lịch tiêm của hồ sơ thuộc tài khoản đang đăng nhập.
             var hoSo = hoSoSucKhoeDAL.LayTheoId(maHoSo, maTaiKhoan.Value);
             if (hoSo == null)
             {
@@ -63,44 +58,59 @@ namespace DoAnTotNghiep.Controllers
                 return RedirectToAction(nameof(ChonHoSo));
             }
 
-            // Mỗi lần xem lịch, hệ thống tính tuổi và chỉ tạo thêm các mũi phù hợp còn thiếu, không tạo trùng.
             var ketQuaTaoLich = taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
             if (ketQuaTaoLich.SoMuiTiemVaccine == 0)
             {
-                TempData["ThongBao"] = "Chưa có dữ liệu mũi tiêm vaccine. Vui lòng thêm mũi tiêm ở trang quản trị.";
+                TempData["ThongBao"] = "Chưa có dữ liệu mũi tiêm vaccine.";
                 TempData["LoaiThongBao"] = "info";
             }
-            else if (ketQuaTaoLich.SoLichTiemDaTao > 0)
-            {
-                TempData["ThongBao"] = "Hệ thống đã tự động tạo lịch tiêm cho hồ sơ này";
-                TempData["LoaiThongBao"] = "success";
-            }
 
-            // Sau khi tạo/kiểm tra lịch, tạo thông báo cho các lịch đã đến hạn hoặc quá hạn.
             thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
             ViewBag.SoThongBaoChuaDoc = thongBaoDAL.DemThongBaoChuaDoc(maTaiKhoan.Value);
             ViewBag.HoTenHoSo = hoSo.HoTen;
-            var danhSachLichTiem = lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value)
-                .Where(LaLichTiemNenHienThi)
-                .ToList();
+            ViewBag.CanhBaoDoiNgaySinh = hoSoSucKhoeDAL.KiemTraHoSoCoCanhBaoDoiNgaySinh(maHoSo, maTaiKhoan.Value);
+            ViewBag.MaHoSoHienTai = maHoSo;
+            ViewBag.NgaySinhText = hoSo.NgaySinh.ToString("dd/MM/yyyy");
 
-            var boLoc = ChuanHoaBoLoc(trangThai);
+            var tatCaLichTiem = lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value);
+
+            // Lấy ngày tiêm thực tế cho tất cả lịch tiêm của hồ sơ (1 query)
+            var ngayTiemThucTeMap = lichSuTiemDAL.LayNgayTiemThucTeTheoHoSo(maHoSo);
+
+            // Serialize to JSON-safe objects for client-side rendering
+            var scheduleData = tatCaLichTiem.Select(l =>
+            {
+                var injectedDate = ngayTiemThucTeMap.TryGetValue(l.MaLichTiem, out var ngayTiem) ? ngayTiem : (DateTime?)null;
+                return new
+                {
+                    id = l.MaLichTiem,
+                    vaccineName = l.TenVaccine ?? "",
+                    doseName = $"Mũi {l.SoMui}",
+                    groupName = l.NhomVaccine ?? "",
+                    expectedDate = l.NgayTiemDuKien.ToString("yyyy-MM-dd"),
+                    injectedDate = injectedDate?.ToString("yyyy-MM-dd"),
+                    isDone = LaDaTiem(l),
+                    note = l.GhiChu ?? ""
+                };
+            }).ToList();
+
+            ViewBag.ScheduleDataJson = System.Text.Json.JsonSerializer.Serialize(scheduleData);
+
+            var dsNhom = tatCaLichTiem.Select(l => l.NhomVaccine)
+                .Where(n => !string.IsNullOrEmpty(n)).Distinct().OrderBy(n => n).ToList();
+            ViewBag.DanhSachNhomVaccine = dsNhom;
             ViewBag.MaHoSo = maHoSo;
-            ViewBag.BoLocTrangThai = boLoc;
-            ViewBag.TongTatCa = danhSachLichTiem.Count;
-            ViewBag.TongDaTiem = danhSachLichTiem.Count(LaDaTiem);
-            ViewBag.TongQuaHan = danhSachLichTiem.Count(LaQuaHan);
-            ViewBag.TongSapToi = danhSachLichTiem.Count(LaSapToi);
-            danhSachLichTiem = LocLichTiemTheoTrangThai(danhSachLichTiem, boLoc);
+            ViewBag.HienThi = hienThi ?? "time";
 
-            return View(danhSachLichTiem);
+            return View(tatCaLichTiem);
+        }
+
+        private static bool LaDenLich(LichTiem lich)
+        {
+            return !LaDaTiem(lich) && lich.NgayTiemDuKien.Date == DateTime.Today;
         }
 
         [HttpGet]
-        // Mục đích: action CapNhatDaTiem xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult CapNhatDaTiem(int maLichTiem)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -109,23 +119,17 @@ namespace DoAnTotNghiep.Controllers
             var lichTiem = lichTiemDAL.LayChiTietCoKiemTraChuSoHuu(maLichTiem, maTaiKhoan.Value);
             if (lichTiem == null) return NotFound();
 
-            if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
-            {
-                TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
-                TempData["LoaiThongBao"] = "warning";
-                return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
-            }
-
-            ViewBag.NgayTiemThucTe = DateTime.Today.ToString("yyyy-MM-dd");
+            // Pre-fill với dữ liệu cũ nếu đã từng cập nhật
+            var lichSuCu = lichSuTiemDAL.LayTheoMaLichTiem(maLichTiem);
+            ViewBag.NgayTiemThucTe = lichSuCu != null
+                ? lichSuCu.NgayTiemThucTe.ToString("yyyy-MM-dd")
+                : DateTime.Today.ToString("yyyy-MM-dd");
+            ViewBag.GhiChu = lichSuCu?.GhiChu ?? string.Empty;
             return View(lichTiem);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Mục đích: action CapNhatDaTiem xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult CapNhatDaTiem(int maLichTiem, DateTime ngayTiemThucTe, string ghiChu)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -134,55 +138,73 @@ namespace DoAnTotNghiep.Controllers
             var lichTiem = lichTiemDAL.LayChiTietCoKiemTraChuSoHuu(maLichTiem, maTaiKhoan.Value);
             if (lichTiem == null) return NotFound();
 
-            // Ngày tiêm thực tế phải nằm trong khoảng từ ngày sinh đến ngày hiện tại.
-            if (ngayTiemThucTe.Date < lichTiem.NgaySinhHoSo.Date)
+            // Validation
+            var loi = ValidateNgayTiemThucTe(lichTiem, ngayTiemThucTe);
+            if (loi != null)
             {
-                ViewBag.ThongBao = "Ngày tiêm thực tế không được nhỏ hơn ngày sinh của hồ sơ.";
+                ViewBag.ThongBao = loi;
                 ViewBag.NgayTiemThucTe = ngayTiemThucTe.ToString("yyyy-MM-dd");
                 ViewBag.GhiChu = ghiChu;
                 return View(lichTiem);
             }
 
-            if (ngayTiemThucTe.Date > DateTime.Today)
-            {
-                ViewBag.ThongBao = "Ngày tiêm thực tế không được lớn hơn ngày hiện tại.";
-                ViewBag.NgayTiemThucTe = ngayTiemThucTe.ToString("yyyy-MM-dd");
-                ViewBag.GhiChu = ghiChu;
-                return View(lichTiem);
-            }
-
-            // Không tạo lại lịch sử nếu lịch tiêm này đã được ghi nhận trước đó.
-            if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
-            {
-                TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
-                TempData["LoaiThongBao"] = "warning";
-                return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
-            }
-
-            var daCapNhat = lichTiemDAL.CapNhatDaTiemVaGhiLichSu(new LichSuTiem
+            var lichSu = new LichSuTiem
             {
                 MaLichTiem = maLichTiem,
                 NgayTiemThucTe = ngayTiemThucTe,
                 GhiChu = ghiChu ?? string.Empty,
                 NgayCapNhat = DateTime.Now
-            }, maTaiKhoan.Value);
+            };
 
-            if (!daCapNhat)
+            if (lichSuTiemDAL.KiemTraDaCoLichSu(maLichTiem))
             {
-                TempData["ThongBao"] = "Lịch tiêm này đã được cập nhật lịch sử tiêm.";
-                TempData["LoaiThongBao"] = "warning";
-                return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
+                // Update record cũ
+                if (!lichSuTiemDAL.CapNhat(lichSu))
+                {
+                    ViewBag.ThongBao = "Cập nhật lịch sử tiêm thất bại.";
+                    return View(lichTiem);
+                }
+            }
+            else
+            {
+                // Tạo mới
+                if (!lichTiemDAL.CapNhatDaTiemVaGhiLichSu(lichSu, maTaiKhoan.Value))
+                {
+                    TempData["ThongBao"] = "Cập nhật lịch tiêm thất bại.";
+                    TempData["LoaiThongBao"] = "warning";
+                    return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
+                }
             }
 
+            // Tính lại các mũi tiếp theo
             var soLichDaDieuChinh = taoLichTiemService.DieuChinhLichMuiTiepTheoSauKhiTiem(
                 lichTiem.MaHoSo,
                 lichTiem.MaMuiTiem,
                 ngayTiemThucTe);
 
             TempData["ThongBao"] = soLichDaDieuChinh > 0
-                ? $"Cập nhật lịch tiêm thành công. Hệ thống đã điều chỉnh {soLichDaDieuChinh} mũi tiếp theo theo ngày tiêm thực tế."
+                ? $"Cập nhật lịch tiêm thành công. Hệ thống đã điều chỉnh {soLichDaDieuChinh} mũi tiếp theo."
                 : "Cập nhật lịch tiêm thành công";
             return RedirectToAction(nameof(Index), new { maHoSo = lichTiem.MaHoSo });
+        }
+
+        private string? ValidateNgayTiemThucTe(LichTiem lichTiem, DateTime ngayTiemThucTe)
+        {
+            if (ngayTiemThucTe.Date < lichTiem.NgaySinhHoSo.Date)
+                return "Ngày tiêm thực tế không được nhỏ hơn ngày sinh.";
+
+            if (ngayTiemThucTe.Date > DateTime.Today)
+                return "Ngày tiêm thực tế không được lớn hơn ngày hiện tại.";
+
+            var ngayMuiTruoc = lichSuTiemDAL.LayNgayTiemThucTeMuiTruoc(lichTiem.MaHoSo, lichTiem.MaMuiTiem);
+            if (ngayMuiTruoc.HasValue && ngayTiemThucTe.Date < ngayMuiTruoc.Value.Date)
+                return "Ngày tiêm thực tế không được nhỏ hơn ngày tiêm thực tế của mũi trước.";
+
+            var ngayMuiSau = lichSuTiemDAL.LayNgayTiemThucTeMuiSau(lichTiem.MaHoSo, lichTiem.MaMuiTiem);
+            if (ngayMuiSau.HasValue && ngayTiemThucTe.Date > ngayMuiSau.Value.Date)
+                return "Ngày tiêm thực tế không được lớn hơn ngày tiêm thực tế của mũi sau.";
+
+            return null;
         }
 
         // Mục đích: action LayMaTaiKhoanUser xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.

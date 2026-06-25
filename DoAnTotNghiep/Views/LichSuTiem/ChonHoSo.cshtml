@@ -8,7 +8,7 @@
 
     string HienThiNgay(DateTime ngay)
     {
-        return ngay == default ? "Chưa cập nhật" : ngay.ToString("dd-MM-yyyy");
+        return ngay == default ? "Chưa cập nhật" : ngay.ToString("dd/MM/yyyy");
     }
 }
 
@@ -732,7 +732,7 @@
                                 <span class="vaccination-stat-icon purple"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
                                 <div class="vaccination-stat-copy">
                                     <span>Mũi gần nhất</span>
-                                    <strong>@(lichSu.Count > 0 ? lichSu[0].NgayTiemThucTe.ToString("dd-MM-yyyy") : "Chưa có")</strong>
+                                    <strong>@(lichSu.Count > 0 ? lichSu[0].NgayTiemThucTe.ToString("dd/MM/yyyy") : "Chưa có")</strong>
                                 </div>
                             </article>
                         </div>
@@ -759,7 +759,7 @@
                                 {
                                     <li class="vaccination-timeline-item">
                                         <span class="vaccination-timeline-check"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
-                                        <time class="vaccination-timeline-date" datetime="@item.NgayTiemThucTe.ToString("yyyy-MM-dd")">@item.NgayTiemThucTe.ToString("dd-MM-yyyy")</time>
+                                        <time class="vaccination-timeline-date" datetime="@item.NgayTiemThucTe.ToString("yyyy-MM-dd")">@item.NgayTiemThucTe.ToString("dd/MM/yyyy")</time>
                                         <span class="vaccination-timeline-vaccine">@(string.IsNullOrWhiteSpace(item.TenVaccine) ? "Chưa cập nhật vaccine" : item.TenVaccine)</span>
                                         <span class="vaccination-dose-badge">Mũi @item.SoMui</span>
                                     </li>

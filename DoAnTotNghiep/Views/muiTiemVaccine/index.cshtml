@@ -29,14 +29,14 @@
         </div>
     </section>
 
-    <form class="dose-filter-card" method="get" action="@Url.Action("Index")">
+    <form class="dose-filter-card" method="get" action="@Url.Action("Index")" data-live-form>
         <input type="hidden" name="page" value="1" />
         <div class="dose-search-wrap">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm kiếm vaccine, mũi tiêm..." />
+            <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm kiếm vaccine, mũi tiêm..." data-live-search />
         </div>
 
-        <select class="dose-select" name="intervalType">
+        <select class="dose-select" name="intervalType" data-live-search>
             <option value="">Tất cả khoảng cách</option>
             <option value="age" selected="@(Model.SelectedIntervalType == "age")">Theo tuổi</option>
             <option value="days" selected="@(Model.SelectedIntervalType == "days")">Theo ngày</option>
@@ -200,5 +200,26 @@
             modal.addEventListener("click", function (event) { if (event.target === modal) modal.hidden = true; });
             document.addEventListener("keydown", function (event) { if (event.key === "Escape") modal.hidden = true; });
         });
+    </script>
+    <script>
+        (function() {
+            var timer = null;
+            document.querySelectorAll("[data-live-search]").forEach(function(el) {
+                var event = el.tagName === "SELECT" ? "change" : "input";
+                el.addEventListener(event, function() {
+                    clearTimeout(timer);
+                    var form = el.closest("form");
+                    if (!form) return;
+                    timer = setTimeout(function() {
+                        var url = new URL(form.action, window.location.origin);
+                        new FormData(form).forEach(function(v, k) {
+                            if (v) url.searchParams.set(k, v);
+                        });
+                        url.searchParams.set("page", "1");
+                        window.location.href = url.toString();
+                    }, 300);
+                });
+            });
+        })();
     </script>
 }

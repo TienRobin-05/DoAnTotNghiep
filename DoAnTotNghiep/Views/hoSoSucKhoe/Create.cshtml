@@ -91,7 +91,7 @@
 
             @if (ViewData.ModelState["NgaySinh"]?.Errors?.Count > 0)
             {
-                <div class="alert alert-danger" style="margin-bottom:20px;">Vui lòng nhập ngày sinh hợp lệ theo định dạng MM/DD/YYYY.</div>
+                <div class="alert alert-danger" style="margin-bottom:20px;">Vui lòng nhập ngày sinh hợp lệ theo định dạng dd/mm/yyyy.</div>
             }
 
             <div class="form-grid">
@@ -110,7 +110,7 @@
                         <i class="bi bi-calendar3 field-icon-left"></i>
 
                         <input type="text" id="ngaySinhDisplay" name="NgaySinhDisplay" inputmode="numeric"
-                               autocomplete="bday" placeholder="mm/dd/yyyy" maxlength="10" class="health-input" />
+                               autocomplete="bday" placeholder="dd/mm/yyyy" maxlength="10" class="health-input" />
 
                         <button type="button" class="calendar-picker-btn" id="calendarPickerBtn" aria-label="Chọn ngày">
                             <i class="bi bi-calendar-week" style="font-size:16px;"></i>
@@ -120,6 +120,7 @@
                         <input type="hidden" id="ngaySinhHidden" name="NgaySinh" value="" />
                     </div>
                     <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                    <small style="display:block;margin-top:4px;color:#6b7280;font-size:12px;">Định dạng: ngày/tháng/năm</small>
                 </div>
 
                 <div class="form-group">
@@ -205,31 +206,35 @@
 
             function digits(v) { return String(v || "").replace(/\D/g, "").slice(0, 8); }
 
-            function formatToMmDdYyyy(v) {
+            function formatToDdMmYyyy(v) {
                 var d = digits(v);
                 if (d.length <= 2) return d;
                 if (d.length <= 4) return d.slice(0, 2) + "/" + d.slice(2);
                 return d.slice(0, 2) + "/" + d.slice(2, 4) + "/" + d.slice(4);
             }
 
-            function mmDdYyyyToIso(v) {
+            function ddMmYyyyToIso(v) {
                 var d = digits(v);
                 if (d.length !== 8) return "";
-                return d.slice(4) + "-" + d.slice(0, 2) + "-" + d.slice(2, 4);
+                return d.slice(4) + "-" + d.slice(2, 4) + "-" + d.slice(0, 2);
             }
 
-            function isoToMmDdYyyy(v) {
+            function isoToDdMmYyyy(v) {
                 if (!v) return "";
-                var parts = v.split("-");
-                if (parts.length !== 3) return "";
-                return parts[1] + "/" + parts[2] + "/" + parts[0];
+                var dateOnly = v;
+                if (v.indexOf("T") >= 0) dateOnly = v.split("T")[0];
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+                    var parts = dateOnly.split("-");
+                    return parts[2] + "/" + parts[1] + "/" + parts[0];
+                }
+                return "";
             }
 
             function isValid(v) {
                 var d = digits(v);
                 if (d.length !== 8) return false;
-                var m = parseInt(d.slice(0, 2), 10);
-                var day = parseInt(d.slice(2, 4), 10);
+                var day = parseInt(d.slice(0, 2), 10);
+                var m = parseInt(d.slice(2, 4), 10);
                 var y = parseInt(d.slice(4), 10);
                 if (m < 1 || m > 12 || day < 1 || day > 31 || y < 1900) return false;
                 var curY = new Date().getFullYear();
@@ -256,9 +261,9 @@
 
             display.addEventListener("input", function () {
                 hideError();
-                var fmt = formatToMmDdYyyy(this.value);
+                var fmt = formatToDdMmYyyy(this.value);
                 this.value = fmt;
-                hidden.value = mmDdYyyyToIso(fmt);
+                hidden.value = ddMmYyyyToIso(fmt);
             });
 
             display.addEventListener("blur", function () {
@@ -266,7 +271,7 @@
                 if (!isValid(this.value)) {
                     this.value = "";
                     hidden.value = "";
-                    showError("Ngày sinh không hợp lệ. Vui lòng nhập theo định dạng MM/DD/YYYY.");
+                    showError("Ngày sinh không hợp lệ. Vui lòng nhập theo định dạng dd/mm/yyyy.");
                 }
             });
 
@@ -281,7 +286,7 @@
 
                 picker.addEventListener("change", function () {
                     if (!this.value) return;
-                    var displayVal = isoToMmDdYyyy(this.value);
+                    var displayVal = isoToDdMmYyyy(this.value);
                     if (displayVal && isValid(displayVal)) {
                         display.value = displayVal;
                         hidden.value = this.value;
@@ -296,7 +301,7 @@
                 form.addEventListener("submit", function (e) {
                     if (!display.value || !hidden.value) {
                         e.preventDefault();
-                        showError("Vui lòng nhập ngày sinh hợp lệ theo định dạng MM/DD/YYYY.");
+                        showError("Vui lòng nhập ngày sinh hợp lệ theo định dạng dd/mm/yyyy.");
                         display.focus();
                         return;
                     }

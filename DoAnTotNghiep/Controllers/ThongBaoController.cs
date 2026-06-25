@@ -14,7 +14,7 @@ namespace DoAnTotNghiep.Controllers
             this.thongBaoDAL = thongBaoDAL;
         }
 
-        public IActionResult Index(string? trangThai, string? tuKhoa, int trang = 1)
+        public IActionResult Index(string? trangThai, string? tuKhoa)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -30,20 +30,14 @@ namespace DoAnTotNghiep.Controllers
 
             var soLuongTheoTrangThai = thongBaoDAL.DemTheoTrangThai(maTaiKhoan.Value, tuKhoa);
             var soLuongTheoNhom = thongBaoDAL.DemTheoNhom(maTaiKhoan.Value, daDoc, tuKhoa);
-            var tongKetQua = soLuongTheoNhom.QuaHan + soLuongTheoNhom.DenLich + soLuongTheoNhom.DaCapNhat;
-            const int soDongMoiTrang = 12;
-            var tongSoTrang = tongKetQua == 0 ? 0 : (int)Math.Ceiling(tongKetQua / (double)soDongMoiTrang);
-            var trangHienTai = tongSoTrang == 0 ? 1 : Math.Clamp(trang, 1, tongSoTrang);
 
+            // Lay toan bo danh sach thong bao (khong phan trang) de chia vao 3 cot
+            const int tatCa = 9999;
             var model = new ThongBaoIndexViewModel
             {
-                DanhSach = thongBaoDAL.LayTrangTheoTaiKhoan(maTaiKhoan.Value, daDoc, tuKhoa, trangHienTai, soDongMoiTrang),
+                DanhSach = thongBaoDAL.LayTrangTheoTaiKhoan(maTaiKhoan.Value, daDoc, tuKhoa, 1, tatCa),
                 TrangThai = trangThaiHopLe,
                 TuKhoa = tuKhoa?.Trim() ?? string.Empty,
-                TrangHienTai = trangHienTai,
-                SoDongMoiTrang = soDongMoiTrang,
-                TongSoTrang = tongSoTrang,
-                TongKetQua = tongKetQua,
                 TongThongBaoTaiKhoan = thongBaoDAL.DemTongThongBao(maTaiKhoan.Value),
                 TongTatCa = soLuongTheoTrangThai.TatCa,
                 TongChuaDoc = soLuongTheoTrangThai.ChuaDoc,
@@ -59,7 +53,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DanhDauTatCaDaDoc(string? trangThai, string? tuKhoa, int trang = 1)
+        public IActionResult DanhDauTatCaDaDoc(string? trangThai, string? tuKhoa)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -69,7 +63,7 @@ namespace DoAnTotNghiep.Controllers
                 ? $"Đã đánh dấu {soThongBaoDaCapNhat} thông báo là đã đọc"
                 : "Không còn thông báo chưa đọc";
 
-            return RedirectToAction(nameof(Index), new { trangThai, tuKhoa, trang });
+            return RedirectToAction(nameof(Index), new { trangThai, tuKhoa });
         }
 
         public IActionResult Details(int id = 0, int maThongBao = 0, bool chuyenHuongLichTiem = false)

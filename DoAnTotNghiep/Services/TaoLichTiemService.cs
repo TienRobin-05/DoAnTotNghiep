@@ -696,18 +696,11 @@ WHERE NOT EXISTS (
         // Kiểm tra mũi tiêm có phù hợp với tuổi hiện tại của hồ sơ theo đúng đơn vị ngày/tuần/tháng/năm.
         private static bool KiemTraMuiTiemPhuHopVoiTuoi(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
         {
-            var donVi = ChuanHoaDonViTuoi(muiTiem.DonViTuoi);
-            var tuoiHienTai = TinhTuoiTheoDonVi(ngaySinh, donVi);
-            var tuoiToiThieu = muiTiem.DoTuoiToiThieu ?? 0;
-            var tuoiToiDa = muiTiem.DoTuoiToiDa ?? 0;
-
-            if (tuoiHienTai < tuoiToiThieu)
-            {
-                return false;
-            }
-
-            // Tuổi tối đa null hoặc 0 được hiểu là không giới hạn.
-            return tuoiToiDa <= 0 || tuoiHienTai <= tuoiToiDa;
+            // Luôn trả về true để tạo lịch cho tất cả vaccine/mũi đang hoạt động.
+            // Ngày dự kiến sẽ được tính theo ngày sinh + độ tuổi khuyến nghị.
+            // Nếu ngày dự kiến trong quá khứ → quá hạn, trong tương lai → sắp tới.
+            // Không lọc bỏ bất kỳ mũi nào để người dùng thấy toàn bộ kế hoạch dài hạn.
+            return true;
         }
 
         // Tính tuổi hiện tại của hồ sơ theo đơn vị tương ứng để lọc mũi tiêm phù hợp.

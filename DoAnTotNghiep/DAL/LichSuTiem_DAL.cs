@@ -62,6 +62,112 @@ VALUES(@MaLichTiem, @NgayTiemThucTe, @GhiChu, @NgayCapNhat)";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        public bool CapNhat(LichSuTiem lichSu)
+        {
+            const string sql = @"UPDATE LichSuTiem
+SET ngayTiemThucTe = @NgayTiemThucTe,
+    ghiChu = @GhiChu,
+    ngayCapNhat = @NgayCapNhat
+WHERE maLichTiem = @MaLichTiem";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaLichTiem", lichSu.MaLichTiem);
+            lenh.Parameters.AddWithValue("@NgayTiemThucTe", lichSu.NgayTiemThucTe.Date);
+            lenh.Parameters.AddWithValue("@GhiChu", string.IsNullOrWhiteSpace(lichSu.GhiChu) ? DBNull.Value : lichSu.GhiChu);
+            lenh.Parameters.AddWithValue("@NgayCapNhat", lichSu.NgayCapNhat);
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
+        public LichSuTiem? LayTheoMaLichTiem(int maLichTiem)
+        {
+            const string sql = @"SELECT TOP 1
+    maLichSu, maLichTiem, ngayTiemThucTe, ghiChu, ngayCapNhat
+FROM LichSuTiem
+WHERE maLichTiem = @MaLichTiem";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            if (!doc.Read()) return null;
+            return new LichSuTiem
+            {
+                MaLichSu = Convert.ToInt32(doc["maLichSu"]),
+                MaLichTiem = Convert.ToInt32(doc["maLichTiem"]),
+                NgayTiemThucTe = Convert.ToDateTime(doc["ngayTiemThucTe"]),
+                GhiChu = doc["ghiChu"] == DBNull.Value ? string.Empty : doc["ghiChu"].ToString() ?? string.Empty,
+                NgayCapNhat = Convert.ToDateTime(doc["ngayCapNhat"])
+            };
+        }
+
+        // Lấy ngày tiêm thực tế của mũi trước trong cùng vaccine (theo số thứ tự mũi)
+        public DateTime? LayNgayTiemThucTeMuiTruoc(int maHoSo, int maMuiTiemHienTai)
+        {
+            const string sql = @"SELECT TOP 1 lst.ngayTiemThucTe
+FROM LichSuTiem lst
+INNER JOIN LichTiem lt ON lst.maLichTiem = lt.maLichTiem
+INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+WHERE lt.maHoSo = @MaHoSo
+AND mt.maVaccine = (SELECT maVaccine FROM MuiTiemVaccine WHERE maMuiTiem = @MaMuiTiem)
+AND mt.soMui < (SELECT soMui FROM MuiTiemVaccine WHERE maMuiTiem = @MaMuiTiem)
+ORDER BY mt.soMui DESC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiemHienTai);
+            ketNoi.Open();
+            var result = lenh.ExecuteScalar();
+            return result == null || result == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(result);
+        }
+
+        // Lấy ngày tiêm thực tế của mũi sau trong cùng vaccine (theo số thứ tự mũi)
+        public DateTime? LayNgayTiemThucTeMuiSau(int maHoSo, int maMuiTiemHienTai)
+        {
+            const string sql = @"SELECT TOP 1 lst.ngayTiemThucTe
+FROM LichSuTiem lst
+INNER JOIN LichTiem lt ON lst.maLichTiem = lt.maLichTiem
+INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+WHERE lt.maHoSo = @MaHoSo
+AND mt.maVaccine = (SELECT maVaccine FROM MuiTiemVaccine WHERE maMuiTiem = @MaMuiTiem)
+AND mt.soMui > (SELECT soMui FROM MuiTiemVaccine WHERE maMuiTiem = @MaMuiTiem)
+ORDER BY mt.soMui ASC";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaMuiTiem", maMuiTiemHienTai);
+            ketNoi.Open();
+            var result = lenh.ExecuteScalar();
+            return result == null || result == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(result);
+        }
+
+        // Lấy tất cả ngày tiêm thực tế của các lịch tiêm thuộc một hồ sơ
+        public Dictionary<int, DateTime> LayNgayTiemThucTeTheoHoSo(int maHoSo)
+        {
+            var result = new Dictionary<int, DateTime>();
+            const string sql = @"SELECT lst.maLichTiem, lst.ngayTiemThucTe
+FROM LichSuTiem lst
+INNER JOIN LichTiem lt ON lst.maLichTiem = lt.maLichTiem
+WHERE lt.maHoSo = @MaHoSo";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            ketNoi.Open();
+            using var doc = lenh.ExecuteReader();
+            while (doc.Read())
+            {
+                var maLichTiem = Convert.ToInt32(doc["maLichTiem"]);
+                var ngayTiem = Convert.ToDateTime(doc["ngayTiemThucTe"]);
+                result[maLichTiem] = ngayTiem;
+            }
+            return result;
+        }
+
         // Mục đích: phương thức LayDanhSachTheoHoSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.

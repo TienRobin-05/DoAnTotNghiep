@@ -76,19 +76,19 @@
             </div>
         </section>
 
-        <form method="get" class="admin-consultation-filter">
+        <form method="get" class="admin-consultation-filter" data-live-form>
             <label class="admin-search-box">
                 <i class="bi bi-search"></i>
-                <input name="keyword" value="@keyword" placeholder="Tìm kiếm câu hỏi, người gửi..." />
+                <input name="keyword" value="@keyword" placeholder="Tìm kiếm câu hỏi, người gửi..." data-live-search />
             </label>
 
-            <select name="trangThai" aria-label="Lọc trạng thái">
+            <select name="trangThai" aria-label="Lọc trạng thái" data-live-search>
                 <option value="">Tất cả trạng thái</option>
                 <option value="answered" selected="@(trangThai == "answered")">Đã trả lời</option>
                 <option value="pending" selected="@(trangThai == "pending")">Đang chờ</option>
             </select>
 
-            <select name="topic" aria-label="Lọc vaccine hoặc chủ đề">
+            <select name="topic" aria-label="Lọc vaccine hoặc chủ đề" data-live-search>
                 <option value="">Tất cả vaccine</option>
                 @foreach (var item in topics)
                 {
@@ -96,13 +96,12 @@
                 }
             </select>
 
-            <select name="sort" aria-label="Sắp xếp">
+            <select name="sort" aria-label="Sắp xếp" data-live-search>
                 <option value="newest" selected="@(sort != "oldest")">Mới nhất</option>
                 <option value="oldest" selected="@(sort == "oldest")">Cũ nhất</option>
             </select>
 
             <input type="hidden" name="pageSize" value="@pageSize" />
-            <button type="submit" class="admin-filter-submit"><i class="bi bi-search"></i><span>Tìm kiếm</span></button>
             <a asp-action="Index" class="admin-filter-reset"><i class="bi bi-arrow-clockwise"></i><span>Làm mới</span></a>
         </form>
 
@@ -2505,6 +2504,27 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+</script>
+<script>
+(function() {
+    var timer = null;
+    document.querySelectorAll("[data-live-search]").forEach(function(el) {
+        var event = el.tagName === "SELECT" ? "change" : "input";
+        el.addEventListener(event, function() {
+            clearTimeout(timer);
+            var form = el.closest("form");
+            if (!form) return;
+            timer = setTimeout(function() {
+                var url = new URL(form.action, window.location.origin);
+                new FormData(form).forEach(function(v, k) {
+                    if (v) url.searchParams.set(k, v);
+                });
+                url.searchParams.set("page", "1");
+                window.location.href = url.toString();
+            }, 300);
+        });
+    });
+})();
 </script>
 
 

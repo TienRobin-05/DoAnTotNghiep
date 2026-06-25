@@ -234,8 +234,6 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public bool CapNhat(HoSoSucKhoe hs)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"UPDATE HoSoSucKhoe
 SET hoTen = @HoTen,
     ngaySinh = @NgaySinh,
@@ -247,9 +245,7 @@ SET hoTen = @HoTen,
 WHERE maHoSo = @MaHoSo
 AND maTaiKhoan = @MaTaiKhoan";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaHoSo", hs.MaHoSo);
             lenh.Parameters.AddWithValue("@MaTaiKhoan", hs.MaTaiKhoan);
@@ -260,10 +256,62 @@ AND maTaiKhoan = @MaTaiKhoan";
             lenh.Parameters.AddWithValue("@CanNang", (object?)hs.CanNang ?? DBNull.Value);
             lenh.Parameters.AddWithValue("@TienSuBenh", (object?)hs.TienSuBenh ?? DBNull.Value);
             lenh.Parameters.AddWithValue("@DiUng", (object?)hs.DiUng ?? DBNull.Value);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
             return lenh.ExecuteNonQuery() > 0;
+        }
+
+        public bool CapNhatNgaySinhVaDanhDau(int maHoSo, int maTaiKhoan, DateTime ngaySinhMoi)
+        {
+            DamBaoCotHoSoSucKhoe();
+            const string sql = @"UPDATE HoSoSucKhoe
+SET ngaySinh = @NgaySinh,
+    birthDateChangedAt = GETDATE(),
+    birthDateWarningDismissedAt = NULL
+WHERE maHoSo = @MaHoSo
+AND maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@NgaySinh", ngaySinhMoi.Date);
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
+        public bool TatCanhBaoDoiNgaySinh(int maHoSo, int maTaiKhoan)
+        {
+            DamBaoCotHoSoSucKhoe();
+            const string sql = @"UPDATE HoSoSucKhoe
+SET birthDateWarningDismissedAt = GETDATE()
+WHERE maHoSo = @MaHoSo
+AND maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery() > 0;
+        }
+
+        public bool KiemTraHoSoCoCanhBaoDoiNgaySinh(int maHoSo, int maTaiKhoan)
+        {
+            DamBaoCotHoSoSucKhoe();
+            const string sql = @"SELECT CASE
+WHEN birthDateChangedAt IS NOT NULL
+AND (birthDateWarningDismissedAt IS NULL OR birthDateWarningDismissedAt < birthDateChangedAt)
+THEN 1 ELSE 0 END
+FROM HoSoSucKhoe
+WHERE maHoSo = @MaHoSo
+AND maTaiKhoan = @MaTaiKhoan";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            ketNoi.Open();
+            return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
         // Mục đích: phương thức Xoa thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
@@ -404,6 +452,19 @@ ORDER BY ngayTao ASC";
                 DiUng = doc["diUng"] == DBNull.Value ? string.Empty : doc["diUng"].ToString() ?? string.Empty,
                 NgayTao = Convert.ToDateTime(doc["ngayTao"])
             };
+        }
+        private void DamBaoCotHoSoSucKhoe()
+        {
+            const string sql = @"
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.HoSoSucKhoe') AND name = 'birthDateChangedAt')
+    ALTER TABLE dbo.HoSoSucKhoe ADD birthDateChangedAt DATETIME NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.HoSoSucKhoe') AND name = 'birthDateWarningDismissedAt')
+    ALTER TABLE dbo.HoSoSucKhoe ADD birthDateWarningDismissedAt DATETIME NULL;";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            ketNoi.Open();
+            lenh.ExecuteNonQuery();
         }
     }
 }

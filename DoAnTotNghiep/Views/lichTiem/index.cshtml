@@ -1,118 +1,273 @@
-﻿@* Khu vực giao diện của view Index.
-   View này nhận dữ liệu từ Controller/Model và hiển thị cho người dùng theo đúng chức năng của màn hình. *@
+﻿@* Trang Lịch tiêm - 2 tab: Theo thời gian / Theo vaccine, chung 1 bộ lọc trạng thái *@
 @model List<LichTiem>
 @{
     ViewData["Title"] = "Lịch tiêm";
-    var maHoSo = ViewBag.MaHoSo is int idHoSo ? idHoSo : 0;
-    var boLocTrangThai = ViewBag.BoLocTrangThai as string ?? "tat-ca";
-    var tongTatCa = ViewBag.TongTatCa is int tatCa ? tatCa : 0;
-    var tongSapToi = ViewBag.TongSapToi is int sapToi ? sapToi : 0;
-    var tongQuaHan = ViewBag.TongQuaHan is int quaHan ? quaHan : 0;
-    var tongDaTiem = ViewBag.TongDaTiem is int daTiem ? daTiem : 0;
-    var hienCotThaoTac = Model.Any(item => item.TrangThai != "Đã tiêm");
+    var hoTenHoSo = ViewBag.HoTenHoSo ?? "";
+    var maHoSo = ViewBag.MaHoSo is int idHS ? idHS : 0;
+    var hienThi = ViewBag.HienThi as string ?? "time";
+    var canhBao = ViewBag.CanhBaoDoiNgaySinh == true;
+    var ngaySinhText = ViewBag.NgaySinhText as string ?? "";
+    var maHoSoHienTai = ViewBag.MaHoSoHienTai is int idHS2 ? idHS2 : 0;
+    var scheduleDataJson = ViewBag.ScheduleDataJson as string ?? "[]";
 }
 
-<div class="list-page-head">
-    <div>
-        <div class="page-title-with-icon">
-            <img src="@Url.Content("~/images/icons/lich-tiem.png")"
-                 alt="Icon lịch tiêm"
-                 class="page-title-icon" />
-            <h2>Lịch tiêm của @ViewBag.HoTenHoSo</h2>
-        </div>
-        <p>@tongTatCa lịch tiêm trong hồ sơ</p>
+<style>
+.schedule-page { width: 100%; min-height: 400px; }
+.schedule-tabs { display: flex; gap: 8px; padding: 6px; background: #f4f7fb; border-radius: 12px; width: fit-content; }
+.tab-btn { border: none; background: transparent; color: #475569; font-weight: 700; font-size: 14px; padding: 10px 18px; border-radius: 10px; cursor: pointer; }
+.tab-btn.active { background: #fff; color: #0d6efd; box-shadow: 0 4px 12px rgba(15,23,42,.08); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.status-filter-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+.status-chip { border: 1px solid #e2e8f0; background: #fff; color: #334155; padding: 9px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; }
+.status-chip span { margin-left: 6px; padding: 2px 7px; border-radius: 999px; background: #f1f5f9; color: #64748b; font-size: 12px; }
+.status-chip.active { background: #0d6efd; color: #fff; border-color: #0d6efd; box-shadow: 0 6px 16px rgba(13,110,253,.25); }
+.status-chip.active span { background: rgba(255,255,255,.2); color: #fff; }
+.month-schedule-list { display: flex; flex-direction: column; gap: 18px; }
+.month-group-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 22px rgba(15,23,42,.04); }
+.month-group-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: linear-gradient(180deg,#fff,#f8fafc); border-bottom: 1px solid #e5e7eb; }
+.month-title-wrap h3 { margin: 0; color: #0f172a; font-size: 18px; font-weight: 800; }
+.month-title-wrap p { margin: 4px 0 0; color: #64748b; font-size: 13px; }
+.month-count-badge { background: #e8f1ff; color: #0d6efd; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+.schedule-item { display: grid; grid-template-columns: 1.4fr 1.4fr 130px 110px 160px; gap: 14px; align-items: center; padding: 16px 20px; border-bottom: 1px solid #eef2f7; }
+.schedule-item:last-child { border-bottom: none; }
+.vaccine-cell { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.vaccine-icon { width: 34px; height: 34px; border-radius: 12px; background: #eff6ff; color: #0d6efd; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.main-text { margin: 0; color: #0f172a; font-size: 14px; font-weight: 800; line-height: 1.35; }
+.sub-text { margin: 4px 0 0; color: #64748b; font-size: 12px; line-height: 1.35; }
+.date-label { margin: 0 0 4px; color: #94a3b8; font-size: 12px; font-weight: 600; }
+.date-value { margin: 0; color: #0f172a; font-size: 14px; font-weight: 800; }
+.status-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; width: fit-content; }
+.status-badge.overdue { background: #fee2e2; color: #dc2626; }
+.status-badge.upcoming { background: #dcfce7; color: #16a34a; }
+.status-badge.done { background: #dbeafe; color: #2563eb; }
+.update-btn { border: none; background: #0d6efd; color: #fff; font-weight: 800; font-size: 13px; padding: 10px 14px; border-radius: 10px; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.update-btn:hover { background: #0b5ed7; }
+.empty-state { text-align: center; padding: 42px 20px; background: #fff; border: 1px dashed #cbd5e1; border-radius: 18px; }
+.empty-state h3 { margin: 0; color: #0f172a; font-size: 18px; }
+.empty-state p { margin: 8px 0 18px; color: #64748b; font-size: 14px; }
+.empty-state button { border: none; background: #0d6efd; color: #fff; font-weight: 800; padding: 10px 16px; border-radius: 10px; cursor: pointer; }
+.vaccine-view { background: #fff; border: 1px solid #dbe7f5; border-radius: 16px; padding: 24px; }
+.vaccine-card { margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+.vaccine-card-header { padding: 14px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.vaccine-card-header strong { font-size: 16px; }
+.vaccine-card-header span { color: #64748b; font-size: 13px; margin-left: 8px; }
+.vaccine-count-badge { font-weight: 800; color: #0d6efd; }
+.vaccine-dose-row { padding: 12px 18px; border-bottom: 1px solid #eef2f7; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.vaccine-dose-row:last-child { border-bottom: none; }
+@@media (max-width: 900px) { .schedule-item { grid-template-columns: 1fr; gap: 10px; align-items: flex-start; } .update-btn { width: 100%; } .month-group-header { flex-direction: column; align-items: flex-start; gap: 10px; } }
+</style>
+
+<div class="schedule-page">
+    <div class="schedule-tabs">
+        <button class="tab-btn @(hienThi=="time"?"active":"")" data-tab="time" onclick="switchTab('time')">Theo thời gian</button>
+        <button class="tab-btn @(hienThi=="vaccine"?"active":"")" data-tab="vaccine" onclick="switchTab('vaccine')">Theo vaccine</button>
     </div>
-    <a asp-action="ChonHoSo" class="btn btn-link">Chọn hồ sơ khác</a>
-</div>
 
-<div class="filter-bar compact-filter">
-    <a asp-action="Index" asp-route-maHoSo="@maHoSo" asp-route-trangThai="tat-ca" class="btn btn-outline-primary @(boLocTrangThai == "tat-ca" ? "active" : "")">
-        Tất cả (@tongTatCa)
-    </a>
-    <a asp-action="Index" asp-route-maHoSo="@maHoSo" asp-route-trangThai="sap-toi" class="btn btn-outline-primary @(boLocTrangThai == "sap-toi" ? "active" : "")">
-        Sắp tới (@tongSapToi)
-    </a>
-    <a asp-action="Index" asp-route-maHoSo="@maHoSo" asp-route-trangThai="qua-han" class="btn btn-outline-primary @(boLocTrangThai == "qua-han" ? "active" : "")">
-        Quá hạn (@tongQuaHan)
-    </a>
-    <a asp-action="Index" asp-route-maHoSo="@maHoSo" asp-route-trangThai="da-tiem" class="btn btn-outline-primary @(boLocTrangThai == "da-tiem" ? "active" : "")">
-        Đã tiêm (@tongDaTiem)
-    </a>
-</div>
+    @* Status filter - shared, single row *@
+    <div class="status-filter-row">
+        <button class="status-chip active" data-status="all">Tất cả <span class="count-all">0</span></button>
+        <button class="status-chip" data-status="overdue">Quá hạn <span class="count-overdue">0</span></button>
+        <button class="status-chip" data-status="upcoming">Sắp tới <span class="count-upcoming">0</span></button>
+        <button class="status-chip" data-status="done">Đã tiêm <span class="count-done">0</span></button>
+    </div>
 
-@* Khối điều kiện bên dưới chỉ hiển thị nội dung khi dữ liệu hoặc trạng thái tương ứng tồn tại. *@
-@if (Model.Count == 0)
-{
-    @* Khu vực thông báo phản hồi kết quả xử lý, ví dụ thành công, lỗi nhập liệu hoặc lỗi nghiệp vụ. *@
-    @if (TempData["ThongBao"] == null)
-    {
-        <div class="empty-state empty-action">
-            <div>
-                <strong>Không có lịch tiêm phù hợp</strong>
-                <span>Hãy đổi bộ lọc hoặc chọn hồ sơ khác để xem lịch tiêm cần theo dõi.</span>
-            </div>
-            <a asp-action="ChonHoSo" class="btn btn-primary">Chọn hồ sơ khác</a>
+    @* Time Tab *@
+    <div id="timeTab" class="tab-content @(hienThi=="time"?"active":"")">
+        <div id="monthScheduleList" class="month-schedule-list"></div>
+        <div id="emptyStateTime" class="empty-state" style="display:none;">
+            <h3>Không có mũi tiêm phù hợp</h3>
+            <p>Trạng thái hiện tại chưa có dữ liệu.</p>
+            <button type="button" onclick="resetToAll()">Xem tất cả</button>
         </div>
+    </div>
+
+    @* Vaccine Tab *@
+    <div id="vaccineTab" class="tab-content @(hienThi=="vaccine"?"active":"")">
+        <div id="vaccineListContainer"></div>
+        <div id="emptyStateVaccine" class="empty-state" style="display:none;">
+            <h3>Không có vaccine phù hợp</h3>
+            <p>Trạng thái hiện tại chưa có dữ liệu.</p>
+            <button type="button" onclick="resetToAll()">Xem tất cả</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var scheduleData = @Html.Raw(scheduleDataJson);
+    var currentStatus = "all";
+    var updateUrlBase = '@Url.Action("CapNhatDaTiem", "LichTiem")';
+
+    function getStatus(item) {
+        if (item.isDone || item.injectedDate) return "done";
+        var d = new Date(item.expectedDate + "T00:00:00");
+        var today = new Date(); today.setHours(0,0,0,0);
+        return d < today ? "overdue" : "upcoming";
     }
-}
-else
-{
-    <section class="schedule-list">
-        @foreach (var nhomVaccine in Model.GroupBy(item => new { item.TenVaccine, item.NhomVaccine }))
-        {
-            <article class="schedule-group">
-                <div class="schedule-group-head">
-                    <div>
-                        <h3>@nhomVaccine.Key.TenVaccine</h3>
-                        <span>@nhomVaccine.Key.NhomVaccine</span>
-                    </div>
-                    <strong>@nhomVaccine.Count() mũi</strong>
-                </div>
 
-                <div class="schedule-rows">
-                @foreach (var item in nhomVaccine.OrderBy(lich => lich.SoMui))
-                {
-                    var trangThaiHienThi = item.TrangThai;
-                    var statusClass = "status-muted";
-                    if (item.TrangThai == "Đã tiêm")
-                    {
-                        trangThaiHienThi = "Đã tiêm";
-                        statusClass = "status-ok";
-                    }
-                    else if (item.NgayTiemDuKien.Date > DateTime.Today)
-                    {
-                        trangThaiHienThi = "Sắp tới";
-                        statusClass = "status-info";
-                    }
-                    else if (item.NgayTiemDuKien.Date == DateTime.Today)
-                    {
-                        trangThaiHienThi = "Hôm nay";
-                        statusClass = "status-warning";
-                    }
-                    else
-                    {
-                        trangThaiHienThi = "Quá hạn";
-                        statusClass = "status-danger";
-                    }
+    function getDoseDisplayName(item) {
+        return item.doseName || "Mũi " + (item.doseNumber || "");
+    }
 
-                    <div class="schedule-item">
-                        <div class="schedule-main">
-                            <div class="schedule-title">
-                                <strong>Mũi @item.SoMui</strong>
-                                <span>@item.TenMui</span>
-                            </div>
-                            <div class="item-meta">@item.GhiChu</div>
-                        </div>
-                        <div class="schedule-date">@item.NgayTiemDuKien.ToString("dd/MM/yyyy")</div>
-                        <span class="status-badge @statusClass">@trangThaiHienThi</span>
-                        @if (item.TrangThai != "Đã tiêm")
-                        {
-                            <a asp-action="CapNhatDaTiem" asp-route-maLichTiem="@item.MaLichTiem" class="btn btn-sm btn-primary">Cập nhật đã tiêm</a>
-                        }
-                    </div>
-                }
-                </div>
-            </article>
-        }
-    </section>
-}
+    function getDisplayDate(item) {
+        if (getStatus(item) === "done" && item.injectedDate) return item.injectedDate;
+        return item.expectedDate;
+    }
+
+    function getDateLabel(item) {
+        return getStatus(item) === "done" ? "Ngày tiêm" : "Ngày dự kiến";
+    }
+
+    function getMonthKeyForItem(item) {
+        var dateStr = getDisplayDate(item);
+        if (!dateStr) return "";
+        var d = new Date(dateStr + "T00:00:00");
+        return String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
+    }
+
+    function getMonthSort(k) {
+        if (!k) return 99999999;
+        var p = k.split("/");
+        return parseInt(p[1]) * 100 + parseInt(p[0]);
+    }
+
+    function fmtDate(s) {
+        if (!s) return "";
+        var d = new Date(s + "T00:00:00");
+        return String(d.getDate()).padStart(2,'0') + "/" + String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
+    }
+
+    function getFilteredDataByStatus() {
+        return scheduleData.filter(function(item) {
+            return currentStatus === "all" || getStatus(item) === currentStatus;
+        });
+    }
+
+    function updateStatusCounts() {
+        var all = scheduleData.length;
+        var overdue = scheduleData.filter(function(x) { return getStatus(x) === "overdue"; }).length;
+        var upcoming = scheduleData.filter(function(x) { return getStatus(x) === "upcoming"; }).length;
+        var done = scheduleData.filter(function(x) { return getStatus(x) === "done"; }).length;
+        document.querySelectorAll(".count-all").forEach(function(el) { el.textContent = all; });
+        document.querySelectorAll(".count-overdue").forEach(function(el) { el.textContent = overdue; });
+        document.querySelectorAll(".count-upcoming").forEach(function(el) { el.textContent = upcoming; });
+        document.querySelectorAll(".count-done").forEach(function(el) { el.textContent = done; });
+    }
+
+    function syncStatusButtons() {
+        document.querySelectorAll(".status-chip").forEach(function(btn) {
+            btn.classList.toggle("active", btn.dataset.status === currentStatus);
+        });
+    }
+
+    function escHtml(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+    function renderTimeTab() {
+        updateStatusCounts();
+        var filtered = getFilteredDataByStatus();
+        var groups = {};
+        filtered.forEach(function(item) {
+            var key = getMonthKeyForItem(item);
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(item);
+        });
+        var sortedKeys = Object.keys(groups).sort(function(a,b) { return getMonthSort(a) - getMonthSort(b); });
+        var container = document.getElementById("monthScheduleList");
+        var empty = document.getElementById("emptyStateTime");
+        container.innerHTML = "";
+        if (sortedKeys.length === 0) { empty.style.display = "block"; return; }
+        empty.style.display = "none";
+        sortedKeys.forEach(function(monthKey) {
+            var items = groups[monthKey];
+            items.sort(function(a,b) { return (a.expectedDate || "").localeCompare(b.expectedDate || ""); });
+            var html = '<div class="month-group-card"><div class="month-group-header">';
+            html += '<div class="month-title-wrap"><h3>Tháng ' + monthKey + '</h3><p>Các mũi tiêm dự kiến trong tháng ' + monthKey + '</p></div>';
+            html += '<div class="month-count-badge">' + items.length + ' mũi</div></div><div class="month-items">';
+            items.forEach(function(item) {
+                var stt = getStatus(item);
+                var sttText = stt === "overdue" ? "Quá hạn" : stt === "done" ? "Đã tiêm" : "Sắp tới";
+                var url = updateUrlBase + '?maLichTiem=' + item.id;
+                html += '<div class="schedule-item">';
+                html += '<div class="vaccine-cell"><div class="vaccine-icon"><i class="bi bi-shield-plus"></i></div><div><p class="main-text">' + escHtml(item.vaccineName) + '</p><p class="sub-text">' + escHtml(item.groupName) + '</p></div></div>';
+                html += '<div><p class="main-text">' + escHtml(getDoseDisplayName(item)) + '</p><p class="sub-text">' + escHtml(item.note || "Mũi tiêm được khuyến nghị theo độ tuổi") + '</p></div>';
+                html += '<div><p class="date-label">' + getDateLabel(item) + '</p><p class="date-value">' + fmtDate(getDisplayDate(item)) + '</p></div>';
+                html += '<div><span class="status-badge ' + stt + '">' + sttText + '</span></div>';
+                html += '<div><a href="' + url + '" class="update-btn">Cập nhật mũi tiêm</a></div>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+            container.innerHTML += html;
+        });
+    }
+
+    function renderVaccineTab() {
+        updateStatusCounts();
+        var filtered = getFilteredDataByStatus();
+        var groups = {};
+        filtered.forEach(function(item) {
+            var key = item.vaccineName;
+            if (!groups[key]) groups[key] = { vaccineName: item.vaccineName, groupName: item.groupName, items: [] };
+            groups[key].items.push(item);
+        });
+        var sortedKeys = Object.keys(groups).sort();
+        var container = document.getElementById("vaccineListContainer");
+        var empty = document.getElementById("emptyStateVaccine");
+        container.innerHTML = "";
+        if (sortedKeys.length === 0) { empty.style.display = "block"; return; }
+        empty.style.display = "none";
+        sortedKeys.forEach(function(key) {
+            var g = groups[key];
+            g.items.sort(function(a,b) { return (a.expectedDate || "").localeCompare(b.expectedDate || ""); });
+            var html = '<div class="vaccine-card"><div class="vaccine-card-header"><div><strong>' + escHtml(g.vaccineName) + '</strong><span>' + escHtml(g.groupName) + '</span></div><div class="vaccine-count-badge">' + g.items.length + ' mũi</div></div>';
+            g.items.forEach(function(item) {
+                var stt = getStatus(item);
+                var sttText = stt === "overdue" ? "Quá hạn" : stt === "done" ? "Đã tiêm" : "Sắp tới";
+                var url = updateUrlBase + '?maLichTiem=' + item.id;
+                html += '<div class="vaccine-dose-row">';
+                html += '<div style="flex:1;min-width:160px;"><strong>' + escHtml(getDoseDisplayName(item)) + '</strong><div style="color:#64748b;font-size:13px;margin-top:2px;">' + escHtml(item.note || "") + '</div></div>';
+                html += '<div style="font-weight:700;white-space:nowrap;">' + fmtDate(getDisplayDate(item)) + '</div>';
+                html += '<span class="status-badge ' + stt + '">' + sttText + '</span>';
+                html += '<a href="' + url + '" class="update-btn" style="margin-left:auto;">Cập nhật mũi tiêm</a>';
+                html += '</div>';
+            });
+            html += '</div>';
+            container.innerHTML += html;
+        });
+    }
+
+    function renderAll() {
+        syncStatusButtons();
+        renderTimeTab();
+        renderVaccineTab();
+        // Ensure correct tab visibility
+        var activeTab = document.querySelector(".tab-btn.active")?.dataset?.tab || "time";
+        document.getElementById("timeTab").classList.toggle("active", activeTab === "time");
+        document.getElementById("vaccineTab").classList.toggle("active", activeTab === "vaccine");
+    }
+
+    // Status click handler
+    document.querySelectorAll(".status-chip").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            currentStatus = this.dataset.status;
+            renderAll();
+        });
+    });
+
+    // Tab switch
+    window.switchTab = function(tab) {
+        document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.toggle("active", b.dataset.tab === tab); });
+        document.getElementById("timeTab").classList.toggle("active", tab === "time");
+        document.getElementById("vaccineTab").classList.toggle("active", tab === "vaccine");
+        // Re-render current tab to ensure counts are correct
+        updateStatusCounts();
+    };
+
+    window.resetToAll = function() {
+        currentStatus = "all";
+        renderAll();
+    };
+
+    renderAll();
+})();
+</script>

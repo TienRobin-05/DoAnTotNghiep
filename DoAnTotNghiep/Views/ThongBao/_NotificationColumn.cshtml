@@ -24,7 +24,8 @@
     }
     else
     {
-        <div class="notification-column-list">
+        <div class="notification-column-scroll">
+            <div class="notification-column-list">
             @foreach (var item in items)
             {
                 <article class="notification-item-card @(item.DaDoc ? "is-read" : "is-unread")">
@@ -38,7 +39,7 @@
                         }
                         <div class="notification-item-footer">
                             <time class="notification-item-time" datetime="@item.NgayGui.ToString("yyyy-MM-ddTHH:mm:ss")">
-                                <i class="bi bi-clock" aria-hidden="true"></i>@item.NgayGui.ToString("dd-MM-yyyy HH:mm")
+                                <i class="bi bi-clock" aria-hidden="true"></i>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")
                             </time>
                             <a asp-action="Details"
                                asp-route-maThongBao="@item.MaThongBao"
@@ -54,6 +55,7 @@
                     }
                 </article>
             }
+            </div>
         </div>
     }
 </section>

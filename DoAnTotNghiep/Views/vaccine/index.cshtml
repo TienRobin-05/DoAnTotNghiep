@@ -513,12 +513,9 @@
                        value="@tuKhoa"
                        class="vaccine-search-input"
                        placeholder="Tìm tên hoặc nhóm vaccine"
-                       aria-label="Tìm tên hoặc nhóm vaccine" />
+                       aria-label="Tìm tên hoặc nhóm vaccine"
+                       data-live-search />
             </div>
-            <button type="submit" class="vaccine-lookup-button vaccine-lookup-submit">
-                <i class="bi bi-search" aria-hidden="true"></i>
-                Tìm
-            </button>
             <a asp-action="TraCuu" class="vaccine-lookup-button vaccine-lookup-reset">
                 <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
                 Làm mới
@@ -1078,33 +1075,30 @@ else
         </section>
 
         <section class="admin-vaccine-filter" aria-label="Bộ lọc vaccine">
-            <form method="get" asp-action="Index">
+            <form method="get" asp-action="Index" class="admin-vaccine-search-form">
                 <input type="hidden" name="pageSize" value="@Model.PageSize" />
                 <div class="admin-vaccine-field">
                     <i class="bi bi-search" aria-hidden="true"></i>
-                    <input id="tuKhoa"
+                    <input id="tuKhoaAdmin"
                            name="tuKhoa"
                            value="@tuKhoa"
                            class="admin-vaccine-input"
                            placeholder="Tìm tên, mã hoặc nhóm vaccine"
-                           aria-label="Tìm tên, mã hoặc nhóm vaccine" />
+                           aria-label="Tìm tên, mã hoặc nhóm vaccine"
+                           data-live-search />
                 </div>
-                <select name="nhom" class="admin-vaccine-select" aria-label="Lọc nhóm vaccine">
+                <select name="nhom" class="admin-vaccine-select" aria-label="Lọc nhóm vaccine" data-live-search>
                     <option value="">Tất cả nhóm</option>
                     @foreach (var group in Model.VaccineGroups)
                     {
                         <option value="@group" selected="@(string.Equals(group, nhomDaChon, StringComparison.OrdinalIgnoreCase))">@group</option>
                     }
                 </select>
-                <select name="trangThai" class="admin-vaccine-select" aria-label="Lọc trạng thái">
+                <select name="trangThai" class="admin-vaccine-select" aria-label="Lọc trạng thái" data-live-search>
                     <option value="">Tất cả trạng thái</option>
                     <option value="active" selected="@(trangThaiDaChon == "active")">Đang dùng</option>
                     <option value="inactive" selected="@(trangThaiDaChon == "inactive")">Ngừng dùng</option>
                 </select>
-                <button type="submit" class="admin-vaccine-search-btn">
-                    <i class="bi bi-search" aria-hidden="true"></i>
-                    Tìm
-                </button>
                 <a asp-action="@actionLamMoi" class="admin-vaccine-reset">
                     <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
                     Làm mới
@@ -1240,6 +1234,27 @@ else
                 url.searchParams.set("pageSize", event.target.value);
                 url.searchParams.set("page", "1");
                 window.location.href = url.toString();
+            });
+        })();
+    </script>
+    <script>
+        (function() {
+            var timer = null;
+            document.querySelectorAll("[data-live-search]").forEach(function(el) {
+                var event = el.tagName === "SELECT" ? "change" : "input";
+                el.addEventListener(event, function() {
+                    clearTimeout(timer);
+                    var form = el.closest("form");
+                    if (!form) return;
+                    timer = setTimeout(function() {
+                        var url = new URL(form.action, window.location.origin);
+                        new FormData(form).forEach(function(v, k) {
+                            if (v) url.searchParams.set(k, v);
+                        });
+                        url.searchParams.set("page", "1");
+                        window.location.href = url.toString();
+                    }, 300);
+                });
             });
         })();
     </script>

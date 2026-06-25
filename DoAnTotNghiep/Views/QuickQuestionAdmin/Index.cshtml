@@ -75,17 +75,17 @@
     </div>
 </section>
 
-<form class="quick-filter-card" method="get" action="@Url.Action("Index")">
+<form class="quick-filter-card" method="get" action="@Url.Action("Index")" data-live-form>
     <input type="hidden" name="page" value="1" />
-    <input type="text" name="keyword" class="quick-input" placeholder="Tìm kiếm tiêu đề câu hỏi..." value="@Model.Keyword" />
+    <input type="text" name="keyword" class="quick-input" placeholder="Tìm kiếm tiêu đề câu hỏi..." value="@Model.Keyword" data-live-search />
 
-    <select name="status" class="quick-select">
+    <select name="status" class="quick-select" data-live-search>
         <option value="">Tất cả trạng thái</option>
         <option value="visible" selected="@(Model.SelectedStatus == "visible")">Đang hiển thị</option>
         <option value="hidden" selected="@(Model.SelectedStatus == "hidden")">Tạm ẩn</option>
     </select>
 
-    <select name="topic" class="quick-select">
+    <select name="topic" class="quick-select" data-live-search>
         <option value="">Tất cả vaccine</option>
         @foreach (var t in Model.Topics)
         {
@@ -93,17 +93,12 @@
         }
     </select>
 
-    <select name="sort" class="quick-select">
+    <select name="sort" class="quick-select" data-live-search>
         <option value="newest" selected="@(Model.SelectedSort == "newest" || string.IsNullOrEmpty(Model.SelectedSort))">Mới nhất</option>
         <option value="oldest" selected="@(Model.SelectedSort == "oldest")">Cũ nhất</option>
         <option value="updated" selected="@(Model.SelectedSort == "updated")">Cập nhật gần nhất</option>
         <option value="az" selected="@(Model.SelectedSort == "az")">Tên A-Z</option>
     </select>
-
-    <button type="submit" class="quick-search-btn">
-        <i class="bi bi-search"></i>
-        Tìm kiếm
-    </button>
 
     <a href="@Url.Action("Index")" class="quick-reset-btn">
         <i class="bi bi-arrow-clockwise"></i>
@@ -332,5 +327,26 @@
                 }
             });
         });
+    </script>
+    <script>
+        (function() {
+            var timer = null;
+            document.querySelectorAll("[data-live-search]").forEach(function(el) {
+                var event = el.tagName === "SELECT" ? "change" : "input";
+                el.addEventListener(event, function() {
+                    clearTimeout(timer);
+                    var form = el.closest("form");
+                    if (!form) return;
+                    timer = setTimeout(function() {
+                        var url = new URL(form.action, window.location.origin);
+                        new FormData(form).forEach(function(v, k) {
+                            if (v) url.searchParams.set(k, v);
+                        });
+                        url.searchParams.set("page", "1");
+                        window.location.href = url.toString();
+                    }, 300);
+                });
+            });
+        })();
     </script>
 }

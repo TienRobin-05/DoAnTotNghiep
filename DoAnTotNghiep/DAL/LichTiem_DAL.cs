@@ -267,7 +267,7 @@ ORDER BY ngayGui DESC, maThongBao DESC";
 FROM ThongBao WITH (UPDLOCK, HOLDLOCK)
 WHERE maTaiKhoan = @MaTaiKhoan
 AND maLichTiem = @MaLichTiem
-AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)
+AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)
 ORDER BY ngayGui DESC, maThongBao DESC";
             const string sqlChuyenThongBao = @"UPDATE ThongBao
 SET tieuDe = @TieuDeDaCapNhat,
@@ -281,7 +281,7 @@ VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDeDaCapNhat, @NoiDungDaCapNhat, @NgayGui, 
             const string sqlXoaThongBaoNhacLichConLai = @"DELETE FROM ThongBao
 WHERE maTaiKhoan = @MaTaiKhoan
 AND maLichTiem = @MaLichTiem
-AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)";
+AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             ketNoi.Open();
@@ -341,14 +341,18 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)";
                     lenh.ExecuteNonQuery();
                 }
 
-                var tieuDeDaCapNhat = "Đã cập nhật lịch tiêm";
-                var thongTinMui = soMui > 0 ? $"mũi {soMui}" : "mũi tiêm";
-                if (!string.IsNullOrWhiteSpace(tenMui))
+                var tieuDeDaCapNhat = "Đã cập nhật trạng thái tiêm";
+                var thongTinMui = tenMui;
+                if (string.IsNullOrWhiteSpace(thongTinMui))
                 {
-                    thongTinMui += $" - {tenMui}";
+                    thongTinMui = $"mũi {soMui}";
+                }
+                else if (!thongTinMui.StartsWith("mũi", StringComparison.OrdinalIgnoreCase))
+                {
+                    thongTinMui = $"mũi {soMui} - {tenMui}";
                 }
 
-                var noiDungDaCapNhat = $"{hoTenHoSo} đã được cập nhật là đã tiêm {thongTinMui} {tenVaccine} ngày {lichSu.NgayTiemThucTe:dd-MM-yyyy}.";
+                var noiDungDaCapNhat = $"{hoTenHoSo} đã được cập nhật trạng thái đã tiêm cho {thongTinMui} - {tenVaccine}.";
                 var maThongBaoDaCapNhat = LayMaThongBao(sqlTimThongBaoCapNhat, ketNoi, giaoDich, maTaiKhoan, lichSu.MaLichTiem, tieuDeDaCapNhat);
 
                 if (!maThongBaoDaCapNhat.HasValue)
@@ -426,6 +430,55 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        // Xóa toàn bộ lịch tiêm, lịch sử, thông báo của hồ sơ (dùng khi đổi ngày sinh)
+        // Tuân thủ thứ tự: ThongBao → LichSuTiem → LichTiem (tránh FK conflict)
+        public bool XoaToanBoLichTiemCuaHoSo(int maHoSo, int maTaiKhoan)
+        {
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            ketNoi.Open();
+            using var giaoDich = ketNoi.BeginTransaction();
+
+            try
+            {
+                // 1. Xóa ThongBao liên quan đến lịch tiêm của hồ sơ
+                using (var lenh = new SqlCommand(@"
+DELETE tb FROM ThongBao tb
+INNER JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+WHERE lt.maHoSo = @MaHoSo AND tb.maTaiKhoan = @MaTaiKhoan", ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+                    lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+                    lenh.ExecuteNonQuery();
+                }
+
+                // 2. Xóa LichSuTiem liên quan đến lịch tiêm của hồ sơ
+                using (var lenh = new SqlCommand(@"
+DELETE lst FROM LichSuTiem lst
+INNER JOIN LichTiem lt ON lst.maLichTiem = lt.maLichTiem
+WHERE lt.maHoSo = @MaHoSo", ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+                    lenh.ExecuteNonQuery();
+                }
+
+                // 3. Xóa LichTiem của hồ sơ
+                using (var lenh = new SqlCommand(@"
+DELETE FROM LichTiem WHERE maHoSo = @MaHoSo", ketNoi, giaoDich))
+                {
+                    lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+                    lenh.ExecuteNonQuery();
+                }
+
+                giaoDich.Commit();
+                return true;
+            }
+            catch
+            {
+                giaoDich.Rollback();
+                return false;
+            }
+        }
+
         // Mục đích: phương thức DocLichTiem thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
@@ -490,8 +543,7 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)";
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
             lenh.Parameters.AddWithValue("@TieuDeSapDen", "Sắp đến lịch tiêm");
-            lenh.Parameters.AddWithValue("@TieuDeHomNay", "Hôm nay là lịch tiêm");
-            lenh.Parameters.AddWithValue("@TieuDeDenHanCu", "Đã đến lịch tiêm");
+            lenh.Parameters.AddWithValue("@TieuDeHomNay", "Đến lịch tiêm hôm nay");
             lenh.Parameters.AddWithValue("@TieuDeQuaHan", "Quá hạn lịch tiêm");
         }
 

@@ -18,21 +18,17 @@ namespace DoAnTotNghiep.DAL
             AND CAST(lt.ngayTiemDuKien AS DATE) < CAST(GETDATE() AS DATE) THEN N'qua-han'
         WHEN (lt.maLichTiem IS NULL OR ISNULL(lt.trangThai, N'') <> N'Đã tiêm')
             AND ISNULL(tb.tieuDe, N'') LIKE N'%Quá hạn%' THEN N'qua-han'
-            WHEN lt.maLichTiem IS NOT NULL
-                AND ISNULL(lt.trangThai, N'') <> N'Đã tiêm'
-                AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, 3, CAST(GETDATE() AS DATE)) THEN N'den-lich'
+        WHEN lt.maLichTiem IS NOT NULL
+            AND ISNULL(lt.trangThai, N'') <> N'Đã tiêm'
+            AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, 3, CAST(GETDATE() AS DATE)) THEN N'den-lich'
         WHEN (lt.maLichTiem IS NULL OR ISNULL(lt.trangThai, N'') <> N'Đã tiêm')
-            AND (
-                ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%'
-                OR (ISNULL(tb.tieuDe, N'') LIKE N'%Hôm nay%' AND ISNULL(tb.tieuDe, N'') LIKE N'%lịch tiêm%')
-            ) THEN N'den-lich'
+            AND (ISNULL(tb.tieuDe, N'') LIKE N'%đến lịch%' OR ISNULL(tb.tieuDe, N'') LIKE N'%Sắp đến lịch%') THEN N'den-lich'
         ELSE N'da-cap-nhat'
     END";
         private static readonly string[] TieuDeThongBaoNhacLich =
         {
             "Sắp đến lịch tiêm",
-            "Hôm nay là lịch tiêm",
-            "Đã đến lịch tiêm",
+            "Đến lịch tiêm hôm nay",
             "Quá hạn lịch tiêm"
         };
         private const int GioGuiThongBaoNhacLich = 0;
@@ -190,6 +186,28 @@ AND (
         // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
         // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
         // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // Xóa thông báo nhắc lịch của các mũi chưa tiêm thuộc hồ sơ (khi đổi ngày sinh)
+        public int XoaThongBaoNhacLichTheoHoSo(int maHoSo, int maTaiKhoan)
+        {
+            const string sql = @"DELETE tb
+FROM ThongBao tb
+INNER JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+WHERE lt.maHoSo = @MaHoSo
+AND tb.maTaiKhoan = @MaTaiKhoan
+AND (lt.trangThai IS NULL OR lt.trangThai <> N'Đã tiêm')
+AND tb.tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
+
+            using var ketNoi = new SqlConnection(chuoiKetNoi);
+            using var lenh = new SqlCommand(sql, ketNoi);
+            lenh.Parameters.AddWithValue("@MaHoSo", maHoSo);
+            lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
+            lenh.Parameters.AddWithValue("@TieuDeSapDen", TieuDeThongBaoNhacLich[0]);
+            lenh.Parameters.AddWithValue("@TieuDeHomNay", TieuDeThongBaoNhacLich[1]);
+            lenh.Parameters.AddWithValue("@TieuDeQuaHan", TieuDeThongBaoNhacLich[2]);
+            ketNoi.Open();
+            return lenh.ExecuteNonQuery();
+        }
+
         public int DemThongBaoChuaDoc(int maTaiKhoan)
         {
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
@@ -409,9 +427,6 @@ AND daDoc = 0";
                     $"soNgay={(l.NgayTiemDuKien.Date - DateTime.Today).Days}");
             }
 
-            var soLichDenHanTheoHoSo = danhSachLich
-                .GroupBy(lich => lich.MaHoSo)
-                .ToDictionary(nhom => nhom.Key, nhom => nhom.Count());
             var soThongBaoDaTao = 0;
 
             foreach (var lich in danhSachLich)
@@ -424,7 +439,7 @@ AND daDoc = 0";
                     continue;
                 }
 
-                var noiDung = TaoNoiDungThongBao(lich, soLichDenHanTheoHoSo.GetValueOrDefault(lich.MaHoSo) > 1);
+                var noiDung = TaoNoiDungThongBao(lich);
 
                 var maThongBao = ThemThongBaoLichTiem(maTaiKhoan, lich.MaLichTiem, tieuDe, noiDung);
                 if (maThongBao > 0)
@@ -440,7 +455,8 @@ AND daDoc = 0";
             return soThongBaoDaTao;
         }
 
-        // Lấy các lịch chưa tiêm sắp đến hạn, đúng ngày hoặc quá hạn của tài khoản hiện tại.
+        // Lấy các lịch chưa tiêm trong khoảng: hôm qua (-1 ngày) đến 3 ngày tới.
+        // Các mũi quá hạn > 1 ngày (diffDays < -1) bị loại: không tạo thông báo.
         private List<LichTiemCanThongBao> LayLichTiemDenHan(int maTaiKhoan)
         {
             const string sql = @"SELECT
@@ -463,6 +479,7 @@ INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
 INNER JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE hs.maTaiKhoan = @MaTaiKhoan
+AND CAST(lt.ngayTiemDuKien AS DATE) >= DATEADD(DAY, -1, CAST(GETDATE() AS DATE))
 AND CAST(lt.ngayTiemDuKien AS DATE) <= DATEADD(DAY, @SoNgayNhacTruoc, CAST(GETDATE() AS DATE))
 AND ISNULL(lt.trangThai, N'') <> @TrangThaiDaTiem
 ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
@@ -506,13 +523,15 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
 FROM ThongBao
 WHERE maTaiKhoan = @maTaiKhoan
 AND maLichTiem = @maLichTiem
-AND tieuDe = @tieuDe";
+AND tieuDe = @tieuDe
+AND CONVERT(DATE, ngayGui) = CONVERT(DATE, @homNay)";
 
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@maTaiKhoan", maTaiKhoan);
             lenh.Parameters.AddWithValue("@maLichTiem", maLichTiem);
             lenh.Parameters.AddWithValue("@tieuDe", tieuDe);
+            lenh.Parameters.AddWithValue("@homNay", DateTime.Today);
 
             ketNoi.Open();
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
@@ -545,40 +564,26 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
             }
 
             return lich.NgayTiemDuKien.Date == DateTime.Today
-                ? "Hôm nay là lịch tiêm"
+                ? "Đến lịch tiêm hôm nay"
                 : "Sắp đến lịch tiêm";
         }
 
-        private static string TaoNoiDungThongBao(LichTiemCanThongBao lich, bool coMuiKhacDenHan)
+        private static string TaoNoiDungThongBao(LichTiemCanThongBao lich)
         {
-            var ngayTiem = lich.NgayTiemDuKien.ToString("dd-MM-yyyy");
-            var soNgayConLai = (lich.NgayTiemDuKien.Date - DateTime.Today).Days;
-            var thongTinMui = $"mũi {lich.SoMui}";
-            if (!string.IsNullOrWhiteSpace(lich.TenMui))
-            {
-                thongTinMui += $" - {lich.TenMui}";
-            }
+            var thongTinMui = $"Mũi {lich.SoMui}";
 
-            string noiDung;
             if (lich.NgayTiemDuKien.Date < DateTime.Today)
             {
-                noiDung = $"{lich.HoTenHoSo} đã quá hạn {thongTinMui} {lich.TenVaccine}. Hãy cập nhật khi đã tiêm.";
-            }
-            else if (lich.NgayTiemDuKien.Date == DateTime.Today)
-            {
-                noiDung = $"Hôm nay {lich.HoTenHoSo} đến lịch tiêm {thongTinMui} {lich.TenVaccine}. Đã tiêm chưa?";
-            }
-            else
-            {
-                noiDung = $"Còn {soNgayConLai} ngày đến lịch tiêm của {lich.HoTenHoSo}: {thongTinMui} {lich.TenVaccine}.";
+                return $"Hồ sơ {lich.HoTenHoSo} đã quá hạn {thongTinMui} - {lich.TenVaccine}. Vui lòng kiểm tra lịch tiêm và cập nhật trạng thái nếu đã tiêm.";
             }
 
-            if (coMuiKhacDenHan)
+            if (lich.NgayTiemDuKien.Date == DateTime.Today)
             {
-                noiDung += " Có thêm mũi khác cần xem.";
+                return $"Hôm nay, hồ sơ {lich.HoTenHoSo} đến lịch tiêm {thongTinMui} - {lich.TenVaccine}. Vui lòng kiểm tra lịch tiêm để thực hiện đúng hẹn.";
             }
 
-            return noiDung;
+            var soNgayConLai = (lich.NgayTiemDuKien.Date - DateTime.Today).Days;
+            return $"Còn {soNgayConLai} ngày nữa, hồ sơ {lich.HoTenHoSo} sẽ đến lịch tiêm {thongTinMui} - {lich.TenVaccine}.";
         }
 
         private void XoaThongBaoNhacLichKhongConHieuLuc(int maTaiKhoan)
@@ -587,7 +592,7 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
 FROM ThongBao tb
 LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
 WHERE tb.maTaiKhoan = @MaTaiKhoan
-AND tb.tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeDenHanCu, @TieuDeQuaHan)
+AND tb.tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)
 AND (
     tb.ngayGui < DATEADD(DAY, -@SoNgayGiu, GETDATE())
     OR lt.maLichTiem IS NULL
@@ -599,8 +604,7 @@ AND (
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
             lenh.Parameters.AddWithValue("@TieuDeSapDen", TieuDeThongBaoNhacLich[0]);
             lenh.Parameters.AddWithValue("@TieuDeHomNay", TieuDeThongBaoNhacLich[1]);
-            lenh.Parameters.AddWithValue("@TieuDeDenHanCu", TieuDeThongBaoNhacLich[2]);
-            lenh.Parameters.AddWithValue("@TieuDeQuaHan", TieuDeThongBaoNhacLich[3]);
+            lenh.Parameters.AddWithValue("@TieuDeQuaHan", TieuDeThongBaoNhacLich[2]);
             lenh.Parameters.AddWithValue("@SoNgayGiu", SoNgayGiuThongBaoNhacLich);
             lenh.Parameters.AddWithValue("@TrangThaiDaTiem", "Đã tiêm");
 
@@ -684,13 +688,20 @@ AND maTaiKhoan = @MaTaiKhoan";
         }
 
         // Lấy tối đa N thông báo chưa đọc chưa từng được đẩy desktop
+        // Trả về thông tin chi tiết để client gộp notification desktop theo hồ sơ
         public List<DesktopPushNotification> LayThongBaoChuaDocChoDesktopPush(int maTaiKhoan, int soLuong)
         {
             DamBaoBangDesktopPushLog();
             const string sql = @"
 SELECT TOP (@SoLuong)
-    tb.maThongBao, tb.tieuDe, tb.noiDung, tb.ngayGui
+    tb.maThongBao, tb.tieuDe, tb.noiDung, tb.ngayGui,
+    lt.maHoSo, hs.hoTen AS hoTenHoSo,
+    v.tenVaccine, mt.tenMui, mt.soMui
 FROM ThongBao tb
+LEFT JOIN LichTiem lt ON tb.maLichTiem = lt.maLichTiem
+LEFT JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo AND hs.maTaiKhoan = tb.maTaiKhoan
+LEFT JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem
+LEFT JOIN Vaccine v ON mt.maVaccine = v.maVaccine
 WHERE tb.maTaiKhoan = @MaTaiKhoan
 AND tb.daDoc = 0
 AND NOT EXISTS (
@@ -711,15 +722,30 @@ ORDER BY tb.ngayGui DESC";
             var danhSach = new List<DesktopPushNotification>();
             while (doc.Read())
             {
-                danhSach.Add(new DesktopPushNotification
+                var item = new DesktopPushNotification
                 {
                     Id = Convert.ToInt32(doc["maThongBao"]),
                     Title = doc["tieuDe"] == DBNull.Value ? "" : doc["tieuDe"].ToString() ?? "",
                     Message = doc["noiDung"] == DBNull.Value ? "" : doc["noiDung"].ToString() ?? "",
-                    CreatedAt = Convert.ToDateTime(doc["ngayGui"])
-                });
+                    CreatedAt = Convert.ToDateTime(doc["ngayGui"]),
+                    MaHoSo = doc["maHoSo"] == DBNull.Value ? null : Convert.ToInt32(doc["maHoSo"]),
+                    HoTenHoSo = doc["hoTenHoSo"] == DBNull.Value ? "" : doc["hoTenHoSo"].ToString() ?? "",
+                    TenVaccine = doc["tenVaccine"] == DBNull.Value ? "" : doc["tenVaccine"].ToString() ?? "",
+                    TenMui = doc["tenMui"] == DBNull.Value ? "" : doc["tenMui"].ToString() ?? "",
+                    SoMui = doc["soMui"] == DBNull.Value ? 0 : Convert.ToInt32(doc["soMui"])
+                };
+                item.LoaiThongBao = GetLoaiThongBao(item.Title);
+                danhSach.Add(item);
             }
             return danhSach;
+        }
+
+        private static string GetLoaiThongBao(string tieuDe)
+        {
+            if (tieuDe.Contains("Quá hạn")) return "overdue";
+            if (tieuDe.Contains("Đến lịch tiêm hôm nay")) return "due_today";
+            if (tieuDe.Contains("Sắp đến lịch")) return "upcoming";
+            return "updated";
         }
 
         // Đánh dấu các thông báo đã được đẩy desktop (chống trùng)
@@ -787,6 +813,12 @@ END;";
             public string Title { get; set; } = "";
             public string Message { get; set; } = "";
             public DateTime CreatedAt { get; set; }
+            public int? MaHoSo { get; set; }
+            public string HoTenHoSo { get; set; } = "";
+            public string TenVaccine { get; set; } = "";
+            public string TenMui { get; set; } = "";
+            public int SoMui { get; set; }
+            public string LoaiThongBao { get; set; } = "";
         }
     }
 }

@@ -14,17 +14,20 @@ namespace DoAnTotNghiep.Controllers
         private readonly TaiKhoan_DAL taiKhoanDAL;
         private readonly ThongBao_DAL thongBaoDAL;
         private readonly TaoLichTiemService taoLichTiemService;
+        private readonly LichTiem_DAL lichTiemDAL;
 
         public HoSoSucKhoeController(
             HoSoSucKhoe_DAL hoSoSucKhoeDAL,
             TaiKhoan_DAL taiKhoanDAL,
             ThongBao_DAL thongBaoDAL,
-            TaoLichTiemService taoLichTiemService)
+            TaoLichTiemService taoLichTiemService,
+            LichTiem_DAL lichTiemDAL)
         {
             this.hoSoSucKhoeDAL = hoSoSucKhoeDAL;
             this.taiKhoanDAL = taiKhoanDAL;
             this.thongBaoDAL = thongBaoDAL;
             this.taoLichTiemService = taoLichTiemService;
+            this.lichTiemDAL = lichTiemDAL;
         }
 
         // Helper: sinh lịch tiêm + lịch demo + đồng bộ notification
@@ -112,7 +115,7 @@ namespace DoAnTotNghiep.Controllers
             var ngaySinhRaw = Request.Form["NgaySinh"].FirstOrDefault() ?? "";
             if (string.IsNullOrWhiteSpace(ngaySinhRaw))
             {
-                ModelState.AddModelError("NgaySinh", "Vui lòng nhập ngày sinh hợp lệ theo định dạng MM/DD/YYYY.");
+                ModelState.AddModelError("NgaySinh", "Vui lòng nhập ngày sinh hợp lệ theo định dạng yyyy-MM-dd.");
                 ViewBag.ThongBao = "Vui lòng nhập ngày sinh hợp lệ.";
                 return View(hoSo);
             }
@@ -121,7 +124,7 @@ namespace DoAnTotNghiep.Controllers
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None, out DateTime ngaySinhParsed))
             {
-                ModelState.AddModelError("NgaySinh", "Ngày sinh không đúng định dạng YYYY-MM-DD.");
+                ModelState.AddModelError("NgaySinh", "Ngày sinh không đúng định dạng yyyy-MM-dd.");
                 ViewBag.ThongBao = "Ngày sinh không hợp lệ.";
                 return View(hoSo);
             }
@@ -174,23 +177,71 @@ namespace DoAnTotNghiep.Controllers
             var hoSo = hoSoSucKhoeDAL.LayTheoId(id, maTaiKhoan.Value);
             if (hoSo == null) return NotFound();
 
+            ViewBag.NgaySinhIso = hoSo.NgaySinh.ToString("yyyy-MM-dd");
             return View(hoSo);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Mục đích: action Edit xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
-        public IActionResult Edit(HoSoSucKhoe hoSo)
+        public IActionResult Edit(HoSoSucKhoe hoSo, bool? xacNhanDoiNgaySinh)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
             if (maTaiKhoan == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
             if (!KiemTraHopLe(hoSo)) return View(hoSo);
 
+            // Kiem tra ngay sinh co thay doi khong
+            var hoSoCu = hoSoSucKhoeDAL.LayTheoId(hoSo.MaHoSo, maTaiKhoan.Value);
+            var ngaySinhThayDoi = hoSoCu != null && hoSoCu.NgaySinh.Date != hoSo.NgaySinh.Date;
+
+            if (ngaySinhThayDoi && xacNhanDoiNgaySinh != true)
+            {
+                // Gui lai view kem thong tin de JS hien popup xac nhan
+                ViewBag.NgaySinhIso = hoSo.NgaySinh.ToString("yyyy-MM-dd");
+                ViewBag.XacNhanDoiNgaySinh = true;
+                return View(hoSo);
+            }
+
             hoSo.MaTaiKhoan = maTaiKhoan.Value;
+
+            if (ngaySinhThayDoi)
+            {
+                // Xoa toan bo lich tiem cu, lich su, thong bao (transaction)
+                if (!lichTiemDAL.XoaToanBoLichTiemCuaHoSo(hoSo.MaHoSo, maTaiKhoan.Value))
+                {
+                    ViewBag.ThongBao = "Không thể xóa lịch tiêm cũ. Vui lòng thử lại.";
+                    return View(hoSo);
+                }
+
+                // Cap nhat ngay sinh + danh dau thoi diem thay doi
+                if (!hoSoSucKhoeDAL.CapNhatNgaySinhVaDanhDau(hoSo.MaHoSo, maTaiKhoan.Value, hoSo.NgaySinh))
+                {
+                    ViewBag.ThongBao = "Cập nhật hồ sơ thất bại.";
+                    return View(hoSo);
+                }
+
+                // Tao lai lich tiem moi theo ngay sinh moi
+                taoLichTiemService.TaoLichTiemChoHoSo(hoSo.MaHoSo);
+
+                // Tao lai thong bao theo lich moi
+                thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan.Value);
+
+                // Tao thong bao "Da tao lai lich tiem"
+                var thongBao = new ThongBao
+                {
+                    MaTaiKhoan = maTaiKhoan.Value,
+                    MaLichTiem = null,
+                    TieuDe = "Đã tạo lại lịch tiêm",
+                    NoiDung = $"Ngày sinh của hồ sơ {hoSo.HoTen} đã được cập nhật. Hệ thống đã tạo lại lịch tiêm mới theo ngày sinh mới. Vui lòng cập nhật lại các mũi đã tiêm để tiếp tục theo dõi lịch chính xác.",
+                    NgayGui = DateTime.Now,
+                    DaDoc = false
+                };
+                thongBaoDAL.Them(thongBao);
+
+                TempData["ThongBao"] = "Đã cập nhật ngày sinh và tạo lại lịch tiêm mới.";
+                return RedirectToAction("Index", "LichTiem", new { maHoSo = hoSo.MaHoSo });
+            }
+
             if (!hoSoSucKhoeDAL.CapNhat(hoSo))
             {
                 ViewBag.ThongBao = "Cập nhật hồ sơ thất bại hoặc hồ sơ không thuộc tài khoản của bạn";
@@ -199,6 +250,17 @@ namespace DoAnTotNghiep.Controllers
 
             TempData["ThongBao"] = "Cập nhật hồ sơ sức khỏe thành công";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult TatCanhBaoDoiNgaySinh(int maHoSo)
+        {
+            var maTaiKhoan = LayMaTaiKhoanUser();
+            if (maTaiKhoan == null) return Unauthorized();
+
+            hoSoSucKhoeDAL.TatCanhBaoDoiNgaySinh(maHoSo, maTaiKhoan.Value);
+            return Ok(new { success = true });
         }
 
         [HttpPost, ActionName("Delete")]

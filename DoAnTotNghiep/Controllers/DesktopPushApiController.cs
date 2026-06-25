@@ -26,10 +26,6 @@ namespace DoAnTotNghiep.Controllers
             return maTaiKhoan.Value;
         }
 
-        /// <summary>
-        /// Lấy tối đa 5 thông báo chưa đọc chưa từng được đẩy desktop
-        /// GET /api/notifications/unread-for-push
-        /// </summary>
         [HttpGet("unread-for-push")]
         public IActionResult GetUnreadForPush()
         {
@@ -37,7 +33,7 @@ namespace DoAnTotNghiep.Controllers
             if (userId == null)
                 return Unauthorized(new { success = false, message = "Vui lòng đăng nhập." });
 
-            var items = thongBaoDAL.LayThongBaoChuaDocChoDesktopPush(userId.Value, 5);
+            var items = thongBaoDAL.LayThongBaoChuaDocChoDesktopPush(userId.Value, 50);
 
             System.Console.WriteLine($"[DesktopPushApi] unread-for-push userId={userId}, count={items.Count}");
 
@@ -46,7 +42,12 @@ namespace DoAnTotNghiep.Controllers
                 id = i.Id,
                 title = i.Title,
                 message = i.Message,
-                category = GetCategoryFromTitle(i.Title),
+                category = i.LoaiThongBao,
+                maHoSo = i.MaHoSo,
+                hoTenHoSo = i.HoTenHoSo ?? "",
+                tenVaccine = i.TenVaccine ?? "",
+                tenMui = i.TenMui ?? "",
+                soMui = i.SoMui,
                 url = "/ThongBao/Index",
                 createdAt = i.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")
             }).ToList();
@@ -54,10 +55,6 @@ namespace DoAnTotNghiep.Controllers
             return Ok(new { success = true, items = result });
         }
 
-        /// <summary>
-        /// Đánh dấu các thông báo đã được đẩy desktop
-        /// POST /api/notifications/mark-desktop-pushed
-        /// </summary>
         [HttpPost("mark-desktop-pushed")]
         public IActionResult MarkDesktopPushed([FromBody] MarkDesktopPushedRequest request)
         {
@@ -73,13 +70,6 @@ namespace DoAnTotNghiep.Controllers
             System.Console.WriteLine($"[DesktopPushApi] mark-desktop-pushed userId={userId}, ids=[{string.Join(",", request.NotificationIds)}]");
 
             return Ok(new { success = true, marked = request.NotificationIds.Count });
-        }
-
-        private static string GetCategoryFromTitle(string title)
-        {
-            if (title.Contains("Quá hạn")) return "overdue";
-            if (title.Contains("đến lịch") || title.Contains("Hôm nay")) return "upcoming";
-            return "updated";
         }
     }
 
