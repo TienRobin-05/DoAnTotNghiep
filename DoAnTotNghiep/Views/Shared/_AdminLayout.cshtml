@@ -1,4 +1,4 @@
-@{
+﻿@{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     var hoTenDangNhap = Context.Session.GetString("HoTen");
@@ -26,9 +26,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Pharmacy City Admin</title>
-    <link rel="icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
-    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/images/logo/pharmacy-favicon.png")" />
+    <title>@ViewData["Title"] - Pharmacity Admin</title>
+    <link rel="icon" type="image/png" href="@Url.Content("~/images/logo/pharmacity-favicon.png")" />
+    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/images/logo/pharmacity-favicon.png")" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1375,9 +1375,9 @@
 <body class="site-page-shell">
     <div class="admin-shell">
         <aside class="admin-sidebar" aria-label="Menu quản trị">
-            <a class="admin-brand" href="/Admin/Index" aria-label="Pharmacy City Admin">
-                <img src="/images/logo/pharmacy-favicon.png" alt="Pharmacy City" />
-                <strong>Pharmacy City</strong>
+            <a class="admin-brand" href="/Admin/Index" aria-label="Pharmacity Admin">
+                <img src="/images/logo/pharmacity-favicon.png" alt="Pharmacity" />
+                <strong>Pharmacity</strong>
             </a>
 
             <nav class="admin-side-nav">
@@ -1408,7 +1408,7 @@
             </nav>
 
             <div class="admin-sidebar-card">
-                <strong>Pharmacy City Admin</strong>
+                <strong>Pharmacity Admin</strong>
                 <p>Hệ thống quản lý sức khỏe<br />và lịch tiêm chủng</p>
                 <span class="admin-version">Phiên bản 1.0.0</span>
             </div>

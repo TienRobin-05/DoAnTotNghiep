@@ -1,14 +1,14 @@
-self.addEventListener("push", function (event) {
+﻿self.addEventListener("push", function (event) {
     if (!event.data) return;
 
     const data = event.data.json();
 
-    const title = data.title || "Pharmacy City";
+    const title = data.title || "Pharmacity";
 
     const options = {
         body: data.body || "",
-        icon: data.icon || "/images/logo/pharmacy-favicon.png",
-        badge: data.badge || "/images/logo/pharmacy-favicon.png",
+        icon: data.icon || "/images/logo/pharmacity-favicon.png",
+        badge: data.badge || "/images/logo/pharmacity-favicon.png",
         data: data.data || {},
         tag: data.tag || "pharmacy-city-notification",
         renotify: true

@@ -666,7 +666,7 @@
                             <i class="bi bi-chevron-right" aria-hidden="true"></i>
                         </button>
                     }
-                    <div id="vaccinationProfileNoResult" class="vaccination-profile-no-result">Không tìm thấy hồ sơ phù hợp.</div>
+                    <div id="vaccinationProfileNoResult" class="vaccination-profile-no-result" style="display:none;">Không tìm thấy hồ sơ phù hợp.</div>
                 </div>
             </aside>
 
@@ -825,12 +825,12 @@
                 let visibleCount = 0;
 
                 profileButtons.forEach((button) => {
-                    const isMatch = normalizeText(button.dataset.search).includes(keyword);
-                    button.hidden = !isMatch;
+                    const isMatch = keyword === "" || normalizeText(button.dataset.search).includes(keyword);
+                    button.style.display = isMatch ? "" : "none";
                     if (isMatch) visibleCount++;
                 });
 
-                noResult.classList.toggle('is-visible', visibleCount === 0);
+                noResult.style.display = visibleCount === 0 ? "block" : "none";
             });
         })();
     </script>

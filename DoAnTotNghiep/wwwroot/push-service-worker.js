@@ -1,4 +1,4 @@
-self.addEventListener("install", event => {
+﻿self.addEventListener("install", event => {
     event.waitUntil(self.skipWaiting());
 });
 
@@ -11,11 +11,11 @@ self.addEventListener("push", event => {
 
     const data = event.data.json();
 
-    const title = data.title || "Pharmacy City";
+    const title = data.title || "Pharmacity";
     const options = {
         body: data.body || "",
-        icon: data.icon || "/images/logo/pharmacy-favicon.png",
-        badge: data.badge || "/images/logo/pharmacy-favicon.png",
+        icon: data.icon || "/images/logo/pharmacity-favicon.png",
+        badge: data.badge || "/images/logo/pharmacity-favicon.png",
         data: data.data || {},
         tag: data.tag || "pharmacy-city-notification",
         renotify: true,

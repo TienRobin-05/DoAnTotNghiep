@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
     var toggle = document.getElementById("tuDongNhacLichSwitch");
 
     if (!window.isSecureContext || !("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
@@ -90,7 +90,7 @@
                     // Day 1 thong bao tong hop
                     var body = "Hồ sơ " + profile.hoTenHoSo + " có " + profile.items.length + " mũi tiêm quá hạn. Vui lòng vào lịch tiêm để kiểm tra và cập nhật trạng thái.";
                     await showDesktopNotification(registration, {
-                        title: "Pharmacy City",
+                        title: "Pharmacity",
                         message: body,
                         url: "/LichTiem/ChonHoSo",
                         id: profile.items[0].id
@@ -114,7 +114,7 @@
             if (otherItems.length > NGUONG_GOP) {
                 var body = "Bạn có " + otherItems.length + " thông báo tiêm chủng cần kiểm tra. Vui lòng vào mục Thông báo để xem chi tiết.";
                 await showDesktopNotification(registration, {
-                    title: "Pharmacy City",
+                    title: "Pharmacity",
                     message: body,
                     url: "/ThongBao/Index",
                     id: otherItems[0].id
@@ -174,15 +174,15 @@
     }
 
     async function showDesktopNotification(registration, item) {
-        var title = item.title || "Pharmacy City";
+        var title = item.title || "Pharmacity";
         var body = item.message || "";
         var tag = "notif-" + (item.id || Date.now());
 
         try {
             await registration.showNotification(title, {
                 body: body,
-                icon: "/images/logo/pharmacy-favicon.png",
-                badge: "/images/logo/pharmacy-favicon.png",
+                icon: "/images/logo/pharmacity-favicon.png",
+                badge: "/images/logo/pharmacity-favicon.png",
                 tag: tag,
                 renotify: true,
                 requireInteraction: false,

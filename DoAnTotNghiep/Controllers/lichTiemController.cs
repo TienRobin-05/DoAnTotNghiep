@@ -116,11 +116,11 @@ namespace DoAnTotNghiep.Controllers
             var lichTiem = lichTiemDAL.LayChiTietCoKiemTraChuSoHuu(maLichTiem, maTaiKhoan.Value);
             if (lichTiem == null) return NotFound();
 
-            // Pre-fill với dữ liệu cũ nếu đã từng cập nhật
+            // Pre-fill với ngày dự kiến (nếu chưa từng cập nhật) hoặc ngày tiêm thực tế cũ
             var lichSuCu = lichSuTiemDAL.LayTheoMaLichTiem(maLichTiem);
             ViewBag.NgayTiemThucTe = lichSuCu != null
                 ? lichSuCu.NgayTiemThucTe.ToString("yyyy-MM-dd")
-                : DateTime.Today.ToString("yyyy-MM-dd");
+                : lichTiem.NgayTiemDuKien.ToString("yyyy-MM-dd");
             ViewBag.GhiChu = lichSuCu?.GhiChu ?? string.Empty;
             return View(lichTiem);
         }

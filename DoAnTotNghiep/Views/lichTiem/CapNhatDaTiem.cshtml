@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Cập nhật trạng thái đã tiêm";
     Layout = "_UserLayout";
-    var ngayTiemThucTe = ViewBag.NgayTiemThucTe as string ?? DateTime.Today.ToString("yyyy-MM-dd");
+    var ngayTiemThucTe = ViewBag.NgayTiemThucTe as string ?? "";
     var ghiChu = ViewBag.GhiChu as string ?? string.Empty;
 }
 
@@ -88,7 +88,6 @@
 
                     <div class="update-date-input-wrap">
                         <input name="ngayTiemThucTe" type="date" class="update-input" value="@ngayTiemThucTe" required />
-                        <i class="bi bi-calendar3"></i>
                     </div>
                 </div>
 
