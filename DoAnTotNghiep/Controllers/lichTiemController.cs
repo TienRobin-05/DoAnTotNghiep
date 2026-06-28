@@ -68,6 +68,7 @@ namespace DoAnTotNghiep.Controllers
             ViewBag.CanhBaoDoiNgaySinh = hoSoSucKhoeDAL.KiemTraHoSoCoCanhBaoDoiNgaySinh(maHoSo, maTaiKhoan.Value);
             ViewBag.MaHoSoHienTai = maHoSo;
             ViewBag.NgaySinhText = hoSo.NgaySinh.ToString("dd/MM/yyyy");
+            ViewBag.NgaySinhIso = hoSo.NgaySinh.ToString("yyyy-MM-dd");
 
             var tatCaLichTiem = lichTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value);
 

@@ -21,7 +21,7 @@ namespace DoAnTotNghiep.DAL
             // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
             // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
-hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
+ hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
 INNER JOIN HoSoSucKhoe hs ON lt.maHoSo = hs.maHoSo
 INNER JOIN MuiTiemVaccine mt ON lt.maMuiTiem = mt.maMuiTiem

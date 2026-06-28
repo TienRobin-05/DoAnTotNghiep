@@ -55,10 +55,34 @@
 .vaccine-count-badge { font-weight: 800; color: #0d6efd; }
 .vaccine-dose-row { padding: 12px 18px; border-bottom: 1px solid #eef2f7; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .vaccine-dose-row:last-child { border-bottom: none; }
-@@media (max-width: 900px) { .schedule-item { grid-template-columns: 1fr; gap: 10px; align-items: flex-start; } .update-btn { width: 100%; } .month-group-header { flex-direction: column; align-items: flex-start; gap: 10px; } }
+.profile-info-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; margin-bottom: 16px; background: #fff; border: 1px solid #dbe7f5; border-radius: 14px; box-shadow: 0 6px 18px rgba(15,23,42,.05); }
+.profile-info-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.profile-info-avatar { width: 46px; height: 46px; border-radius: 14px; background: #eaf4ff; color: #0d6efd; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.profile-info-name { font-size: 15px; color: #475569; }
+.profile-info-name strong { color: #0f172a; font-size: 16px; }
+.profile-info-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; color: #64748b; font-size: 13px; }
+.profile-info-code { color: #94a3b8; font-size: 12px; }
+.profile-info-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: 1px solid #cfe0f4; border-radius: 10px; color: #0d6efd; background: #fff; font-weight: 700; font-size: 13px; text-decoration: none; white-space: nowrap; }
+.profile-info-btn:hover { background: #eff6ff; }
+@@media (max-width: 900px) { .schedule-item { grid-template-columns: 1fr; gap: 10px; align-items: flex-start; } .update-btn { width: 100%; } .month-group-header { flex-direction: column; align-items: flex-start; gap: 10px; } .profile-info-card { flex-direction: column; align-items: flex-start; } }
 </style>
 
 <div class="schedule-page">
+    @* Profile info card *@
+    <div class="profile-info-card">
+        <div class="profile-info-left">
+            <div class="profile-info-avatar"><i class="bi bi-person-fill"></i></div>
+            <div>
+                <div class="profile-info-name">Đang xem lịch tiêm của: <strong>@ViewBag.HoTenHoSo</strong></div>
+                <div class="profile-info-meta">
+                    <span>Ngày sinh: @ViewBag.NgaySinhText</span>
+                    <span class="profile-info-code">Mã hồ sơ #@ViewBag.MaHoSoHienTai</span>
+                </div>
+            </div>
+        </div>
+        <a asp-action="ChonHoSo" class="profile-info-btn"><i class="bi bi-arrow-left"></i> Chọn hồ sơ khác</a>
+    </div>
+
     <div class="schedule-tabs">
         <button class="tab-btn @(hienThi=="time"?"active":"")" data-tab="time" onclick="switchTab('time')">Theo thời gian</button>
         <button class="tab-btn @(hienThi=="vaccine"?"active":"")" data-tab="vaccine" onclick="switchTab('vaccine')">Theo vaccine</button>
@@ -70,6 +94,7 @@
         <button class="status-chip" data-status="overdue">Quá hạn <span class="count-overdue">0</span></button>
         <button class="status-chip" data-status="upcoming">Sắp tới <span class="count-upcoming">0</span></button>
         <button class="status-chip" data-status="done">Đã tiêm <span class="count-done">0</span></button>
+        <button class="status-chip" data-status="age">Phù hợp độ tuổi <span class="count-age">0</span></button>
     </div>
 
     @* Time Tab *@
@@ -77,7 +102,7 @@
         <div id="monthScheduleList" class="month-schedule-list"></div>
         <div id="emptyStateTime" class="empty-state" style="display:none;">
             <h3>Không có mũi tiêm phù hợp</h3>
-            <p>Trạng thái hiện tại chưa có dữ liệu.</p>
+            <p id="emptyStateTimeText">Trạng thái hiện tại chưa có dữ liệu.</p>
             <button type="button" onclick="resetToAll()">Xem tất cả</button>
         </div>
     </div>
@@ -98,6 +123,17 @@
     var scheduleData = @Html.Raw(scheduleDataJson);
     var currentStatus = "all";
     var updateUrlBase = '@Url.Action("CapNhatDaTiem", "LichTiem")';
+    var ngaySinhIso = '@ViewBag.NgaySinhIso';
+
+    // Kiểm tra mũi tiêm có phù hợp độ tuổi hiện tại (dựa trên ngày dự kiến)
+    function phuHopTuoi(item) {
+        if (!item.expectedDate) return false;
+        var d = new Date(item.expectedDate + "T00:00:00");
+        var today = new Date(); today.setHours(0,0,0,0);
+        var diff = Math.round((d - today) / (1000 * 60 * 60 * 24));
+        // Từ 30 ngày trước đến 90 ngày sau
+        return diff >= -30 && diff <= 90;
+    }
 
     function getStatus(item) {
         if (item.isDone || item.injectedDate) return "done";
@@ -140,6 +176,7 @@
 
     function getFilteredDataByStatus() {
         return scheduleData.filter(function(item) {
+            if (currentStatus === "age") return phuHopTuoi(item);
             return currentStatus === "all" || getStatus(item) === currentStatus;
         });
     }
@@ -149,10 +186,12 @@
         var overdue = scheduleData.filter(function(x) { return getStatus(x) === "overdue"; }).length;
         var upcoming = scheduleData.filter(function(x) { return getStatus(x) === "upcoming"; }).length;
         var done = scheduleData.filter(function(x) { return getStatus(x) === "done"; }).length;
+        var age = scheduleData.filter(function(x) { return phuHopTuoi(x); }).length;
         document.querySelectorAll(".count-all").forEach(function(el) { el.textContent = all; });
         document.querySelectorAll(".count-overdue").forEach(function(el) { el.textContent = overdue; });
         document.querySelectorAll(".count-upcoming").forEach(function(el) { el.textContent = upcoming; });
         document.querySelectorAll(".count-done").forEach(function(el) { el.textContent = done; });
+        document.querySelectorAll(".count-age").forEach(function(el) { el.textContent = age; });
     }
 
     function syncStatusButtons() {
@@ -175,8 +214,17 @@
         var sortedKeys = Object.keys(groups).sort(function(a,b) { return getMonthSort(a) - getMonthSort(b); });
         var container = document.getElementById("monthScheduleList");
         var empty = document.getElementById("emptyStateTime");
+        var emptyText = document.getElementById("emptyStateTimeText");
         container.innerHTML = "";
-        if (sortedKeys.length === 0) { empty.style.display = "block"; return; }
+        if (sortedKeys.length === 0) {
+            if (currentStatus === "age") {
+                emptyText.textContent = "Hiện chưa có mũi tiêm nào phù hợp với độ tuổi hiện tại. Bạn có thể chọn Tất cả để xem đầy đủ lịch tiêm.";
+            } else {
+                emptyText.textContent = "Trạng thái hiện tại chưa có dữ liệu.";
+            }
+            empty.style.display = "block";
+            return;
+        }
         empty.style.display = "none";
         sortedKeys.forEach(function(monthKey) {
             var items = groups[monthKey];
