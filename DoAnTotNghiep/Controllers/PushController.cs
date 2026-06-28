@@ -1,4 +1,4 @@
-using DoAnTotNghiep.DAL;
+﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using DoAnTotNghiep.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +17,14 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // lấy public key push
         public IActionResult PublicKey()
         {
             return Json(new { publicKey = pushNotificationService.LayPublicKey() });
         }
 
         [HttpPost]
+        // đăng ký nhận thông báo
         public IActionResult DangKy([FromBody] PushSubscriptionRequest? request)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -44,6 +46,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpPost]
+        // hủy đăng ký thông báo
         public IActionResult HuyDangKy([FromBody] PushSubscriptionRequest? request)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();

@@ -12,14 +12,9 @@ namespace DoAnTotNghiep.DAL
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        // Mục đích: phương thức LayDanhSachTheoHoSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy lịch tiêm theo hồ sơ
         public List<LichTiem> LayDanhSachTheoHoSo(int maHoSo, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
  hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
@@ -71,6 +66,7 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             return danhSach;
         }
 
+        // đếm tổng lịch tiêm
         public int DemTatCa()
         {
             const string sql = "SELECT COUNT(*) FROM LichTiem";
@@ -81,6 +77,7 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             return Convert.ToInt32(lenh.ExecuteScalar());
         }
 
+        // đếm số mũi đã tiêm
         public int DemDaTiem()
         {
             const string sql = "SELECT COUNT(*) FROM LichTiem WHERE trangThai = N'Đã tiêm'";
@@ -104,14 +101,9 @@ AND ISNULL(trangThai, N'') <> N'Đã tiêm'";
             return Convert.ToInt32(lenh.ExecuteScalar());
         }
 
-        // Mục đích: phương thức KiemTraHoSoCoLichTiem thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // kiểm tra hồ sơ có lịch tiêm chưa
         public bool KiemTraHoSoCoLichTiem(int maHoSo)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM LichTiem WHERE maHoSo = @MaHoSo";
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
                         using var lenh = new SqlCommand(sql, ketNoi);
@@ -120,14 +112,9 @@ AND ISNULL(trangThai, N'') <> N'Đã tiêm'";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        // Mục đích: phương thức Them thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // thêm lịch tiêm
         public bool Them(LichTiem lich)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"INSERT INTO LichTiem(maHoSo, maMuiTiem, ngayTiemDuKien, trangThai, ghiChu)
 VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -141,14 +128,8 @@ VALUES(@MaHoSo, @MaMuiTiem, @NgayTiemDuKien, @TrangThai, @GhiChu)";
                         return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public LichTiem? LayTheoId(int maLichTiem)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
 hs.hoTen AS hoTenHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
@@ -164,14 +145,9 @@ WHERE lt.maLichTiem = @MaLichTiem";
             return doc.Read() ? DocLichTiem(doc) : null;
         }
 
-        // Mục đích: phương thức LayChiTietCoKiemTraChuSoHuu thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+// lấy chi tiết lịch tiêm kèm kiểm tra quyền
         public LichTiem? LayChiTietCoKiemTraChuSoHuu(int maLichTiem, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT lt.maLichTiem, lt.maHoSo, lt.maMuiTiem, lt.ngayTiemDuKien, lt.trangThai, lt.ghiChu,
 hs.hoTen AS hoTenHoSo, hs.ngaySinh AS ngaySinhHoSo, v.tenVaccine, v.nhomVaccine, mt.tenMui, mt.soMui
 FROM LichTiem lt
@@ -191,14 +167,8 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
             return doc.Read() ? DocLichTiem(doc) : null;
         }
 
-        // Mục đích: phương thức CapNhatDaTiem thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public bool CapNhatDaTiem(int maLichTiem)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "UPDATE LichTiem SET trangThai = @TrangThai WHERE maLichTiem = @MaLichTiem";
 
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -210,6 +180,7 @@ AND hs.maTaiKhoan = @MaTaiKhoan";
                         return lenh.ExecuteNonQuery() > 0;
         }
 
+        // cập nhật đã tiêm và ghi lịch sử
         public bool CapNhatDaTiemVaGhiLichSu(LichSuTiem lichSu, int maTaiKhoan)
         {
             const string sqlKhoaLich = @"SELECT TOP 1
@@ -363,14 +334,9 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
             }
         }
 
-        // Mục đích: phương thức CapNhatTrangThai thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // cập nhật trạng thái mũi tiêm
         public bool CapNhatTrangThai(int maLichTiem, string trangThai)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "UPDATE LichTiem SET trangThai = @TrangThai WHERE maLichTiem = @MaLichTiem";
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
                         using var lenh = new SqlCommand(sql, ketNoi);
@@ -380,14 +346,9 @@ AND tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
                         return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức KiemTraLichTonTai thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // kiểm tra lịch đã tồn tại
         public bool KiemTraLichTonTai(int maHoSo, int maMuiTiem)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM LichTiem WHERE maHoSo = @MaHoSo AND maMuiTiem = @MaMuiTiem";
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
                         using var lenh = new SqlCommand(sql, ketNoi);
@@ -446,10 +407,6 @@ DELETE FROM LichTiem WHERE maHoSo = @MaHoSo", ketNoi, giaoDich))
             }
         }
 
-        // Mục đích: phương thức DocLichTiem thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         private static LichTiem DocLichTiem(SqlDataReader doc)
         {
             return new LichTiem
@@ -471,10 +428,7 @@ DELETE FROM LichTiem WHERE maHoSo = @MaHoSo", ketNoi, giaoDich))
             };
         }
 
-        // Mục đích: phương thức CoCot thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // kiểm tra cột tồn tại
         private static bool CoCot(SqlDataReader doc, string tenCot)
         {
             for (var i = 0; i < doc.FieldCount; i++)
@@ -488,6 +442,7 @@ DELETE FROM LichTiem WHERE maHoSo = @MaHoSo", ketNoi, giaoDich))
             return false;
         }
 
+        // lấy mã thông báo
         private static int? LayMaThongBao(string sql, SqlConnection ketNoi, SqlTransaction giaoDich, int maTaiKhoan, int maLichTiem, string tieuDeDaCapNhat)
         {
             using var lenh = new SqlCommand(sql, ketNoi, giaoDich);

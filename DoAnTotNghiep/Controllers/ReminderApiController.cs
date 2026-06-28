@@ -1,4 +1,4 @@
-using DoAnTotNghiep.DAL;
+﻿using DoAnTotNghiep.DAL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DoAnTotNghiep.Controllers
@@ -23,6 +23,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet("push-enabled")]
+        // kiểm tra trạng thái thông báo đẩy
         public IActionResult GetPushEnabled()
         {
             var userId = GetCurrentUserId();
@@ -34,6 +35,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpPost("push-enabled")]
+        // bật/tắt thông báo đẩy
         public IActionResult SetPushEnabled([FromBody] PushEnabledRequest request)
         {
             var userId = GetCurrentUserId();

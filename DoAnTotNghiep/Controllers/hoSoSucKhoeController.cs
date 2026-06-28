@@ -53,6 +53,7 @@ namespace DoAnTotNghiep.Controllers
             System.Console.WriteLine($"[CreateProfile] Da dong bo {soTB} thong bao cho maTaiKhoan={maTaiKhoan}");
         }
 
+        // hiển thị danh sách hồ sơ
         public IActionResult Index()
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -63,6 +64,7 @@ namespace DoAnTotNghiep.Controllers
             return View(danhSach);
         }
 
+        // hiển thị chi tiết hồ sơ
         public IActionResult Details(int id)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -87,6 +89,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // xử lý thêm hồ sơ
         public IActionResult Create(HoSoSucKhoe hoSo)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -160,6 +163,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // xử lý sửa hồ sơ
         public IActionResult Edit(HoSoSucKhoe hoSo, bool? xacNhanDoiNgaySinh)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -329,6 +333,7 @@ namespace DoAnTotNghiep.Controllers
             return View();
         }
 
+        // lấy mã tài khoản người dùng
         private int? LayMaTaiKhoanUser()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
@@ -340,6 +345,7 @@ namespace DoAnTotNghiep.Controllers
             return maTaiKhoan.Value;
         }
 
+        // kiểm tra dữ liệu hợp lệ
         private bool KiemTraHopLe(HoSoSucKhoe hoSo, DateTime? ngaySinhNhap = null)
         {
             if (string.IsNullOrWhiteSpace(hoSo.HoTen))
@@ -376,6 +382,7 @@ namespace DoAnTotNghiep.Controllers
             return true;
         }
 
+        // gán thông tin tài khoản lên view
         private void GanThongTinTaiKhoanLenView(int maTaiKhoan)
         {
             var soDienThoai = HttpContext.Session.GetString("SoDienThoai");

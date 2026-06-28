@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using DoAnTotNghiep.Models;
@@ -17,6 +17,7 @@ namespace DoAnTotNghiep.DAL
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
+        // khởi tạo mở rộng bảng nếu cần
         public void KhoiTaoMoRongNeuCan()
         {
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -64,6 +65,7 @@ WHERE moTaNgan IS NULL OR LTRIM(RTRIM(moTaNgan)) = N'';");
             SeedNeuChuaCoDuLieu(ketNoi);
         }
 
+        // lấy bài viết cho admin
         public List<BaiVietCamNang> LayTatCaChoAdmin()
         {
             KhoiTaoMoRongNeuCan();
@@ -93,6 +95,7 @@ ORDER BY bv.ngayTao DESC";
             return LayDanhSachChoUser(null, null, "newest", 1, soLuong, null);
         }
 
+        // lấy bài viết cho người dùng
         public List<BaiVietCamNang> LayDanhSachChoUser(string? loaiBaiViet, string? keyword, string? sort, int page, int limit, bool? featured)
         {
             KhoiTaoMoRongNeuCan();
@@ -125,6 +128,7 @@ WHERE bv.trangThai = 1");
             return DocDanhSachTuReader(doc);
         }
 
+        // đếm bài viết cho người dùng
         public int DemDanhSachChoUser(string? loaiBaiViet, string? keyword, bool? featured)
         {
             KhoiTaoMoRongNeuCan();
@@ -164,6 +168,7 @@ WHERE trangThai = 1";
                 doc["guide"] == DBNull.Value ? 0 : Convert.ToInt32(doc["guide"]));
         }
 
+        // lấy bài viết theo mã
         public BaiVietCamNang? LayTheoId(int maBaiViet)
         {
             KhoiTaoMoRongNeuCan();
@@ -201,6 +206,7 @@ WHERE bv.slug = @Slug AND bv.trangThai = 1";
             return doc.Read() ? DocBaiViet(doc) : null;
         }
 
+        // tăng lượt xem
         public void TangLuotXem(int maBaiViet)
         {
             KhoiTaoMoRongNeuCan();
@@ -212,6 +218,7 @@ WHERE bv.slug = @Slug AND bv.trangThai = 1";
             lenh.ExecuteNonQuery();
         }
 
+        // thêm bài viết
         public bool Them(BaiVietCamNang bv)
         {
             KhoiTaoMoRongNeuCan();
@@ -229,6 +236,7 @@ VALUES(@MaTaiKhoan, @TieuDe, @Slug, @MoTaNgan, @NoiDung, @LoaiBaiViet, @AnhDaiDi
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // cập nhật bài viết
         public bool CapNhat(BaiVietCamNang bv)
         {
             KhoiTaoMoRongNeuCan();
@@ -254,6 +262,7 @@ WHERE maBaiViet = @MaBaiViet";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // ẩn/hiện bài viết
         public bool AnHien(int maBaiViet, bool trangThai)
         {
             const string sql = "UPDATE BaiVietCamNang SET trangThai = @TrangThai WHERE maBaiViet = @MaBaiViet";
@@ -265,6 +274,7 @@ WHERE maBaiViet = @MaBaiViet";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // đổi trạng thái nổi bật
         public bool DoiNoiBat(int maBaiViet, bool noiBat)
         {
             KhoiTaoMoRongNeuCan();
@@ -277,6 +287,7 @@ WHERE maBaiViet = @MaBaiViet";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // xóa bài viết
         public bool Xoa(int maBaiViet)
         {
             const string sql = "DELETE FROM BaiVietCamNang WHERE maBaiViet = @MaBaiViet";
@@ -287,6 +298,7 @@ WHERE maBaiViet = @MaBaiViet";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // gán điều kiện lọc
         private static void GanDieuKienLoc(StringBuilder sql, SqlCommand lenh, string? loaiBaiViet, string? keyword, bool? featured)
         {
             var loaiDaChuanHoa = ChuanHoaLoaiBaiViet(loaiBaiViet);
@@ -311,6 +323,7 @@ WHERE maBaiViet = @MaBaiViet";
             }
         }
 
+        // gán tham số bài viết
         private static void GanThamSoBaiViet(SqlCommand lenh, BaiVietCamNang bv)
         {
             lenh.Parameters.AddWithValue("@MaBaiViet", bv.MaBaiViet);
@@ -327,12 +340,14 @@ WHERE maBaiViet = @MaBaiViet";
             lenh.Parameters.AddWithValue("@LuotXem", Math.Max(0, bv.LuotXem));
         }
 
+        // chạy lệnh sql
         private static void ChayLenh(SqlConnection ketNoi, string sql)
         {
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.ExecuteNonQuery();
         }
 
+        // đọc danh sách từ sql
         private List<BaiVietCamNang> DocDanhSach(string sql)
         {
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -342,6 +357,7 @@ WHERE maBaiViet = @MaBaiViet";
             return DocDanhSachTuReader(doc);
         }
 
+        // đọc danh sách từ reader
         private static List<BaiVietCamNang> DocDanhSachTuReader(SqlDataReader doc)
         {
             var danhSach = new List<BaiVietCamNang>();
@@ -353,6 +369,7 @@ WHERE maBaiViet = @MaBaiViet";
             return danhSach;
         }
 
+        // đọc bài viết từ reader
         private static BaiVietCamNang DocBaiViet(SqlDataReader doc)
         {
             return new BaiVietCamNang
@@ -373,6 +390,7 @@ WHERE maBaiViet = @MaBaiViet";
             };
         }
 
+        // tạo mô tả ngắn
         private static string TaoMoTaNgan(string? moTa, string noiDung)
         {
             var text = string.IsNullOrWhiteSpace(moTa) ? noiDung : moTa;
@@ -381,6 +399,7 @@ WHERE maBaiViet = @MaBaiViet";
             return text.Length <= 240 ? text : text[..240];
         }
 
+        // tạo slug từ tiêu đề
         public static string TaoSlug(string text)
         {
             text = string.IsNullOrWhiteSpace(text) ? "bai-viet" : text.Trim().ToLowerInvariant();
@@ -399,6 +418,7 @@ WHERE maBaiViet = @MaBaiViet";
             return string.IsNullOrWhiteSpace(slug) ? "bai-viet" : slug;
         }
 
+        // chuẩn hóa loại bài viết
         public static string? ChuanHoaLoaiBaiViet(string? loaiBaiViet)
         {
             if (string.IsNullOrWhiteSpace(loaiBaiViet))
@@ -422,11 +442,13 @@ WHERE maBaiViet = @MaBaiViet";
             };
         }
 
+        // lấy loại api
         private static string LayApiType(BaiVietCamNang baiViet)
         {
             return baiViet.LoaiBaiViet == LoaiTinTuc ? "news" : "guide";
         }
 
+        // tạo dto cho bài viết
         public static object TaoArticleDto(BaiVietCamNang baiViet)
         {
             var type = LayApiType(baiViet);
@@ -449,6 +471,7 @@ WHERE maBaiViet = @MaBaiViet";
             };
         }
 
+        // seed dữ liệu mẫu nếu chưa có
         private static void SeedNeuChuaCoDuLieu(SqlConnection ketNoi)
         {
             using (var dem = new SqlCommand("SELECT COUNT(*) FROM dbo.BaiVietCamNang", ketNoi))

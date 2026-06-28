@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace DoAnTotNghiep.Services
 {
@@ -33,6 +33,7 @@ namespace DoAnTotNghiep.Services
             return LaHash(matKhau) ? matKhau : TaoHash(matKhau);
         }
 
+        // kiểm tra mật khẩu
         public static bool KiemTra(string matKhauNhap, string matKhauDaLuu)
         {
             if (string.IsNullOrEmpty(matKhauNhap) || string.IsNullOrEmpty(matKhauDaLuu))

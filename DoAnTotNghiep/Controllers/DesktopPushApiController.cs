@@ -1,4 +1,4 @@
-using DoAnTotNghiep.DAL;
+﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +27,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet("unread-for-push")]
+        // lấy thông báo chưa đọc để đẩy desktop
         public IActionResult GetUnreadForPush()
         {
             var userId = GetCurrentUserId();
@@ -56,6 +57,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpPost("mark-desktop-pushed")]
+        // đánh dấu đã đẩy desktop
         public IActionResult MarkDesktopPushed([FromBody] MarkDesktopPushedRequest request)
         {
             var userId = GetCurrentUserId();

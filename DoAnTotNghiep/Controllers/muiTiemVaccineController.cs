@@ -17,6 +17,7 @@ namespace DoAnTotNghiep.Controllers
             this.vaccineDAL = vaccineDAL;
         }
 
+        // hiển thị danh sách mũi tiêm
         public IActionResult Index(string? keyword, string? intervalType, int page = 1, int pageSize = 10)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -94,10 +95,7 @@ namespace DoAnTotNghiep.Controllers
             return "Theo tuổi";
         }
 
-        // Mục đích: action IndexTheoVaccine xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị danh sách mũi tiêm
         public IActionResult IndexTheoVaccine(int maVaccine)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -111,10 +109,7 @@ namespace DoAnTotNghiep.Controllers
             return View(muiTiemVaccineDAL.LayMuiTiemTheoVaccine(maVaccine));
         }
 
-        // Mục đích: action Details xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // xem chi tiết mũi tiêm
         public IActionResult Details(int id)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -128,10 +123,6 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
-        // Mục đích: action Create xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult Create(int? maVaccine)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -148,10 +139,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Mục đích: action Create xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // xử lý thêm mũi tiêm
         public IActionResult Create(MuiTiemVaccine mt)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -175,10 +163,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
-        // Mục đích: action Edit xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị form sửa mũi tiêm
         public IActionResult Edit(int id)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -193,10 +178,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Mục đích: action Edit xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // xử lý sửa mũi tiêm
         public IActionResult Edit(MuiTiemVaccine mt)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -221,10 +203,6 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        // Mục đích: action DeleteConfirmed xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         public IActionResult DeleteConfirmed(int id)
         {
             var chanQuyen = ChanNeuKhongPhaiAdmin();
@@ -251,10 +229,6 @@ namespace DoAnTotNghiep.Controllers
             return RedirectToAction(nameof(IndexTheoVaccine), new { maVaccine = muiTiem.MaVaccine });
         }
 
-        // Mục đích: action NapDanhSachVaccine xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private void NapDanhSachVaccine(int? maVaccineDangChon = null)
         {
             ViewBag.DanhSachVaccine = new SelectList(
@@ -264,10 +238,6 @@ namespace DoAnTotNghiep.Controllers
                 maVaccineDangChon);
         }
 
-        // Mục đích: action KiemTraHopLe xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private bool KiemTraHopLe(MuiTiemVaccine mt, int? maMuiTiemBoQua)
         {
             if (mt.MaVaccine <= 0)
@@ -308,10 +278,6 @@ namespace DoAnTotNghiep.Controllers
             return true;
         }
 
-        // Mục đích: action LaAdmin xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
         private bool LaAdmin()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");

@@ -14,10 +14,7 @@ namespace DoAnTotNghiep.Controllers
             this.lichSuTiemDAL = lichSuTiemDAL;
         }
 
-        // Mục đích: action ChonHoSo xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị danh sách hồ sơ
         public IActionResult ChonHoSo(int? maHoSo)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -37,10 +34,7 @@ namespace DoAnTotNghiep.Controllers
             return View(danhSachHoSo);
         }
 
-        // Mục đích: action Index xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị lịch sử tiêm của hồ sơ
         public IActionResult Index(int maHoSo)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -54,10 +48,7 @@ namespace DoAnTotNghiep.Controllers
             return View(lichSuTiemDAL.LayDanhSachTheoHoSo(maHoSo, maTaiKhoan.Value));
         }
 
-        // Mục đích: action LayMaTaiKhoanUser xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // lấy mã tài khoản người dùng
         private int? LayMaTaiKhoanUser()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");

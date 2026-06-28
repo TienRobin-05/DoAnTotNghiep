@@ -1,4 +1,4 @@
-using DoAnTotNghiep.DAL;
+﻿using DoAnTotNghiep.DAL;
 using DoAnTotNghiep.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +14,7 @@ namespace DoAnTotNghiep.Controllers
             this.thongBaoDAL = thongBaoDAL;
         }
 
+        // hiển thị danh sách thông báo
         public IActionResult Index(string? trangThai, string? tuKhoa)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -53,6 +54,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // đánh dấu tất cả đã đọc
         public IActionResult DanhDauTatCaDaDoc(string? trangThai, string? tuKhoa)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -66,6 +68,7 @@ namespace DoAnTotNghiep.Controllers
             return RedirectToAction(nameof(Index), new { trangThai, tuKhoa });
         }
 
+        // xem chi tiết thông báo
         public IActionResult Details(int id = 0, int maThongBao = 0, bool chuyenHuongLichTiem = false)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -99,6 +102,7 @@ namespace DoAnTotNghiep.Controllers
             return View(thongBao);
         }
 
+        // lấy mã tài khoản người dùng
         private int? LayMaTaiKhoanUser()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");

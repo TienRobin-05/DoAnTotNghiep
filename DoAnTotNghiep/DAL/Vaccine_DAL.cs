@@ -12,14 +12,9 @@ namespace DoAnTotNghiep.DAL
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        // Mục đích: phương thức LayDanhSach thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy danh sách vaccine
         public List<Vaccine> LayDanhSach()
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maVaccine,
     tenVaccine,
@@ -36,14 +31,9 @@ ORDER BY maVaccine DESC";
             return DocDanhSach(sql);
         }
 
-        // Mục đích: phương thức LayDanhSachDangSuDung thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy danh sách vaccine
         public List<Vaccine> LayDanhSachDangSuDung()
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maVaccine,
     tenVaccine,
@@ -61,14 +51,9 @@ ORDER BY maVaccine DESC";
             return DocDanhSach(sql);
         }
 
-        // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy vaccine theo mã
         public Vaccine? LayTheoId(int maVaccine)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maVaccine,
     tenVaccine,
@@ -82,26 +67,17 @@ ORDER BY maVaccine DESC";
 FROM Vaccine
 WHERE maVaccine = @MaVaccine";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaVaccine", maVaccine);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
             using var doc = lenh.ExecuteReader();
             return doc.Read() ? DocVaccine(doc) : null;
         }
 
-        // Mục đích: phương thức Them thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // thêm vaccine
         public bool Them(Vaccine vaccine)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"INSERT INTO Vaccine
 (
     tenVaccine,
@@ -125,25 +101,16 @@ VALUES
     @TrangThai
 )";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             GanThamSo(lenh, vaccine);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
             return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức CapNhat thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // cập nhật vaccine
         public bool CapNhat(Vaccine vaccine)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"UPDATE Vaccine
 SET tenVaccine = @TenVaccine,
     nhomVaccine = @NhomVaccine,
@@ -155,15 +122,11 @@ SET tenVaccine = @TenVaccine,
     trangThai = @TrangThai
 WHERE maVaccine = @MaVaccine";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaVaccine", vaccine.MaVaccine);
             GanThamSo(lenh, vaccine);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
             return lenh.ExecuteNonQuery() > 0;
         }
 
@@ -177,39 +140,22 @@ WHERE maVaccine = @MaVaccine";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        // Mục đích: phương thức XoaHoacAn thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public bool XoaHoacAn(int maVaccine)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "UPDATE Vaccine SET trangThai = 0 WHERE maVaccine = @MaVaccine";
 
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
-            // Tạo SqlCommand để gắn câu SQL với kết nối, sau đó truyền tham số trước khi thực thi.
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaVaccine", maVaccine);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
-            // ExecuteNonQuery trả về số dòng bị ảnh hưởng; lớn hơn 0 nghĩa là thêm/sửa/xóa thành công.
             return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức DocDanhSach thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         private List<Vaccine> DocDanhSach(string sql)
         {
-            // Tạo kết nối đến SQL Server bằng chuỗi kết nối đã lấy từ appsettings.json.
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
-            // Mở kết nối ngay trước khi thực thi để giảm thời gian giữ kết nối database.
             ketNoi.Open();
-            // ExecuteReader dùng để đọc từng dòng dữ liệu trả về từ câu SELECT.
             using var doc = lenh.ExecuteReader();
 
             var danhSach = new List<Vaccine>();
@@ -221,10 +167,6 @@ WHERE maVaccine = @MaVaccine";
             return danhSach;
         }
 
-        // Mục đích: phương thức GanThamSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         private static void GanThamSo(SqlCommand lenh, Vaccine vaccine)
         {
             lenh.Parameters.AddWithValue("@TenVaccine", vaccine.TenVaccine);
@@ -237,10 +179,6 @@ WHERE maVaccine = @MaVaccine";
             lenh.Parameters.AddWithValue("@TrangThai", vaccine.TrangThai);
         }
 
-        // Mục đích: phương thức DocVaccine thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         private static Vaccine DocVaccine(SqlDataReader doc)
         {
             return new Vaccine

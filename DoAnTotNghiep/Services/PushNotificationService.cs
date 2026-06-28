@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 using DoAnTotNghiep.DAL;
 using WebPush;
@@ -18,11 +18,13 @@ namespace DoAnTotNghiep.Services
             this.taiKhoanDAL = taiKhoanDAL;
         }
 
+        // lấy public key cho push
         public string LayPublicKey()
         {
             return configuration["WebPush:PublicKey"] ?? string.Empty;
         }
 
+        // gửi thông báo push
         public void GuiThongBao(int maTaiKhoan, int maThongBao, string tieuDe, string noiDung)
         {
             var publicKey = configuration["WebPush:PublicKey"] ?? string.Empty;

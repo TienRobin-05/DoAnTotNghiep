@@ -39,14 +39,9 @@ namespace DoAnTotNghiep.DAL
             this.pushNotificationService = pushNotificationService;
         }
 
-        // Mục đích: phương thức LayDanhSachTheoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy danh sách thông báo
         public List<ThongBao> LayDanhSachTheoTaiKhoan(int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maThongBao,
     maTaiKhoan,
@@ -165,6 +160,7 @@ AND (
             return (Convert.ToInt32(doc["quaHan"]), Convert.ToInt32(doc["denLich"]), Convert.ToInt32(doc["daCapNhat"]));
         }
 
+        // đếm tổng thông báo
         public int DemTongThongBao(int maTaiKhoan)
         {
             const string sql = "SELECT COUNT(*) FROM ThongBao WHERE maTaiKhoan = @MaTaiKhoan";
@@ -175,10 +171,6 @@ AND (
             return Convert.ToInt32(lenh.ExecuteScalar());
         }
 
-        // Mục đích: phương thức DemThongBaoChuaDoc thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         // Xóa thông báo nhắc lịch của các mũi chưa tiêm thuộc hồ sơ (khi đổi ngày sinh)
         public int XoaThongBaoNhacLichTheoHoSo(int maHoSo, int maTaiKhoan)
         {
@@ -201,10 +193,9 @@ AND tb.tieuDe IN (@TieuDeSapDen, @TieuDeHomNay, @TieuDeQuaHan)";
             return lenh.ExecuteNonQuery();
         }
 
+        // đếm thông báo chưa đọc
         public int DemThongBaoChuaDoc(int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT COUNT(*)
 FROM ThongBao
 WHERE maTaiKhoan = @MaTaiKhoan
@@ -218,6 +209,7 @@ AND daDoc = 0";
             return Convert.ToInt32(lenh.ExecuteScalar());
         }
 
+        // lấy thông báo chưa đọc gần nhất
         public List<ThongBao> LayThongBaoChuaDocMoiNhat(int maTaiKhoan, int soLuong)
         {
             const string sql = @"SELECT TOP (@SoLuong)
@@ -250,14 +242,8 @@ ORDER BY ngayGui DESC";
             return danhSach;
         }
 
-        // Mục đích: phương thức LayThongBaoMoiNhat thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public List<ThongBao> LayThongBaoMoiNhat(int maTaiKhoan, int soLuong)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT TOP (@SoLuong)
     maThongBao,
     maTaiKhoan,
@@ -287,6 +273,7 @@ ORDER BY ngayGui DESC";
             return danhSach;
         }
 
+        // lấy thông báo gần đây
         public List<ThongBao> LayThongBaoGanDay(int maTaiKhoan, int soNgay)
         {
             const string sql = @"SELECT
@@ -319,14 +306,9 @@ ORDER BY ngayGui DESC";
             return danhSach;
         }
 
-        // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy thông báo theo mã
         public ThongBao? LayTheoId(int maThongBao, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             var sql = $@"SELECT
     tb.maThongBao, tb.maTaiKhoan, tb.maLichTiem, tb.tieuDe, tb.noiDung, tb.ngayGui, tb.daDoc,
     lt.maHoSo, hs.hoTen AS hoTenHoSo,
@@ -347,14 +329,9 @@ AND tb.maTaiKhoan = @MaTaiKhoan";
             return doc.Read() ? DocThongBao(doc) : null;
         }
 
-        // Mục đích: phương thức Them thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // tạo thông báo mới
         public bool Them(ThongBao tb)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"INSERT INTO ThongBao(maTaiKhoan, maLichTiem, tieuDe, noiDung, ngayGui, daDoc)
 VALUES(@MaTaiKhoan, @MaLichTiem, @TieuDe, @NoiDung, @NgayGui, @DaDoc)";
 
@@ -495,6 +472,7 @@ ORDER BY lt.ngayTiemDuKien, v.tenVaccine, mt.soMui";
             return danhSach;
         }
 
+        // kiểm tra đã có thông báo cho lịch chưa
         private bool DaCoThongBaoChoLich(int maTaiKhoan, int maLichTiem, string tieuDe)
         {
             const string sql = @"SELECT COUNT(*)
@@ -515,6 +493,7 @@ AND CONVERT(DATE, ngayGui) = CONVERT(DATE, @homNay)";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        // thêm thông báo lịch tiêm
         private int ThemThongBaoLichTiem(int maTaiKhoan, int maLichTiem, string tieuDe, string noiDung)
         {
             const string sql = @"INSERT INTO ThongBao(maTaiKhoan, maLichTiem, tieuDe, noiDung, ngayGui, daDoc)
@@ -534,6 +513,7 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
             return ketQua == null || ketQua == DBNull.Value ? 0 : Convert.ToInt32(ketQua);
         }
 
+        // tạo nội dung thông báo
         private static string TaoTieuDeThongBao(LichTiemCanThongBao lich)
         {
             if (lich.NgayTiemDuKien.Date < DateTime.Today)
@@ -546,6 +526,7 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
                 : "Sắp đến lịch tiêm";
         }
 
+        // tạo nội dung thông báo
         private static string TaoNoiDungThongBao(LichTiemCanThongBao lich)
         {
             var thongTinMui = $"Mũi {lich.SoMui}";
@@ -564,6 +545,7 @@ VALUES(@maTaiKhoan, @maLichTiem, @tieuDe, @noiDung, @ngayGui, 0)";
             return $"Còn {soNgayConLai} ngày nữa, hồ sơ {lich.HoTenHoSo} sẽ đến lịch tiêm {thongTinMui} - {lich.TenVaccine}.";
         }
 
+        // xóa thông báo nhắc lịch hết hiệu lực
         private void XoaThongBaoNhacLichKhongConHieuLuc(int maTaiKhoan)
         {
             const string sql = @"DELETE tb
@@ -590,14 +572,9 @@ AND (
             lenh.ExecuteNonQuery();
         }
 
-        // Mục đích: phương thức DanhDauDaDoc thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // đánh dấu đã đọc
         public bool DanhDauDaDoc(int maThongBao, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"UPDATE ThongBao
 SET daDoc = 1
 WHERE maThongBao = @MaThongBao
@@ -612,10 +589,6 @@ AND maTaiKhoan = @MaTaiKhoan";
                         return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức DocThongBao thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         private static ThongBao DocThongBao(SqlDataReader doc)
         {
             return new ThongBao
@@ -714,6 +687,7 @@ ORDER BY tb.ngayGui DESC";
             return danhSach;
         }
 
+        // lấy loại thông báo
         private static string GetLoaiThongBao(string tieuDe)
         {
             if (tieuDe.Contains("Quá hạn")) return "overdue";
@@ -743,6 +717,7 @@ IF NOT EXISTS (SELECT 1 FROM NotificationDesktopPushLogs WHERE maTaiKhoan = @MaT
             }
         }
 
+        // đảm bảo bảng log push tồn tại
         private void DamBaoBangDesktopPushLog()
         {
             const string sql = @"

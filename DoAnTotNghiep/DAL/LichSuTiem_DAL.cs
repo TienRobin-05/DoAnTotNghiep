@@ -12,14 +12,9 @@ namespace DoAnTotNghiep.DAL
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        // Mục đích: phương thức Them thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // thêm lịch sử tiêm
         public bool Them(LichSuTiem lichSu)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"INSERT INTO LichSuTiem(maLichTiem, ngayTiemThucTe, ghiChu, ngayCapNhat)
 VALUES(@MaLichTiem, @NgayTiemThucTe, @GhiChu, @NgayCapNhat)";
 
@@ -34,14 +29,9 @@ VALUES(@MaLichTiem, @NgayTiemThucTe, @GhiChu, @NgayCapNhat)";
                         return lenh.ExecuteNonQuery() > 0;
         }
 
-        // Mục đích: phương thức KiemTraDaCoLichSu thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // kiểm tra đã có lịch sử chưa
         public bool KiemTraDaCoLichSu(int maLichTiem)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM LichSuTiem WHERE maLichTiem = @MaLichTiem";
 
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -52,6 +42,7 @@ VALUES(@MaLichTiem, @NgayTiemThucTe, @GhiChu, @NgayCapNhat)";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        // cập nhật lịch sử tiêm
         public bool CapNhat(LichSuTiem lichSu)
         {
             const string sql = @"UPDATE LichSuTiem
@@ -70,6 +61,7 @@ WHERE maLichTiem = @MaLichTiem";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // lấy lịch sử theo mã lịch tiêm
         public LichSuTiem? LayTheoMaLichTiem(int maLichTiem)
         {
             const string sql = @"SELECT TOP 1
@@ -158,14 +150,9 @@ WHERE lt.maHoSo = @MaHoSo";
             return result;
         }
 
-        // Mục đích: phương thức LayDanhSachTheoHoSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy lịch sử tiêm theo hồ sơ
         public List<LichSuTiem> LayDanhSachTheoHoSo(int maHoSo, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     lst.maLichSu,
     lst.maLichTiem,

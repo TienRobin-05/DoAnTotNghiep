@@ -27,10 +27,7 @@ namespace DoAnTotNghiep.Controllers
             this.taoLichTiemService = taoLichTiemService;
         }
 
-        // Mục đích: action ChonHoSo xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị danh sách hồ sơ để chọn
         public IActionResult ChonHoSo()
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -42,6 +39,7 @@ namespace DoAnTotNghiep.Controllers
             return View(danhSachHoSo);
         }
 
+        // hiển thị lịch tiêm của hồ sơ
         public IActionResult Index(int maHoSo, string? hienThi)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -103,6 +101,7 @@ namespace DoAnTotNghiep.Controllers
             return View(tatCaLichTiem);
         }
 
+        // kiểm tra trạng thái mũi tiêm
         private static bool LaDenLich(LichTiem lich)
         {
             return !LaDaTiem(lich) && lich.NgayTiemDuKien.Date == DateTime.Today;
@@ -128,6 +127,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // xử lý cập nhật mũi tiêm
         public IActionResult CapNhatDaTiem(int maLichTiem, DateTime ngayTiemThucTe, string ghiChu)
         {
             var maTaiKhoan = LayMaTaiKhoanUser();
@@ -205,10 +205,7 @@ namespace DoAnTotNghiep.Controllers
             return null;
         }
 
-        // Mục đích: action LayMaTaiKhoanUser xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // lấy mã tài khoản người dùng
         private int? LayMaTaiKhoanUser()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
@@ -230,6 +227,7 @@ namespace DoAnTotNghiep.Controllers
             return lich.TrangThai == "Đã tiêm" || lich.NgayTiemDuKien.Year == DateTime.Today.Year;
         }
 
+        // lọc lịch tiêm theo trạng thái
         private static List<LichTiem> LocLichTiemTheoTrangThai(List<LichTiem> danhSach, string boLoc)
         {
             return boLoc switch
@@ -241,6 +239,7 @@ namespace DoAnTotNghiep.Controllers
             };
         }
 
+        // chuẩn hóa/xử lý chuỗi
         private static string ChuanHoaBoLoc(string? boLoc)
         {
             return boLoc switch
@@ -252,21 +251,25 @@ namespace DoAnTotNghiep.Controllers
             };
         }
 
+        // kiểm tra trạng thái mũi tiêm
         private static bool LaDaTiem(LichTiem lich)
         {
             return string.Equals(lich.TrangThai, "Đã tiêm", StringComparison.OrdinalIgnoreCase);
         }
 
+        // kiểm tra trạng thái mũi tiêm
         private static bool LaQuaHan(LichTiem lich)
         {
             return !LaDaTiem(lich) && lich.NgayTiemDuKien.Date < DateTime.Today;
         }
 
+        // kiểm tra trạng thái mũi tiêm
         private static bool LaSapToi(LichTiem lich)
         {
             return !LaDaTiem(lich) && lich.NgayTiemDuKien.Date >= DateTime.Today;
         }
 
+        // kiểm tra vaccine nhắc năm
         private static bool LaVaccineNhacHangNam(LichTiem lich)
         {
             var noiDung = BoDauTiengViet($"{lich.TenVaccine} {lich.NhomVaccine}").ToLowerInvariant();
@@ -274,6 +277,7 @@ namespace DoAnTotNghiep.Controllers
                 || noiDung.Contains("hang nam");
         }
 
+        // chuẩn hóa/xử lý chuỗi
         private static string BoDauTiengViet(string giaTri)
         {
             var normalized = giaTri.Normalize(System.Text.NormalizationForm.FormD);

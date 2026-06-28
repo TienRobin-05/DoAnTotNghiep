@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace DoAnTotNghiep.Services
@@ -7,6 +7,7 @@ namespace DoAnTotNghiep.Services
     {
         public static readonly string[] DonViHopLe = { "ngày", "tuần", "tháng", "năm" };
 
+        // chuẩn hóa đơn vị tuổi
         public static string ChuanHoa(string? donViTuoi)
         {
             var donVi = (donViTuoi ?? string.Empty).Trim().ToLowerInvariant();
@@ -38,6 +39,7 @@ namespace DoAnTotNghiep.Services
             return DonViHopLe.Contains(donVi, StringComparer.OrdinalIgnoreCase);
         }
 
+        // cộng thêm đơn vị tuổi vào ngày
         public static DateTime? CongTheoDonVi(DateTime ngaySinh, int soLuong, string? donViTuoi)
         {
             try
@@ -57,6 +59,7 @@ namespace DoAnTotNghiep.Services
             }
         }
 
+        // tính tuổi hiện tại theo đơn vị
         public static int TinhTuoiHienTai(DateTime ngaySinh, string? donViTuoi)
         {
             var ngayHienTai = DateTime.Today;
@@ -80,6 +83,7 @@ namespace DoAnTotNghiep.Services
             return string.Join(", ", DonViHopLe);
         }
 
+        // tính số tháng
         private static int TinhSoThangTuoi(DateTime ngaySinh, DateTime ngayHienTai)
         {
             var soThang = ((ngayHienTai.Year - ngaySinh.Year) * 12) + ngayHienTai.Month - ngaySinh.Month;

@@ -126,6 +126,7 @@ ORDER BY lt.ngayTiemDuKien";
             return result;
         }
 
+        // tạo lịch tiêm cho hồ sơ
         public KetQuaTaoLichTiem TaoLichTiemChoHoSo(int maHoSo)
         {
             var hoSo = LayHoSoTheoMa(maHoSo);
@@ -152,6 +153,7 @@ ORDER BY lt.ngayTiemDuKien";
             return ketQua;
         }
 
+        // điều chỉnh lịch mũi sau khi tiêm
         public int DieuChinhLichMuiTiepTheoSauKhiTiem(int maHoSo, int maMuiTiemDaTiem, DateTime ngayTiemThucTe)
         {
             var danhSachMuiCungVaccine = LayDanhSachLichTheoVaccineCuaMui(maHoSo, maMuiTiemDaTiem);
@@ -189,6 +191,7 @@ ORDER BY lt.ngayTiemDuKien";
             return soLichDaDieuChinh;
         }
 
+        // tạo lịch cho từng vaccine
         private void TaoLichChoTungVaccine(
             int maHoSo,
             DateTime ngaySinh,
@@ -241,6 +244,7 @@ ORDER BY lt.ngayTiemDuKien";
             }
         }
 
+        // lấy hồ sơ theo mã
         private HoSoTaoLich? LayHoSoTheoMa(int maHoSo)
         {
             const string sql = @"SELECT maHoSo, ngaySinh
@@ -266,7 +270,7 @@ WHERE maHoSo = @MaHoSo";
             };
         }
 
-        // Mục đích: phương thức LayDanhSachMuiTiemVaccine lấy toàn bộ mũi tiêm làm nguồn tự động tạo lịch tiêm.
+        // lấy danh sách mũi tiêm để tạo lịch
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
@@ -315,6 +319,7 @@ ORDER BY mt.maVaccine, mt.soMui";
             return danhSach;
         }
 
+        // lấy danh sách lịch theo vaccine của mũi
         private List<MuiTiemDieuChinhLich> LayDanhSachLichTheoVaccineCuaMui(int maHoSo, int maMuiTiem)
         {
             const string sql = @"SELECT
@@ -398,6 +403,7 @@ AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // kiểm tra lịch tiêm đã tồn tại
         private bool KiemTraLichTiemDaTonTai(int maHoSo, int maMuiTiem)
         {
             const string sql = @"SELECT COUNT(*)
@@ -414,6 +420,7 @@ AND maMuiTiem = @MaMuiTiem";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        // lấy ngày tiêm cơ sở đã có
         private NgayTiemCoSo? LayNgayTiemCoSoDaCo(int maHoSo, int maMuiTiem)
         {
             const string sql = @"SELECT TOP 1
@@ -449,6 +456,7 @@ ORDER BY COALESCE(lst.ngayTiemThucTe, lt.ngayTiemDuKien) DESC";
             };
         }
 
+        // kiểm tra lịch nhắc năm đã tồn tại
         private bool KiemTraLichNhacHangNamDaTonTai(int maHoSo, int maMuiTiem, int nam)
         {
             const string sql = @"SELECT COUNT(*)
@@ -467,6 +475,7 @@ AND YEAR(ngayTiemDuKien) = @Nam";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
+        // cập nhật lịch tự động nếu cần
         private void CapNhatLichTiemTuDongNeuCan(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien, string ghiChu)
         {
             const string sql = @"UPDATE LichTiem
@@ -493,7 +502,7 @@ AND NOT EXISTS (
             lenh.ExecuteNonQuery();
         }
 
-        // Mục đích: phương thức ThemLichTiemNeuChuaTonTai chỉ insert khi chưa có cặp maHoSo + maMuiTiem trong LichTiem.
+        // insert lịch nếu chưa tồn tại
         // Dữ liệu đầu vào: các model, mã định danh hoặc dữ liệu nghiệp vụ cần thiết cho quá trình xử lý.
         // Xử lý chính: phối hợp các bước tính toán, kiểm tra điều kiện và gọi DAL khi cần truy xuất dữ liệu.
         // Kết quả trả về: kết quả nghiệp vụ sau khi xử lý, có thể là dữ liệu, trạng thái thành công hoặc không trả về giá trị nếu chỉ thực hiện tác vụ.
@@ -520,6 +529,7 @@ WHERE NOT EXISTS (
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // thêm lịch nhắc năm nếu chưa tồn tại
         private bool ThemLichNhacHangNamNeuChuaTonTai(int maHoSo, int maMuiTiem, DateTime ngayTiemDuKien, string ghiChu)
         {
             if (KiemTraLichNhacHangNamDaTonTai(maHoSo, maMuiTiem, ngayTiemDuKien.Year))
@@ -550,6 +560,7 @@ WHERE NOT EXISTS (
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // tính ngày tiêm theo thứ tự mũi
         private static KetQuaTinhNgay TinhNgayTiemTheoThuTuMui(
             DateTime ngaySinh,
             MuiTiemTaoLich muiTiem,
@@ -583,11 +594,13 @@ WHERE NOT EXISTS (
             };
         }
 
+        // tính ngày sau khoảng cách
         private static DateTime TinhNgaySauKhoangCach(DateTime ngayCoSo, int khoangCachNgay, bool ngayCoSoLaNgayTiemThucTe)
         {
             return ngayCoSo.Date.AddDays(khoangCachNgay + (ngayCoSoLaNgayTiemThucTe ? 1 : 0));
         }
 
+        // lấy khoảng cách ngày
         private static int LayKhoangCachNgay(MuiTiemTaoLich muiTiem)
         {
             if (muiTiem.KhoangCachNgay.HasValue && muiTiem.KhoangCachNgay.Value > 0)
@@ -604,6 +617,7 @@ WHERE NOT EXISTS (
             return 30;
         }
 
+        // tính ngày tiêm nhắc năm
         private static KetQuaTinhNgay TinhNgayTiemNhacHangNam(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
         {
             var ngayTheoTuoi = TinhNgayTiemTheoDoTuoi(ngaySinh, muiTiem);
@@ -624,6 +638,7 @@ WHERE NOT EXISTS (
             };
         }
 
+        // tính ngày tiêm theo độ tuổi
         private static DateTime? TinhNgayTiemTheoDoTuoi(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
         {
             var doTuoiTinhLich = muiTiem.DoTuoiKhuyenNghi ?? muiTiem.DoTuoiToiThieu;
@@ -635,17 +650,20 @@ WHERE NOT EXISTS (
             return TinhNgayTiemDuKien(ngaySinh, doTuoiTinhLich.Value, muiTiem.DonViTuoi);
         }
 
+        // tính ngày tiêm dự kiến
         private static DateTime? TinhNgayTiemDuKien(DateTime ngaySinh, int doTuoi, string donViTuoi)
         {
             return DonViTuoiHelper.CongTheoDonVi(ngaySinh, doTuoi, donViTuoi);
         }
 
+        // tạo ngày an toàn trong năm
         private static DateTime TaoNgayTrongNamAnToan(int nam, int thang, int ngay)
         {
             var ngayToiDaTrongThang = DateTime.DaysInMonth(nam, thang);
             return new DateTime(nam, thang, Math.Min(ngay, ngayToiDaTrongThang));
         }
 
+        // kiểm tra vaccine nhắc năm
         private static bool LaVaccineNhacHangNam(MuiTiemTaoLich muiTiem)
         {
             var noiDung = BoDauTiengViet($"{muiTiem.TenVaccine} {muiTiem.NhomVaccine}").ToLowerInvariant();
@@ -654,6 +672,7 @@ WHERE NOT EXISTS (
                 || noiDung.Contains("hang nam");
         }
 
+        // bỏ dấu tiếng việt
         private static string BoDauTiengViet(string giaTri)
         {
             var normalized = giaTri.Normalize(NormalizationForm.FormD);
@@ -669,6 +688,7 @@ WHERE NOT EXISTS (
             return builder.ToString().Normalize(NormalizationForm.FormC);
         }
 
+        // chuẩn hóa đơn vị tuổi
         private static string ChuanHoaDonViTuoi(string donViTuoi)
         {
             return DonViTuoiHelper.ChuanHoa(donViTuoi);
@@ -690,6 +710,7 @@ WHERE NOT EXISTS (
             return DonViTuoiHelper.TinhTuoiHienTai(ngaySinh, donViTuoi);
         }
 
+        // tính số tháng tuổi
         private static int TinhSoThangTuoi(DateTime ngaySinh, DateTime ngayHienTai)
         {
             var soThang = ((ngayHienTai.Year - ngaySinh.Year) * 12) + ngayHienTai.Month - ngaySinh.Month;
@@ -701,6 +722,7 @@ WHERE NOT EXISTS (
             return Math.Max(0, soThang);
         }
 
+        // tính số năm tuổi
         private static int TinhSoNamTuoi(DateTime ngaySinh, DateTime ngayHienTai)
         {
             var soNam = ngayHienTai.Year - ngaySinh.Year;

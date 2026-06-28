@@ -12,14 +12,9 @@ namespace DoAnTotNghiep.DAL
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        // Mục đích: phương thức KiemTraTaiKhoanDaCoHoSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // kiểm tra tài khoản đã có hồ sơ chưa
         public bool KiemTraTaiKhoanDaCoHoSo(int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = "SELECT COUNT(*) FROM HoSoSucKhoe WHERE maTaiKhoan = @MaTaiKhoan";
                         using var ketNoi = new SqlConnection(chuoiKetNoi);
                         using var lenh = new SqlCommand(sql, ketNoi);
@@ -28,14 +23,9 @@ namespace DoAnTotNghiep.DAL
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        // Mục đích: phương thức LayDanhSachTheoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy danh sách hồ sơ theo tài khoản
         public List<HoSoSucKhoe> LayDanhSachTheoTaiKhoan(int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maHoSo,
     maTaiKhoan,
@@ -66,14 +56,8 @@ ORDER BY ngayTao DESC";
             return danhSach;
         }
 
-        // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
         public HoSoSucKhoe? LayTheoId(int maHoSo)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maHoSo,
     maTaiKhoan,
@@ -96,14 +80,9 @@ WHERE maHoSo = @MaHoSo";
             return doc.Read() ? DocHoSo(doc) : null;
         }
 
-        // Mục đích: phương thức LayTheoId thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy hồ sơ theo mã và tài khoản
         public HoSoSucKhoe? LayTheoId(int maHoSo, int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT
     maHoSo,
     maTaiKhoan,
@@ -128,14 +107,9 @@ AND maTaiKhoan = @MaTaiKhoan";
             return doc.Read() ? DocHoSo(doc) : null;
         }
 
-        // Mục đích: phương thức Them thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // thêm hồ sơ mới
         public bool Them(HoSoSucKhoe hs)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"INSERT INTO HoSoSucKhoe
 (
     maTaiKhoan,
@@ -206,10 +180,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             return maHoSoMoi == null || maHoSoMoi == DBNull.Value ? 0 : Convert.ToInt32(maHoSoMoi);
         }
 
-        // Mục đích: phương thức CapNhat thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // cập nhật hồ sơ
         public bool CapNhat(HoSoSucKhoe hs)
         {
             const string sql = @"UPDATE HoSoSucKhoe
@@ -238,6 +209,7 @@ AND maTaiKhoan = @MaTaiKhoan";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // cập nhật ngày sinh + đánh dấu thời điểm đổi
         public bool CapNhatNgaySinhVaDanhDau(int maHoSo, int maTaiKhoan, DateTime ngaySinhMoi)
         {
             DamBaoCotHoSoSucKhoe();
@@ -257,6 +229,7 @@ AND maTaiKhoan = @MaTaiKhoan";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // tắt cảnh báo đổi ngày sinh
         public bool TatCanhBaoDoiNgaySinh(int maHoSo, int maTaiKhoan)
         {
             DamBaoCotHoSoSucKhoe();
@@ -273,6 +246,7 @@ AND maTaiKhoan = @MaTaiKhoan";
             return lenh.ExecuteNonQuery() > 0;
         }
 
+        // kiểm tra có cảnh báo đổi ngày sinh ko
         public bool KiemTraHoSoCoCanhBaoDoiNgaySinh(int maHoSo, int maTaiKhoan)
         {
             DamBaoCotHoSoSucKhoe();
@@ -292,10 +266,7 @@ AND maTaiKhoan = @MaTaiKhoan";
             return Convert.ToInt32(lenh.ExecuteScalar()) > 0;
         }
 
-        // Mục đích: phương thức Xoa thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // xóa hồ sơ
         public bool Xoa(int maHoSo, int maTaiKhoan)
         {
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -359,14 +330,9 @@ AND maTaiKhoan = @MaTaiKhoan", maHoSo, maTaiKhoan);
             return lenh.ExecuteNonQuery();
         }
 
-        // Mục đích: phương thức LayHoSoDauTienTheoTaiKhoan thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // lấy hồ sơ đầu tiên của tài khoản
         public HoSoSucKhoe? LayHoSoDauTienTheoTaiKhoan(int maTaiKhoan)
         {
-            // Câu lệnh SQL này dùng để lấy, thêm, sửa hoặc xóa dữ liệu theo đúng nghiệp vụ của phương thức hiện tại.
-            // Các giá trị động được truyền bằng tham số @... để tránh ghép chuỗi trực tiếp, giúp truy vấn rõ ràng và an toàn hơn.
             const string sql = @"SELECT TOP 1
     maHoSo,
     maTaiKhoan,
@@ -390,10 +356,7 @@ ORDER BY ngayTao ASC";
             return doc.Read() ? DocHoSo(doc) : null;
         }
 
-        // Mục đích: phương thức GanThamSoHoSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // gán tham số hồ sơ
         private static void GanThamSoHoSo(SqlCommand lenh, HoSoSucKhoe hs)
         {
             lenh.Parameters.AddWithValue("@MaTaiKhoan", hs.MaTaiKhoan);
@@ -407,10 +370,7 @@ ORDER BY ngayTao ASC";
             lenh.Parameters.AddWithValue("@NgayTao", hs.NgayTao);
         }
 
-        // Mục đích: phương thức DocHoSo thực hiện thao tác đọc/ghi dữ liệu trong SQL Server cho chức năng tương ứng.
-        // Dữ liệu đầu vào: các tham số nghiệp vụ hoặc model được Controller truyền xuống để tạo câu lệnh SQL và tham số SQL.
-        // Xử lý chính: tạo SqlConnection, tạo SqlCommand, gán tham số chống lỗi SQL injection, mở kết nối và thực thi câu lệnh.
-        // Kết quả trả về: dữ liệu model/danh sách/giá trị kiểm tra hoặc true/false cho biết thao tác database có thành công hay không.
+        // đọc dữ liệu hồ sơ từ reader
         private static HoSoSucKhoe DocHoSo(SqlDataReader doc)
         {
             return new HoSoSucKhoe
@@ -427,6 +387,7 @@ ORDER BY ngayTao ASC";
                 NgayTao = Convert.ToDateTime(doc["ngayTao"])
             };
         }
+        // đảm bảo các cột phụ tồn tại
         private void DamBaoCotHoSoSucKhoe()
         {
             const string sql = @"

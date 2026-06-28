@@ -21,10 +21,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
-        // Mục đích: action DangKy xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị form đăng ký
         public IActionResult DangKy()
         {
             XoaPhienDatLaiMatKhau();
@@ -33,10 +30,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Mục đích: action DangKy xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị form đăng ký
         public IActionResult DangKy(string hoTen, string email, string soDienThoai, string matKhau, string nhapLaiMatKhau)
         {
             if (string.IsNullOrWhiteSpace(hoTen))
@@ -117,10 +111,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
-        // Mục đích: action DangNhap xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị form đăng nhập
         public IActionResult DangNhap()
         {
             XoaPhienDatLaiMatKhau();
@@ -129,10 +120,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Mục đích: action DangNhap xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // hiển thị form đăng nhập
         public IActionResult DangNhap(string soDienThoaiDangNhap, string matKhauDangNhap)
         {
             // Đăng nhập chỉ dùng số điện thoại và mật khẩu, không dùng email.
@@ -192,6 +180,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // hiển thị form quên mật khẩu
         public IActionResult QuenMatKhau()
         {
             GanTrangThaiNhapMaXacNhan();
@@ -200,6 +189,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // hiển thị form quên mật khẩu
         public IActionResult QuenMatKhau(string soDienThoai, string email, string matKhauMoi, string xacNhanMatKhau, string maXacNhan)
         {
             soDienThoai = soDienThoai?.Trim() ?? string.Empty;
@@ -282,10 +272,7 @@ namespace DoAnTotNghiep.Controllers
             return RedirectToAction(nameof(DangNhap));
         }
 
-        // Mục đích: action DangXuat xử lý request tương ứng từ người dùng và quyết định trả về giao diện hoặc chuyển hướng phù hợp.
-        // Dữ liệu đầu vào: dữ liệu gửi từ route, query string, form hoặc session tùy theo màn hình đang thao tác.
-        // Xử lý chính: kiểm tra dữ liệu cần thiết, gọi DAL/service để đọc hoặc cập nhật dữ liệu, sau đó gán thông báo/ViewBag/TempData nếu cần.
-        // Kết quả trả về: IActionResult là View hiển thị cho người dùng hoặc RedirectToAction khi cần chuyển sang màn hình khác.
+        // đăng xuất tài khoản
         public IActionResult DangXuat()
         {
             HttpContext.Session.Clear();
@@ -294,6 +281,7 @@ namespace DoAnTotNghiep.Controllers
         }
 
         [HttpGet]
+        // hiển thị thông tin cá nhân
         public IActionResult ThongTinCaNhan()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
@@ -324,6 +312,7 @@ namespace DoAnTotNghiep.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // hiển thị thông tin cá nhân
         public IActionResult ThongTinCaNhan(ThongTinCaNhanViewModel model)
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");

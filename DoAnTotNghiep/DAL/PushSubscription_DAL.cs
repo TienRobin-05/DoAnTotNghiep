@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using DoAnTotNghiep.Models;
 using Microsoft.Data.SqlClient;
@@ -14,6 +14,7 @@ namespace DoAnTotNghiep.DAL
             chuoiKetNoi = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
+        // khởi tạo bảng nếu chưa có
         public void KhoiTaoBangNeuChuaCo()
         {
             const string sql = @"
@@ -89,6 +90,7 @@ END;";
             lenh.ExecuteNonQuery();
         }
 
+        // lưu đăng ký push
         public void LuuDangKy(int maTaiKhoan, PushSubscriptionRequest request)
         {
             const string sql = @"IF EXISTS (SELECT 1 FROM PushSubscription WHERE endpointHash = @EndpointHash OR endpoint = @Endpoint)
@@ -118,6 +120,7 @@ END";
             });
         }
 
+        // lấy danh sách đăng ký push
         public List<PushSubscriptionModel> LayTheoTaiKhoan(int maTaiKhoan)
         {
             const string sql = @"SELECT maPushSubscription, maTaiKhoan, endpoint, p256dh, auth
@@ -156,6 +159,7 @@ AND ISNULL(isActive, 1) = 1";
             }
         }
 
+        // xóa đăng ký push theo endpoint
         public void XoaTheoEndpoint(string endpoint)
         {
             const string sql = @"UPDATE PushSubscription
@@ -173,6 +177,7 @@ OR endpoint = @Endpoint";
             });
         }
 
+        // thực thi, tự tạo bảng nếu thiếu
         private void ThucThiVoiKhoiTaoLaiNeuThieuBang(Action<SqlCommand> thaoTac)
         {
             using var ketNoi = new SqlConnection(chuoiKetNoi);
@@ -192,6 +197,7 @@ OR endpoint = @Endpoint";
             }
         }
 
+        // gán tham số đăng ký
         private static void GanThamSoDangKy(SqlCommand lenh, int maTaiKhoan, PushSubscriptionRequest request)
         {
             lenh.Parameters.AddWithValue("@MaTaiKhoan", maTaiKhoan);
@@ -201,6 +207,7 @@ OR endpoint = @Endpoint";
             lenh.Parameters.AddWithValue("@Auth", request.Keys.Auth);
         }
 
+        // kiểm tra lỗi thiếu bảng
         private static bool LaLoiThieuBangPushSubscription(SqlException ex)
         {
             foreach (SqlError error in ex.Errors)
@@ -214,6 +221,7 @@ OR endpoint = @Endpoint";
             return false;
         }
 
+        // tạo hash cho endpoint
         private static string TaoEndpointHash(string endpoint)
         {
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(endpoint));
