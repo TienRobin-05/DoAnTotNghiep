@@ -374,7 +374,6 @@ AND daDoc = 0";
             }
 
             var danhSachLich = LayLichTiemDenHan(maTaiKhoan);
-            System.Console.WriteLine($"[ThongBao_DAL] Lay duoc {danhSachLich.Count} lich can xu ly cho maTaiKhoan={maTaiKhoan}");
             foreach (var l in danhSachLich)
             {
                 System.Console.WriteLine($"[ThongBao_DAL]   Lich maLichTiem={l.MaLichTiem}, hoSo={l.HoTenHoSo}, " +
@@ -390,7 +389,6 @@ AND daDoc = 0";
 
                 if (DaCoThongBaoChoLich(maTaiKhoan, lich.MaLichTiem, tieuDe))
                 {
-                    System.Console.WriteLine($"[ThongBao_DAL]   Bo qua (da co): maLichTiem={lich.MaLichTiem}, tieuDe={tieuDe}");
                     continue;
                 }
 
@@ -406,7 +404,6 @@ AND daDoc = 0";
                 }
             }
 
-            System.Console.WriteLine($"[ThongBao_DAL] Tong cong da tao {soThongBaoDaTao} thong bao moi cho maTaiKhoan={maTaiKhoan}");
             return soThongBaoDaTao;
         }
 

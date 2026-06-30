@@ -36,8 +36,6 @@ namespace DoAnTotNghiep.Controllers
 
             var items = thongBaoDAL.LayThongBaoChuaDocChoDesktopPush(userId.Value, 50);
 
-            System.Console.WriteLine($"[DesktopPushApi] unread-for-push userId={userId}, count={items.Count}");
-
             var result = items.Select(i => new
             {
                 id = i.Id,
@@ -68,8 +66,6 @@ namespace DoAnTotNghiep.Controllers
                 return Ok(new { success = true, marked = 0 });
 
             thongBaoDAL.MarkDesktopPushed(userId.Value, request.NotificationIds);
-
-            System.Console.WriteLine($"[DesktopPushApi] mark-desktop-pushed userId={userId}, ids=[{string.Join(",", request.NotificationIds)}]");
 
             return Ok(new { success = true, marked = request.NotificationIds.Count });
         }

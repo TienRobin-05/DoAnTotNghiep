@@ -44,8 +44,6 @@ namespace DoAnTotNghiep.Controllers
 
             taiKhoanDAL.SetPushNotificationEnabled(userId.Value, request.Enabled);
 
-            System.Console.WriteLine($"[ReminderApi] Set push-enabled userId={userId}, enabled={request.Enabled}");
-
             return Ok(new { success = true, enabled = request.Enabled });
         }
     }

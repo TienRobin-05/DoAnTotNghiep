@@ -27,30 +27,11 @@ namespace DoAnTotNghiep.Controllers
             this.lichTiemDAL = lichTiemDAL;
         }
 
-        // Helper: sinh lịch tiêm + lịch demo + đồng bộ notification
+        // sinh lịch tiêm + đồng bộ thông báo
         private void SinhLichVaDongBoThongBao(int maHoSo, int maTaiKhoan)
         {
-            System.Console.WriteLine($"[CreateProfile] Bat dau sinh lich cho maHoSo={maHoSo}, maTaiKhoan={maTaiKhoan}");
-
-            // Bước 1: tạo lịch tiêm theo quy tắc chuẩn
-            var ketQua = taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
-            System.Console.WriteLine($"[CreateProfile] Da tao {ketQua.SoLichTiemDaTao} lich chuan, " +
-                $"phuHop={ketQua.SoMuiTiemPhuHop}/{ketQua.SoMuiTiemVaccine}");
-
-            // Bước 2: tạo lịch tiêm demo sắp đến hạn (hôm nay + 3 ngày) để test "Đến lịch"
-            var demoTao = taoLichTiemService.TaoLichTiemDemoSapToi(maHoSo);
-            if (demoTao > 0)
-            {
-                System.Console.WriteLine($"[CreateProfile] Da tao lich demo sap den han cho maHoSo={maHoSo}");
-            }
-            else
-            {
-                System.Console.WriteLine($"[CreateProfile] Lich demo da ton tai hoac khong the tao cho maHoSo={maHoSo}");
-            }
-
-            // Bước 3: đồng bộ notification
-            var soTB = thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan);
-            System.Console.WriteLine($"[CreateProfile] Da dong bo {soTB} thong bao cho maTaiKhoan={maTaiKhoan}");
+            taoLichTiemService.TaoLichTiemChoHoSo(maHoSo);
+            thongBaoDAL.TaoThongBaoLichTiemDenHan(maTaiKhoan);
         }
 
         // hiển thị danh sách hồ sơ
