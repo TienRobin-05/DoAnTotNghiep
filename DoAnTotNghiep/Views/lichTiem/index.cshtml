@@ -147,12 +147,13 @@
     }
 
     function getDisplayDate(item) {
-        if (getStatus(item) === "done" && item.injectedDate) return item.injectedDate;
+        if (item.injectedDate) return item.injectedDate;
         return item.expectedDate;
     }
 
     function getDateLabel(item) {
-        return getStatus(item) === "done" ? "Ngày tiêm" : "Ngày dự kiến";
+        if (item.injectedDate || item.isDone) return "Ngày tiêm";
+        return "Ngày dự kiến";
     }
 
     function getMonthKeyForItem(item) {
@@ -238,7 +239,7 @@
                 var url = updateUrlBase + '?maLichTiem=' + item.id;
                 html += '<div class="schedule-item">';
                 html += '<div class="vaccine-cell"><div class="vaccine-icon"><i class="bi bi-shield-plus"></i></div><div><p class="main-text">' + escHtml(item.vaccineName) + '</p><p class="sub-text">' + escHtml(item.groupName) + '</p></div></div>';
-                html += '<div><p class="main-text">' + escHtml(getDoseDisplayName(item)) + '</p><p class="sub-text">' + escHtml(item.note || "Mũi tiêm được khuyến nghị theo độ tuổi") + '</p></div>';
+                html += '<div><p class="main-text">' + escHtml(getDoseDisplayName(item)) + '</p></div>';
                 html += '<div><p class="date-label">' + getDateLabel(item) + '</p><p class="date-value">' + fmtDate(getDisplayDate(item)) + '</p></div>';
                 html += '<div><span class="status-badge ' + stt + '">' + sttText + '</span></div>';
                 html += '<div><a href="' + url + '" class="update-btn">Cập nhật mũi tiêm</a></div>';
@@ -273,7 +274,7 @@
                 var sttText = stt === "overdue" ? "Quá hạn" : stt === "done" ? "Đã tiêm" : "Sắp tới";
                 var url = updateUrlBase + '?maLichTiem=' + item.id;
                 html += '<div class="vaccine-dose-row">';
-                html += '<div style="flex:1;min-width:160px;"><strong>' + escHtml(getDoseDisplayName(item)) + '</strong><div style="color:#64748b;font-size:13px;margin-top:2px;">' + escHtml(item.note || "") + '</div></div>';
+                html += '<div style="flex:1;min-width:160px;"><strong>' + escHtml(getDoseDisplayName(item)) + '</strong></div>';
                 html += '<div style="font-weight:700;white-space:nowrap;">' + fmtDate(getDisplayDate(item)) + '</div>';
                 html += '<span class="status-badge ' + stt + '">' + sttText + '</span>';
                 html += '<a href="' + url + '" class="update-btn" style="margin-left:auto;">Cập nhật mũi tiêm</a>';

@@ -275,8 +275,7 @@ AND NOT EXISTS (
     FROM LichSuTiem
     WHERE maLichTiem = @MaLichTiem
 )
-AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien";
-            `   
+AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien";  
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);

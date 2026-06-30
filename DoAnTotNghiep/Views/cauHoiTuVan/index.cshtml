@@ -336,7 +336,7 @@
                                             data-answered="@(item.NgayTraLoi?.ToString("dd/MM/yyyy HH:mm") ?? "")">
                                         <span class="user-question-icon"><i class="bi bi-chat-dots"></i></span>
                                         <span class="user-question-main">
-                                            <strong>@item.CauHoi</strong>
+                                            <strong class="question-title">@item.CauHoi</strong>
                                             <small>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</small>
                                         </span>
                                         <span class="user-question-status @(daTraLoi ? "answered" : "pending")">@(daTraLoi ? "Đã trả lời" : "Đang chờ")</span>
@@ -344,7 +344,6 @@
                                 }
                             </div>
                         }
-                        <a asp-action="Index" class="consult-view-all-btn">Xem tất cả câu hỏi của bạn <i class="bi bi-arrow-right"></i></a>
                     </section>
 
                     <section class="consult-trust-card">
@@ -362,6 +361,17 @@
 }
 
 <style>
+    .user-question-list {
+        max-height: 340px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+    .user-question-list::-webkit-scrollbar { width: 6px; }
+    .user-question-list::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 999px; }
+    .user-question-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .user-question-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .user-question-item.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 8px 20px rgba(37,99,235,.12); }
+    .question-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .admin-consultation-page {
         display: grid;
         gap: 22px;
@@ -2546,7 +2556,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     items.forEach(function (item) {
-        item.addEventListener("click", function () { renderContent(item); });
+        item.addEventListener("click", function () {
+            document.querySelectorAll(".user-question-item").forEach(function (i) { i.classList.remove("active"); });
+            item.classList.add("active");
+            renderContent(item);
+        });
     });
 
     tabs.forEach(function (tab) {
