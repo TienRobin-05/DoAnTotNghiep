@@ -276,7 +276,7 @@ AND NOT EXISTS (
     WHERE maLichTiem = @MaLichTiem
 )
 AND CAST(ngayTiemDuKien AS date) <> @NgayTiemDuKien";
-
+            `   
             using var ketNoi = new SqlConnection(chuoiKetNoi);
             using var lenh = new SqlCommand(sql, ketNoi);
             lenh.Parameters.AddWithValue("@MaLichTiem", maLichTiem);
@@ -581,10 +581,6 @@ WHERE NOT EXISTS (
         // Kiểm tra mũi tiêm có phù hợp với tuổi hiện tại của hồ sơ theo đúng đơn vị ngày/tuần/tháng/năm.
         private static bool KiemTraMuiTiemPhuHopVoiTuoi(DateTime ngaySinh, MuiTiemTaoLich muiTiem)
         {
-            // Luôn trả về true để tạo lịch cho tất cả vaccine/mũi đang hoạt động.
-            // Ngày dự kiến sẽ được tính theo ngày sinh + độ tuổi khuyến nghị.
-            // Nếu ngày dự kiến trong quá khứ → quá hạn, trong tương lai → sắp tới.
-            // Không lọc bỏ bất kỳ mũi nào để người dùng thấy toàn bộ kế hoạch dài hạn.
             return true;
         }
 
@@ -664,8 +660,7 @@ WHERE NOT EXISTS (
             public int SoMuiTiemPhuHop { get; set; }
             public int SoLichTiemDaTao { get; set; }
             public List<int> MaMuiTiemPhuHop { get; set; } = new();
-        }
+        } 
 
-        // Lớp debug dùng để trả về dữ liệu lịch tiêm
     }
 }

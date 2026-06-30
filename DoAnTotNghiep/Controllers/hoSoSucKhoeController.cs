@@ -122,7 +122,7 @@ namespace DoAnTotNghiep.Controllers
                 return View(hoSo);
             }
 
-            // Sau khi tạo hồ sơ: sinh lịch tiêm + lịch demo + đồng bộ thông báo
+            // sinh lịch tiêm + đồng bộ thông báo
             SinhLichVaDongBoThongBao(maHoSoMoi, maTaiKhoan.Value);
             TempData["ThongBao"] = "Thêm hồ sơ sức khỏe thành công";
             return RedirectToAction(nameof(Index));
@@ -303,7 +303,7 @@ namespace DoAnTotNghiep.Controllers
             {
                 taiKhoanDAL.CapNhatHoTen(maTaiKhoan.Value, hoTen);
                 HttpContext.Session.SetString("HoTen", hoTen);
-                // Hồ sơ cá nhân đầu tiên: sinh lịch tiêm + lịch demo + đồng bộ thông báo
+                // sinh lịch tiêm + đồng bộ thông báo
                 SinhLichVaDongBoThongBao(maHoSoMoi, maTaiKhoan.Value);
                 TempData["ThongBao"] = "Cập nhật hồ sơ sức khỏe thành công";
                 return RedirectToAction("Index", "NguoiDung");

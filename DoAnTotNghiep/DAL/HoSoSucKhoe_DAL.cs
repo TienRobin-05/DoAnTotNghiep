@@ -314,7 +314,6 @@ AND maTaiKhoan = @MaTaiKhoan", maHoSo, maTaiKhoan);
                 }
                 catch
                 {
-                    // Nếu rollback cũng lỗi thì trả false để Controller hiển thị thông báo thất bại thay vì crash.
                 }
 
                 return false;
